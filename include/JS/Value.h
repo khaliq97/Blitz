@@ -34,7 +34,6 @@ class Value
             switch (type)
             {
                 case ValueType::NUMBER: {
-                printf("RETURNING NUM!\n");
                     std::ostringstream strs;
                     strs << m_value.asDouble;
                     return strs.str();

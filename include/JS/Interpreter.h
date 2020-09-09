@@ -24,9 +24,13 @@ class Interpreter : public ExpressionVisitor<Value>
             return expr->accept(*this);
         }
 
-        virtual std::shared_ptr<Value> visitLiteralExpression(LiteralExpression<Value>& expr) override
+        virtual std::shared_ptr<Value> visitExpression(Expression<Value>& expr) override
         {
 
+        }
+
+        virtual std::shared_ptr<Value> visitLiteralExpression(LiteralExpression<Value>& expr) override
+        {
             return expr.m_value;
         }
 
@@ -41,8 +45,8 @@ class Interpreter : public ExpressionVisitor<Value>
 
             switch (expr.op->type)
             {
-                //case TokenType::MINUS:
-                   //return -right->m_value.asDouble;
+                case TokenType::MINUS:
+                   return std::make_shared<Value>(-right->m_value.asDouble);
             }
         }
 
@@ -51,18 +55,23 @@ class Interpreter : public ExpressionVisitor<Value>
             std::shared_ptr<Value> left = evaluate(expr.left);
             std::shared_ptr<Value> right = evaluate(expr.right);
 
-            printf("Binary Left: %f\n", left->m_value.asDouble);
-            printf("Binary Right: %f\n", right->m_value.asDouble);
-
             switch (expr.op->type)
             {
                 case TokenType::MINUS:
                     return std::make_shared<Value>(left->m_value.asDouble - right->m_value.asDouble);
-                    //return left.m_value.asDouble - right.m_value.asDouble;
                 case TokenType::SLASH:
                     return std::make_shared<Value>(left->m_value.asDouble / right->m_value.asDouble);
                 case TokenType::STAR:
                     return std::make_shared<Value>(left->m_value.asDouble * right->m_value.asDouble);
+                case TokenType::PLUS:
+                    if (left->type == Value::ValueType::NUMBER && right->type == Value::ValueType::NUMBER)
+                    {
+                        return std::make_shared<Value>(left->m_value.asDouble + right->m_value.asDouble);
+                    }
+                    else if (left->type == Value::ValueType::STRING && right->type == Value::ValueType::STRING)
+                    {
+                        return std::make_shared<Value>(left->m_value.asString.append(right->m_value.asString));
+                    }
             }
         }
 

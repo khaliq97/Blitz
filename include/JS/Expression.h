@@ -5,6 +5,11 @@ template <typename T>
 class Expression : public ASTNode<T>
 {
     public:
+        std::shared_ptr<T> accept(ExpressionVisitor<T>& visitor)
+        {
+            return visitor.visitExpression(*this);
+        }
+
 };
 
 #endif // EXPRESSION_H

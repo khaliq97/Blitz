@@ -11,6 +11,7 @@ template<class T>
 class ExpressionVisitor
 {
     public:
+        virtual std::shared_ptr<T> visitExpression(Expression<T>& expr) = 0;
         virtual std::shared_ptr<T> visitBinaryExpression(BinaryExpression<T>& expr) = 0;
         virtual std::shared_ptr<T> visitLiteralExpression(LiteralExpression<T>& expr) = 0;
         virtual std::shared_ptr<T> visitUnaryExpression(UnaryExpression<T>& expr) = 0;

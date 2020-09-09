@@ -3,6 +3,7 @@
 #include <Browser/Window.h>
 #include <gtkmm-3.0/gtkmm.h>
 #include <Terminal/Terminal.h>
+#include <JS/JS.h>
 #include <gtk/gtk.h>
 #include <memory>
 #include <string>
@@ -27,6 +28,19 @@ int onCommandLine(const Glib::RefPtr<Gio::ApplicationCommandLine> &, Glib::RefPt
 
 int main(int argc, char ** argv)
 {
+    std::string arg = argv[1];
+    if (arg.compare("js") == 0)
+    {
+        if (argc == 3)
+        {
+             std::unique_ptr<JS> js = std::make_unique<JS>(argv[2]);
+             return 0;
+        }
+
+        std::unique_ptr<JS> js = std::make_unique<JS>("");
+        return 0;
+    }
+
     auto app = Gtk::Application::create(argc, argv, "lumber.web.browser", Gio::ApplicationFlags::APPLICATION_HANDLES_COMMAND_LINE);
     app->signal_command_line().connect(sigc::bind(sigc::ptr_fun(onCommandLine), app), false);
 
