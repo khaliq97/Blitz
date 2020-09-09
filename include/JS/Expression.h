@@ -1,9 +1,10 @@
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
-#include <ASTNode.h>
-class Expression : public ASTNode
+#include <JS/ASTNode.h>
+template <typename T>
+class Expression : public ASTNode<T>
 {
-
+    public:
 };
 
 #endif // EXPRESSION_H
