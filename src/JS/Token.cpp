@@ -1,9 +1,9 @@
 #include <JS/Token.h>
-Token::Token(TokenType type, std::string lexeme, std::shared_ptr<Value> literal, int line)
+Token::Token(TokenType type, std::string lexeme, std::string literal, int line)
 {
     this->type = type;
     this->lexeme = lexeme;
-    this->literal = literal;
+    this->value = literal;
     this->line = line;
 }
 
@@ -50,5 +50,5 @@ std::string JSTokenTypes[] = {
 
 std::string Token::toString()
 {
-    return JSTokenTypes[(int) type] + " " + lexeme + " " + literal->toString();
+    return JSTokenTypes[(int) type] + " " + lexeme + " " + value;
 }
