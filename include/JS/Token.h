@@ -9,10 +9,10 @@ class Token
     public:
         TokenType type;
         std::string lexeme;
-        std::shared_ptr<Value> literal;
+        std::string value;
         int line;
 
-        Token(TokenType type, std::string lexeme, std::shared_ptr<Value> literal, int line);
+        Token(TokenType type, std::string lexeme, std::string literal, int line);
         std::string toString();
 
 };
