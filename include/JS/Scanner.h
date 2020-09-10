@@ -12,7 +12,7 @@ class Scanner
         std::vector<std::shared_ptr<Token>> tokens;
         std::vector<std::shared_ptr<Token>> scanTokens();
         void addToken(TokenType type);
-        void addToken(TokenType type, std::shared_ptr<Value> literal);
+        void addToken(TokenType type, std::string literal);
         void scanToken();
         void identifier();
         void number();
