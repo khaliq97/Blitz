@@ -43,8 +43,8 @@ std::vector<std::shared_ptr<Token>> Scanner::scanTokens()
         start = current;
         scanToken();
     }
-    std::shared_ptr<Value> value = std::make_shared<Value>("");
-    std::shared_ptr<Token> token = std::make_shared<Token>(TokenType::ENDOFFILE, "", value, line);
+
+    std::shared_ptr<Token> token = std::make_shared<Token>(TokenType::ENDOFFILE, "", "", line);
     tokens.push_back(std::move(token));
     return tokens;
 }
@@ -145,8 +145,7 @@ void Scanner::number()
             advance();
     }
 
-    std::shared_ptr<Value> value = std::make_shared<Value>(std::stod(source.substr(start, current - start)));
-    addToken(TokenType::NUMBER, value);
+    addToken(TokenType::NUMBER, source.substr(start, current - start));
 }
 
 void Scanner::string()
@@ -166,8 +165,7 @@ void Scanner::string()
 
     advance();
 
-    std::shared_ptr<Value> value = std::make_shared<Value>(source.substr(start + 1, current - start - 2));
-    addToken(TokenType::STRING, value);
+    addToken(TokenType::STRING, source.substr(start + 1, current - start - 2));
 }
 
 bool Scanner::match(char expected)
@@ -200,14 +198,13 @@ bool Scanner::isDigit(char c )
 }
 void Scanner::addToken(TokenType type)
 {
-    std::shared_ptr<Value> value = std::make_shared<Value>("");
-    addToken(type, value);
+    addToken(type, "");
 }
 
-void Scanner::addToken(TokenType type, std::shared_ptr<Value> literal)
+void Scanner::addToken(TokenType type, std::string value)
 {
     std::string text = source.substr(start, current - start);
-    std::shared_ptr<Token> token = std::make_shared<Token>(type, text, literal, line);
+    std::shared_ptr<Token> token = std::make_shared<Token>(type, text, value, line);
     tokens.push_back(std::move(token));
 }
 
