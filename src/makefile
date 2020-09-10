@@ -39,7 +39,7 @@ _DEPS = Lumber.h \
 		JS/TokenType.h \
 		JS/ASTNode.h \
 		JS/Expression.h \
-		JS/ExpressionVisitor.h \
+		JS/ExpressionStatement.h \
 		JS/BinaryExpression.h \
 		JS/LiteralExpression.h
 DEPS = $(patsubst, %,$(IDIR)/%,$(_DEPS))
@@ -79,7 +79,7 @@ _OBJ = Main.o Lumber.o \
 		JS/TokenType.o \
 		JS/ASTNode.o \
 		JS/Expression.o \
-		JS/ExpressionVisitor.o \
+		JS/ExpressionStatement.o \
 		JS/BinaryExpression.o \
 		JS/LiteralExpression.o \
 		JS/UnaryExpression.o \
