@@ -57,7 +57,7 @@ void JS::run(std::string source)
 
     std::unique_ptr<Parser> parser = std::make_unique<Parser>(tokens);
 
-    std::shared_ptr<Expression<Value>> expression = parser->parse();
+    std::shared_ptr<Expression> expression = parser->parse();
 
     // Fix ASTPrinter not working because of different template types
 
