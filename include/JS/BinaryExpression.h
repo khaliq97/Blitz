@@ -2,23 +2,21 @@
 #define BINARYEXPRESSION_H
 #include <JS/ASTNode.h>
 #include <JS/Token.h>
+#include <JS/Expression.h>
 #include <string>
 #include <memory>
-template<typename T>
-class BinaryExpression : public Expression<T>
+class BinaryExpression : public Expression
 {
     public:
-        BinaryExpression(std::shared_ptr<Expression<T>> left, std::shared_ptr<Token> op, std::shared_ptr<Expression<T>> right)
-            : left(std::move(left)), op(op), right(std::move(right)){ }
+        BinaryExpression(const std::shared_ptr<Expression>& left, const std::shared_ptr<Token>& op, const std::shared_ptr<Expression>& right)
+            : left(left), op(op), right(right){ }
 
-        std::shared_ptr<T> accept(ExpressionVisitor<T>& visitor)
-        {
-            return visitor.visitBinaryExpression(*this);
-        }
+        virtual std::shared_ptr<Value> execute() override;
 
-        std::shared_ptr<Expression<T>> left;
+    private:
+        std::shared_ptr<Expression> left;
         std::shared_ptr<Token> op;
-        std::shared_ptr<Expression<T>> right;
+        std::shared_ptr<Expression> right;
 };
 
 #endif // BINARYEXPRESSION_H

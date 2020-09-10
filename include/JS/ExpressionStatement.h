@@ -1,19 +1,17 @@
 #ifndef EXPRESSIONSTATEMENT_H
 #define EXPRESSIONSTATEMENT_H
 #include <JS/ASTNode.h>
-template <typename T>
-class ExpressionStatement : public Expression<T>
+#include <JS/Expression.h>
+class ExpressionStatement : public Expression
 {
     public:
-        ExpressionStatement(std::shared_ptr<Expression<T>> expression)
+        ExpressionStatement(const std::shared_ptr<Expression>& expression)
             : expression(expression) { }
 
-        std::shared_ptr<T> accept(ExpressionVisitor<T>& visitor)
-        {
-            return visitor.visitExpressionStatement(*this);
-        }
+        virtual std::shared_ptr<Value> execute() override;
 
-        std::shared_ptr<Expression<T>> expression;
+    private:
+        std::shared_ptr<Expression> expression;
 
 };
 

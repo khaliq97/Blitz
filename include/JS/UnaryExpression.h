@@ -2,21 +2,19 @@
 #define UNARYEXPRESSION_H
 #include <JS/ASTNode.h>
 #include <JS/Token.h>
+#include <JS/Expression.h>
 #include <string>
 #include <memory>
-template<typename T>
-class UnaryExpression : public Expression<T>
+class UnaryExpression : public Expression
 {
     public:
-        UnaryExpression(std::shared_ptr<Token> op, std::shared_ptr<Expression<T>> right)
-            : op(op), right(std::move(right)){ }
+        UnaryExpression(const std::shared_ptr<Token>& op, const std::shared_ptr<Expression>& right)
+            : op(op), right(right) { }
 
-        std::shared_ptr<T> accept(ExpressionVisitor<T>& visitor)
-        {
-            return visitor.visitUnaryExpression(*this);
-        }
+        virtual std::shared_ptr<Value> execute() override;
 
+    private:
         std::shared_ptr<Token> op;
-        std::shared_ptr<Expression<T>> right;
+        std::shared_ptr<Expression> right;
 };
 #endif // UNARYEXPRESSION_H

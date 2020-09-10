@@ -3,35 +3,14 @@
 #include <JS/Expression.h>
 #include <JS/Value.h>
 #include <string>
-template<typename T>
-class LiteralExpression : public Expression<T>
+class LiteralExpression : public Expression
 {
     public:
-        LiteralExpression(bool value)
-        {
-            m_value = std::make_shared<Value>(value);
-        }
+        virtual ~LiteralExpression();
 
-        LiteralExpression(double value)
-        {
-            m_value = std::make_shared<Value>(value);
-        }
-
-        LiteralExpression(std::string value)
-        {
-            m_value = std::make_shared<Value>(value);
-        }
-
-        std::shared_ptr<T> accept(ExpressionVisitor<T>& visitor)
-        {
-            return visitor.visitLiteralExpression(*this);
-        }
-
-        std::shared_ptr<Value> m_value;
 };
 
-template<typename T>
-class NumericLiteral : public LiteralExpression<T>
+class NumericLiteral : public LiteralExpression
 {
     public:
         NumericLiteral(double value)
@@ -39,11 +18,12 @@ class NumericLiteral : public LiteralExpression<T>
         {
 
         }
+        virtual std::shared_ptr<Value> execute() override;
+    private:
         double value;
 };
 
-template<typename T>
-class StringLiteral : public LiteralExpression<T>
+class StringLiteral : public LiteralExpression
 {
     public:
         StringLiteral(std::string value)
@@ -51,18 +31,21 @@ class StringLiteral : public LiteralExpression<T>
         {
 
         }
+        virtual std::shared_ptr<Value> execute() override;
+    private:
         std::string value;
 };
 
-template<typename T>
-class BoolLiteral : public LiteralExpression<T>
+class BooleanLiteral : public LiteralExpression
 {
     public:
-        BoolLiteral(bool value)
+        BooleanLiteral(bool value)
             : value(value)
         {
 
         }
+        virtual std::shared_ptr<Value> execute() override;
+    private:
         bool value;
 };
 
