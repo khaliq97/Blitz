@@ -29,4 +29,41 @@ class LiteralExpression : public Expression<T>
 
         std::shared_ptr<Value> m_value;
 };
+
+template<typename T>
+class NumericLiteral : public LiteralExpression<T>
+{
+    public:
+        NumericLiteral(double value)
+            : value(value)
+        {
+
+        }
+        double value;
+};
+
+template<typename T>
+class StringLiteral : public LiteralExpression<T>
+{
+    public:
+        StringLiteral(std::string value)
+            : value(value)
+        {
+
+        }
+        std::string value;
+};
+
+template<typename T>
+class BoolLiteral : public LiteralExpression<T>
+{
+    public:
+        BoolLiteral(bool value)
+            : value(value)
+        {
+
+        }
+        bool value;
+};
+
 #endif // LITERALEXPRESSION_H
