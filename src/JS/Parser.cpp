@@ -2,7 +2,7 @@
 #include <JS/JS.h>
 static JS js;
 
-std::shared_ptr<Expression<Value>> Parser::parse()
+std::shared_ptr<Expression> Parser::parse()
 {
     try {
         return expression();
@@ -12,111 +12,112 @@ std::shared_ptr<Expression<Value>> Parser::parse()
     }
 }
 
-std::shared_ptr<Expression<Value>> Parser::expression()
+std::shared_ptr<Expression> Parser::expression()
 {
     return equality();
 }
 
-std::shared_ptr<Expression<Value>> Parser::equality()
+std::shared_ptr<Expression> Parser::equality()
 {
-    std::shared_ptr<Expression<Value>> expr = comparison();
+    std::shared_ptr<Expression> expr = comparison();
     while (match({TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL}))
     {
          std::shared_ptr<Token> op = previous();
-         std::shared_ptr<Expression<Value>> right = comparison();
-         expr = std::make_shared<BinaryExpression<Value>>(expr, op, right);
+         std::shared_ptr<Expression> right = comparison();
+         expr = std::make_shared<BinaryExpression>(expr, op, right);
     }
 
     return expr;
 }
 
-std::shared_ptr<Expression<Value>> Parser::comparison()
+std::shared_ptr<Expression> Parser::comparison()
 {
-     std::shared_ptr<Expression<Value>> expr = additon();
+     std::shared_ptr<Expression> expr = additon();
      while (match({TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL}))
      {
           std::shared_ptr<Token> op = previous();
-          std::shared_ptr<Expression<Value>> right = additon();
-          expr = std::make_shared<BinaryExpression<Value>>(expr, op, right);
+          std::shared_ptr<Expression> right = additon();
+          expr = std::make_shared<BinaryExpression>(expr, op, right);
      }
 
      return expr;
 }
 
-std::shared_ptr<Expression<Value>> Parser::additon()
+std::shared_ptr<Expression> Parser::additon()
 {
-     std::shared_ptr<Expression<Value>> expr = multiplication();
+     std::shared_ptr<Expression> expr = multiplication();
      while (match({TokenType::MINUS, TokenType::PLUS}))
      {
           std::shared_ptr<Token> op = previous();
-          std::shared_ptr<Expression<Value>> right = multiplication();
-          expr = std::make_shared<BinaryExpression<Value>>(expr, op, right);
+          std::shared_ptr<Expression> right = multiplication();
+          expr = std::make_shared<BinaryExpression>(expr, op, right);
      }
 
      return expr;
 }
 
-std::shared_ptr<Expression<Value>> Parser::multiplication()
+std::shared_ptr<Expression> Parser::multiplication()
 {
-    std::shared_ptr<Expression<Value>> expr = unary();
+    std::shared_ptr<Expression> expr = unary();
     while (match({TokenType::SLASH, TokenType::STAR}))
     {
          std::shared_ptr<Token> op = previous();
-         std::shared_ptr<Expression<Value>> right = unary();
-         expr = std::make_shared<BinaryExpression<Value>>(expr, op, right);
+         std::shared_ptr<Expression> right = unary();
+         expr = std::make_shared<BinaryExpression>(expr, op, right);
     }
 
     return expr;
 }
 
 
-std::shared_ptr<Expression<Value>> Parser::unary()
+std::shared_ptr<Expression> Parser::unary()
 {
     if (match({TokenType::BANG, TokenType::MINUS}))
     {
         std::shared_ptr<Token> op = previous();
-        std::shared_ptr<Expression<Value>> right = unary();
-        return std::make_shared<UnaryExpression<Value>>(op, right);
+        std::shared_ptr<Expression> right = unary();
+        return std::make_shared<UnaryExpression>(op, right);
     }
 
     return primary();
 }
 
-std::shared_ptr<Expression<Value>> Parser::primary()
+std::shared_ptr<Expression> Parser::primary()
 {
-    //std::shared_ptr<Expression<Value>> expression;
     if (match({TokenType::JSFALSE}))
     {
-        return std::make_shared<LiteralExpression<Value>>(false);
+        return std::make_shared<BooleanLiteral>(false);
     }
     else if (match({TokenType::JSTRUE}))
     {
-        return std::make_shared<LiteralExpression<Value>>(true);
+        return std::make_shared<BooleanLiteral>(true);
     }
     else if (match({TokenType::JSNULL}))
     {
-        return std::make_shared<LiteralExpression<Value>>("null");
+        // FIXME: This should not a string...
+        return std::make_shared<StringLiteral>("null");
     }
     else if (match({TokenType::UNDEFINED}))
     {
-        return std::make_shared<LiteralExpression<Value>>("undefined");
+        // FIXME: This should not a string...
+        return std::make_shared<StringLiteral>("undefined");
     }
 
     if (match({TokenType::NUMBER}))
     {
-        return std::make_shared<LiteralExpression<Value>>(previous()->literal->m_value.asDouble);
+        return std::make_shared<NumericLiteral>(std::stod(previous()->value));
     }
 
     if (match({TokenType::STRING}))
     {
-        return std::make_shared<LiteralExpression<Value>>(previous()->literal->m_value.asString);
+        return std::make_shared<StringLiteral>(previous()->value);
     }
 
     if (match({TokenType::LEFT_PAREN}))
     {
-        std::shared_ptr<Expression<Value>> expr = expression();
+        std::shared_ptr<Expression> expr = expression();
         consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
-        return std::make_shared<ExpressionStatement<Value>>(expr);
+        return std::make_shared<ExpressionStatement>(expr);
     }
 
     throw error(peek(), "Expect expression.");
