@@ -10,8 +10,15 @@ class Value
         {
             NUMBER,
             BOOL,
-            STRING
+            STRING,
+            UNDEFINED
         };
+
+        Value(ValueType type)
+        {
+            this->type = type;
+        }
+
         Value(double value)
         {
             m_value.asDouble = value;
@@ -43,6 +50,9 @@ class Value
                 }
                 case ValueType::BOOL: {
                     return m_value.asBool ? "true" : "false";
+                }
+                case ValueType::UNDEFINED: {
+                    return "undefined";
                 }
             }
         }
