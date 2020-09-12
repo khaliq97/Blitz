@@ -14,13 +14,45 @@ std::shared_ptr<Value> BinaryExpression::execute()
         case TokenType::STAR:
             return std::make_shared<Value>(leftExpr->m_value.asDouble * rightExpr->m_value.asDouble);
         case TokenType::PLUS:
-            if (rightExpr->type == Value::ValueType::NUMBER && rightExpr->type == Value::ValueType::NUMBER)
+            if (leftExpr->type == Value::ValueType::NUMBER && rightExpr->type == Value::ValueType::NUMBER)
             {
                 return std::make_shared<Value>(leftExpr->m_value.asDouble + rightExpr->m_value.asDouble);
             }
-            else if (rightExpr->type == Value::ValueType::STRING && rightExpr->type == Value::ValueType::STRING)
+            else if (leftExpr->type == Value::ValueType::STRING && rightExpr->type == Value::ValueType::STRING)
             {
                 return std::make_shared<Value>(leftExpr->m_value.asString.append(rightExpr->m_value.asString));
             }
+            break;
+        case TokenType::EQUAL_EQUAL:
+            if (leftExpr->type == Value::ValueType::NUMBER && rightExpr->type == Value::ValueType::NUMBER)
+            {
+                // FIXME: Unsafe comparison of floating point types
+                return std::make_shared<Value>(leftExpr->m_value.asDouble == rightExpr->m_value.asDouble);
+            }
+            break;
+        case TokenType::GREATER:
+            if (leftExpr->type == Value::ValueType::NUMBER && rightExpr->type == Value::ValueType::NUMBER)
+            {
+                return std::make_shared<Value>(leftExpr->m_value.asDouble > rightExpr->m_value.asDouble);
+            }
+            break;
+        case TokenType::GREATER_EQUAL:
+            if (leftExpr->type == Value::ValueType::NUMBER && rightExpr->type == Value::ValueType::NUMBER)
+            {
+                return std::make_shared<Value>(leftExpr->m_value.asDouble >= rightExpr->m_value.asDouble);
+            }
+            break;
+        case TokenType::LESS:
+            if (leftExpr->type == Value::ValueType::NUMBER && rightExpr->type == Value::ValueType::NUMBER)
+            {
+                return std::make_shared<Value>(leftExpr->m_value.asDouble < rightExpr->m_value.asDouble);
+            }
+            break;
+        case TokenType::LESS_EQUAL:
+            if (leftExpr->type == Value::ValueType::NUMBER && rightExpr->type == Value::ValueType::NUMBER)
+            {
+                return std::make_shared<Value>(leftExpr->m_value.asDouble <= rightExpr->m_value.asDouble);
+            }
+            break;
     }
 }
