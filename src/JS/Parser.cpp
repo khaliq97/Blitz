@@ -17,6 +17,16 @@ std::shared_ptr<Expression> Parser::expression()
     return equality();
 }
 
+std::shared_ptr<Expression> Parser::statement()
+{
+    if (match({TokenType::VAR}))
+    {
+        return varDeclaration();
+    }
+
+    return expression();
+}
+
 std::shared_ptr<Expression> Parser::equality()
 {
     std::shared_ptr<Expression> expr = comparison();
@@ -76,7 +86,7 @@ std::shared_ptr<Expression> Parser::unary()
     {
         std::shared_ptr<Token> op = previous();
         std::shared_ptr<Expression> right = unary();
-        return std::make_shared<UnaryExpression>(op, right);
+        return std::make_shared<UnaryExpression>(op, right);Expression
     }
 
     return primary();
@@ -122,6 +132,11 @@ std::shared_ptr<Expression> Parser::primary()
 
     throw error(peek(), "Expect expression.");
 };
+
+std::shared_ptr<Expression> Parser::varDeclaration()
+{
+
+}
 
 std::shared_ptr<Token> Parser::consume(TokenType type, std::string message)
 {

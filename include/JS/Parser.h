@@ -16,13 +16,14 @@ class Parser
         Parser(std::vector<std::shared_ptr<Token>> tokens) : tokens(tokens) { }
         std::shared_ptr<Expression> parse();
         std::shared_ptr<Expression> expression();
+        std::shared_ptr<Expression> statement();
         std::shared_ptr<Expression> equality();
         std::shared_ptr<Expression> additon();
         std::shared_ptr<Expression> multiplication();
         std::shared_ptr<Expression> comparison();
         std::shared_ptr<Expression> unary();
         std::shared_ptr<Expression> primary();
-
+        std::shared_ptr<Expression> varDeclaration();
         std::shared_ptr<Token> consume(TokenType type, std::string message);
         std::unique_ptr<SyntaxError> error(std::shared_ptr<Token> token, std::string message);
         void synchronize();
