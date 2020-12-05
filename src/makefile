@@ -1,4 +1,4 @@
-IDIR=../include
+IDIR= ${CURDIR}
 CC=g++
 CFLAGS= -g -I$(IDIR)
 
