@@ -8,6 +8,7 @@
 #include <JS/ExpressionStatement.h>
 #include <JS/BinaryExpression.h>
 #include <JS/UnaryExpression.h>
+#include <JS/VariableDeclaration.h>
 #include <JS/Value.h>
 #include <JS/Error.h>
 class Parser
@@ -17,6 +18,7 @@ class Parser
         std::shared_ptr<Expression> parse();
         std::shared_ptr<Expression> expression();
         std::shared_ptr<Expression> statement();
+        std::shared_ptr<Expression> declaration();
         std::shared_ptr<Expression> equality();
         std::shared_ptr<Expression> additon();
         std::shared_ptr<Expression> multiplication();
