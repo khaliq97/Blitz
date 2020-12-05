@@ -5,7 +5,7 @@ static JS js;
 std::shared_ptr<Expression> Parser::parse()
 {
     try {
-        return expression();
+        return declaration();
     } catch (SyntaxError error) {
         printf("%s\n%s", error.name.c_str(), error.message.c_str());
         return nullptr;
@@ -19,12 +19,17 @@ std::shared_ptr<Expression> Parser::expression()
 
 std::shared_ptr<Expression> Parser::statement()
 {
+    return expression();
+}
+
+std::shared_ptr<Expression> Parser::declaration()
+{
     if (match({TokenType::VAR}))
     {
         return varDeclaration();
     }
 
-    return expression();
+    return statement();
 }
 
 std::shared_ptr<Expression> Parser::equality()
@@ -86,7 +91,7 @@ std::shared_ptr<Expression> Parser::unary()
     {
         std::shared_ptr<Token> op = previous();
         std::shared_ptr<Expression> right = unary();
-        return std::make_shared<UnaryExpression>(op, right);Expression
+        return std::make_shared<UnaryExpression>(op, right);
     }
 
     return primary();
@@ -123,6 +128,11 @@ std::shared_ptr<Expression> Parser::primary()
         return std::make_shared<StringLiteral>(previous()->value);
     }
 
+    if (match({TokenType::IDENTIFIER}))
+    {
+        return std::make_shared<StringLiteral>(previous()->value);
+    }
+
     if (match({TokenType::LEFT_PAREN}))
     {
         std::shared_ptr<Expression> expr = expression();
@@ -135,7 +145,15 @@ std::shared_ptr<Expression> Parser::primary()
 
 std::shared_ptr<Expression> Parser::varDeclaration()
 {
+    std::shared_ptr<Token> name = consume(TokenType::IDENTIFIER, "Expect variable name");
 
+    std::shared_ptr<Expression> expr;
+    if (match({TokenType::EQUAL}))
+    {
+        expr = expression();
+    }
+
+    return std::make_shared<VariableDeclarator>(name->lexeme, expr);
 }
 
 std::shared_ptr<Token> Parser::consume(TokenType type, std::string message)
