@@ -41,7 +41,10 @@ _DEPS = Lumber.h \
 		JS/Expression.h \
 		JS/ExpressionStatement.h \
 		JS/BinaryExpression.h \
-		JS/LiteralExpression.h
+		JS/LiteralExpression.h \
+		JS/VariableDeclaration.h \
+		CSS/Tokenizer.h
+
 DEPS = $(patsubst, %,$(IDIR)/%,$(_DEPS))
 
 _OBJ = Main.o Lumber.o \
@@ -84,8 +87,9 @@ _OBJ = Main.o Lumber.o \
 		JS/LiteralExpression.o \
 		JS/UnaryExpression.o \
 		JS/Value.o \
-		JS/Error.o
-		
+		JS/Error.o \
+		JS/VariableDeclaration.o \
+		CSS/Tokenizer.o	
 OBJ = $(patsubst %, $(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.cpp $(DEPS)
@@ -97,4 +101,4 @@ lumber: $(OBJ)
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o $(ODIR)/Browser/*.o $(ODIR)/DOM/*.o $(ODIR)/JS/*.o $(ODIR)/Parser/*.o $(ODIR)/Terminal/*.o *~ core $(INCDIR)/*~
+	rm -f $(ODIR)/*.o $(ODIR)/Browser/*.o $(ODIRR)/CSS/*.o $(ODIR)/DOM/*.o $(ODIR)/JS/*.o $(ODIR)/Parser/*.o $(ODIR)/Terminal/*.o *~ core $(INCDIR)/*~
