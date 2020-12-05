@@ -10,4 +10,15 @@ class ASTNode
 
 };
 
+class Statement : public ASTNode
+{
+
+};
+
+class DeclarationStatement : public Statement
+{
+
+};
+
+
 #endif // ASTNODE_H
