@@ -180,12 +180,3 @@ char Lexer::consume()
 {
     return charTokens[tokenIndex++];
 }
-
-void Lexer::printHTML()
-{
-    for (auto token: charTokens)
-    {
-        printf("%c", token);
-    }
-}
-
