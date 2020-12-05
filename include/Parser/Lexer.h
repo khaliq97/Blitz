@@ -28,7 +28,6 @@ class Lexer {
         std::string getFileContent(std::string fileName);
 
         void loadContent(std::string content);
-        void printHTML();
 
 };
 
