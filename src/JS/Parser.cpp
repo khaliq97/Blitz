@@ -153,7 +153,7 @@ std::shared_ptr<Expression> Parser::varDeclaration()
         expr = expression();
     }
 
-    return std::make_shared<VariableDeclarator>(name->lexeme, expr);
+    return std::make_shared<VariableDeclaration>(name->lexeme, expr);
 }
 
 std::shared_ptr<Token> Parser::consume(TokenType type, std::string message)
