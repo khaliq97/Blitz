@@ -1,5 +1,5 @@
 #include <Terminal/Terminal.h>
-#include <Lumber.h>
+#include <Blitz.h>
 #include <iostream>
 #include <vector>
 #include <map>
@@ -71,8 +71,7 @@ void Terminal::processCommand()
         }
         else
         {
-            lumberInstance = std::make_unique<Lumber>();
-            lumberInstance->loadHTML(lexer->getFileContent(token));
+            //Todo: run an instance of blitz
         }
     }
 }

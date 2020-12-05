@@ -5,7 +5,7 @@ CFLAGS= -g -I$(IDIR)
 ODIR=obj
 LDIR=../lib
 
-_DEPS = Lumber.h \
+_DEPS = Blitz.h \
 		Parser/HTMLStateMachine.h \
 		Parser/HTMLDocumentParser.h \
 		Parser/Lexer.h \
@@ -47,7 +47,7 @@ _DEPS = Lumber.h \
 
 DEPS = $(patsubst, %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = Main.o Lumber.o \
+_OBJ = Main.o Blitz.o \
 		Parser/HTMLStateMachine.o \
 		Parser/HTMLDocumentParser.o \
 		Parser/Lexer.o \
@@ -95,7 +95,7 @@ OBJ = $(patsubst %, $(ODIR)/%,$(_OBJ))
 $(ODIR)/%.o: %.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS) `pkg-config --libs --cflags gtk+-3.0 gtkmm-3.0 cairo libcurl`
 
-lumber: $(OBJ)
+blitz: $(OBJ)
 	$(CC) -g -o $@ $^ $(CFLAGS) `pkg-config --libs --cflags gtk+-3.0 gtkmm-3.0 cairo libcurl`
 
 .PHONY: clean

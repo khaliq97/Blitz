@@ -1,14 +1,14 @@
-#ifndef LUMBER_H
-#define LUMBER_H
+#ifndef BLITZ_H
+#define BLITZ_H
 #include <string>
 #include <memory>
 #include <Parser/HTMLDocumentParser.h>
 #include <Parser/HTMLStateMachine.h>
 #include <Parser/CSSParser.h>
 #include <Browser/Render.h>
-class Lumber {
+class Blitz {
     public:
-        Lumber();
+        Blitz();
         std::string getFileContent(std::string fileName);
         void loadHTML(std::string html);
         std::shared_ptr<HTMLDocumentParser> documentParser;
@@ -17,4 +17,4 @@ class Lumber {
         std::unique_ptr<class Render> render;
 };
 
-#endif // LUMBER_H
+#endif // BLITZ_H

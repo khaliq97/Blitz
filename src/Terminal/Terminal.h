@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 #include <Parser/Lexer.h>
-#include <Lumber.h>
+#include <Blitz.h>
 class Terminal
 {
     public:
@@ -12,7 +12,7 @@ class Terminal
         void start();
         void processCommand();
         std::string consumeUntilChar(char tokenData);
-        std::unique_ptr<Lumber> lumberInstance;
+        std::unique_ptr<Blitz> lumberInstance;
     private:
 
 };

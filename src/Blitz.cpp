@@ -1,4 +1,4 @@
-#include <Lumber.h>
+#include <Blitz.h>
 #include <fstream>
 #include <Browser/Render.h>
 #include <gtkmm.h>
@@ -7,12 +7,12 @@
 
 static Lexer lexer;
 
-Lumber::Lumber()
+Blitz::Blitz()
 {
 
 }
 
-void Lumber::loadHTML(std::string html)
+void Blitz::loadHTML(std::string html)
 {
     stateMachine = std::make_unique<HTMLStateMachine>(html);
     stateMachine->run();
