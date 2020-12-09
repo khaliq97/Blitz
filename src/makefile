@@ -43,8 +43,8 @@ _DEPS = Blitz.h \
 		JS/BinaryExpression.h \
 		JS/LiteralExpression.h \
 		JS/VariableDeclaration.h \
-		CSS/Tokenizer.h
-
+		CSS/Tokenizer.h \
+		CSS/CSSToken.h
 DEPS = $(patsubst, %,$(IDIR)/%,$(_DEPS))
 
 _OBJ = Main.o Blitz.o \
@@ -89,7 +89,8 @@ _OBJ = Main.o Blitz.o \
 		JS/Value.o \
 		JS/Error.o \
 		JS/VariableDeclaration.o \
-		CSS/Tokenizer.o	
+		CSS/Tokenizer.o \
+		CSS/CSSToken.o
 OBJ = $(patsubst %, $(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.cpp $(DEPS)
