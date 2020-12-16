@@ -7,15 +7,8 @@ Tokenizer::Tokenizer(std::string css)
     scanTokens();
 }
 
-void Tokenizer::scanTokens()
+void Tokenizer::printTokens()
 {
-    while (!isAtEnd())
-    {
-        scanToken();
-    }
-
-    addToken(CSSTokenType::EndOfFile);
-
     printf("Tokens: \n");
     for (auto token: tokens)
     {
@@ -37,7 +30,20 @@ void Tokenizer::scanTokens()
             printf("    Number Type: %d\n", (int) token->numberType());
         }
     }
+}
 
+void Tokenizer::scanTokens()
+{
+    while (!isAtEnd())
+    {
+        scanToken();
+    }
+
+    addToken(CSSTokenType::EndOfFile);
+
+#ifdef TOKEN_STREAM
+    printTokens();
+#endif
 }
 
 void Tokenizer::scanToken()
@@ -181,7 +187,7 @@ void Tokenizer::scanToken()
 
 void Tokenizer::notSupported(std::string tokenName)
 {
-    printf("%s are not supported :(\n", tokenName.c_str());
+    printf("Tokenizer: %s are not supported :(\n", tokenName.c_str());
     exit(0);
 }
 
@@ -258,8 +264,10 @@ std::shared_ptr<CSSToken> Tokenizer::createNumericToken()
     std::shared_ptr<Number> result = consumeNumber();
     std::shared_ptr<CSSToken> token;
 
+
     if (wouldStartIdentifier(peek(), peekNext(), peekAtOffset(2)))
     {
+        //printf("Result: %s\n", result->repr.c_str());
         token = std::make_shared<CSSToken>(CSSTokenType::Dimension);
         token->setValue(result->repr);
         token->setNumberType(NumberType::Number);
@@ -301,17 +309,17 @@ const std::shared_ptr<Number> Tokenizer::consumeNumber()
     {
         number->repr += peek();
         consume();
-    }
 
-    if (peek() == '.' && std::isdigit(peekNext()))
-    {
-        number->repr += peek();
-        number->repr += peekNext();
+        if (peek() == '.' && std::isdigit(peekNext()))
+        {
+            number->repr += peek();
+            number->repr += peekNext();
 
-        consumeSpecific('.');
-        consume();
+            consumeSpecific('.');
+            consume();
 
-        number->type = NumberType::Number;
+            number->type = NumberType::Number;
+        }
     }
 
     return number;

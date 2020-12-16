@@ -21,6 +21,7 @@ public:
     void addToken(CSSTokenType type);
     void string();
     void hash();
+    const std::vector<std::shared_ptr<CSSToken>>& getTokens() { return tokens; }
 private:
     std::string source;
     int current;
@@ -34,6 +35,7 @@ private:
     const std::shared_ptr<Number> consumeNumber();
     std::shared_ptr<CSSToken> createNumericToken();
     void notSupported(std::string tokenName);
+    void printTokens();
 };
 
 #endif // TOKENIZER_H
