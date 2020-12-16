@@ -49,11 +49,5 @@ int main(int argc, char ** argv)
     blitzInstance = std::make_unique<Blitz>();
     blitzInstance->loadHTML(terminal->lexer->getFileContent(argv[1]));
 
-    std::unique_ptr<Gtk::Window> window = Window::createBrowserWindow("Blitz Web", 1280, 720);
-
-    std::unique_ptr<HTMLView> view = std::make_unique<HTMLView>(blitzInstance->documentParser->getDocument());
-    view->processRenderTree();
-    window->add(*view);
-    view->show();
-    return app->run(*window, argc, argv);
+    return 0;
 }
