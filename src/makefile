@@ -10,9 +10,6 @@ _DEPS = Blitz.h \
 		Parser/HTMLDocumentParser.h \
 		Parser/Lexer.h \
 		Parser/HTMLToken.h \
-		Parser/CSSParser.h \
-		Parser/Stylesheet.h \
-		Parser/StyleRule.h \
 		DOM/Document.h \
 		DOM/HTMLElement.h \
 		DOM/HTMLHeadElement.h \
@@ -24,11 +21,9 @@ _DEPS = Blitz.h \
 		DOM/NamedNodeMap.h \
 		DOM/DocumentType.h \
 		DOM/Text.h \
-		Browser/HTMLView.h \
 		Browser/Window.h \
 		Browser/Render.h \
 		Browser/BoxModel.h \
-		Browser/RenderNode.h \
 		Browser/Layout.h \
 		Browser/Dimension.h \
 		Terminal/Terminal.h \
@@ -44,7 +39,17 @@ _DEPS = Blitz.h \
 		JS/LiteralExpression.h \
 		JS/VariableDeclaration.h \
 		CSS/Tokenizer.h \
-		CSS/CSSToken.h
+		CSS/CSSToken.h \
+		CSS/Parser.h \
+		CSS/QualifiedRule.h \
+		CSS/SimpleBlock.h \
+		CSS/Stylesheet.h \
+		CSS/Selectors/ComplexSelector.h \
+		CSS/Selectors/CompoundSelector.h \
+		CSS/Selectors/SimpleSelector.h \
+		CSS/Declaration.h \
+		CSS/StyleRule.o 
+
 DEPS = $(patsubst, %,$(IDIR)/%,$(_DEPS))
 
 _OBJ = Main.o Blitz.o \
@@ -52,9 +57,6 @@ _OBJ = Main.o Blitz.o \
 		Parser/HTMLDocumentParser.o \
 		Parser/Lexer.o \
 		Parser/HTMLToken.o \
-		Parser/CSSParser.o \
-		Parser/Stylesheet.o \
-		Parser/StyleRule.o \
 		DOM/Document.o \
 		DOM/HTMLElement.o \
 		DOM/HTMLHeadElement.o \
@@ -66,11 +68,9 @@ _OBJ = Main.o Blitz.o \
 		DOM/NamedNodeMap.o \
 		DOM/DocumentType.o \
 		DOM/Text.o \
-		Browser/HTMLView.o \
 		Browser/Window.o \
 		Browser/Render.o \
 		Browser/BoxModel.o \
-		Browser/RenderNode.o \
 		Browser/Layout.o \
 		Browser/Dimension.o \
 		Terminal/Terminal.o \
@@ -90,7 +90,17 @@ _OBJ = Main.o Blitz.o \
 		JS/Error.o \
 		JS/VariableDeclaration.o \
 		CSS/Tokenizer.o \
-		CSS/CSSToken.o
+		CSS/CSSToken.o \
+		CSS/Parser.o \
+		CSS/QualifiedRule.o \
+		CSS/SimpleBlock.o \
+		CSS/Stylesheet.o \
+		CSS/Selectors/ComplexSelector.o \
+		CSS/Selectors/CompoundSelector.o \
+		CSS/Selectors/SimpleSelector.o \
+		CSS/Declaration.o \
+		CSS/StyleRule.o 
+
 OBJ = $(patsubst %, $(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.cpp $(DEPS)
@@ -102,4 +112,4 @@ blitz: $(OBJ)
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o $(ODIR)/Browser/*.o $(ODIRR)/CSS/*.o $(ODIR)/DOM/*.o $(ODIR)/JS/*.o $(ODIR)/Parser/*.o $(ODIR)/Terminal/*.o *~ core $(INCDIR)/*~
+	rm -f $(ODIR)/*.o $(ODIR)/Browser/*.o $(ODIR)/CSS/*.o $(ODIR)/CSS/Selectors/*.o $(ODIR)/DOM/*.o $(ODIR)/JS/*.o $(ODIR)/Parser/*.o $(ODIR)/Terminal/*.o *~ core $(INCDIR)/*~

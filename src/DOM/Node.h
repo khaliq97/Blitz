@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <Browser/RenderNode.h>
 #include <Browser/Layout.h>
 class Document;
 class Element;
@@ -47,13 +46,12 @@ class Node
 
         std::shared_ptr<Node> firstChild;
         std::unique_ptr<Node> lastChild;
-        std::unique_ptr<Node> previousSibling;
+        std::shared_ptr<Node> previousSibling;
         std::shared_ptr<Node> nextSibling;
 
         std::string nodeValue;
         std::string textContent;
 
-        std::shared_ptr<RenderNode> css;
         std::shared_ptr<Layout> layout;
 };
 

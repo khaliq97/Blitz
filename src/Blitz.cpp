@@ -1,9 +1,6 @@
 #include <Blitz.h>
 #include <fstream>
-#include <Browser/Render.h>
 #include <gtkmm.h>
-#include <Browser/Window.h>
-#include <Browser/HTMLView.h>
 static Lexer lexer;
 
 Blitz::Blitz()
