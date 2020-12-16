@@ -15,14 +15,8 @@ void Blitz::loadHTML(std::string html)
 
     documentParser = std::make_shared<HTMLDocumentParser>(html, stateMachine->getParsedTokens());
     documentParser->run();
-    cssTokenizer = std::make_shared<Tokenizer>(lexer.getFileContent("../res/default.css"));
+    documentParser->printDOMTree();
 
-    // Old rendering stuff
-    /*
-    render = std::make_unique<class Render>(documentParser->getDocument(), documentParser->lexer);
-    render->render();
- std::shared_ptr<Node> styleTag = documentParser->findElementByTagName(documentParser->getDocument(), "style");
-    cssParser = std::make_unique<CSSParser>(documentParser->getDocument());
-    cssParser->runCSSContent(lexer.getFileContent("../res/default.css"));
-    */
+    cssTokenizer = std::make_shared<Tokenizer>(lexer.getFileContent("../res/test.css"));
+    cssParser = std::make_shared<CSS::Parser>(cssTokenizer->getTokens());
 }
