@@ -10,8 +10,8 @@ class StyleRule
 {
 public:
     StyleRule();
-    std::vector<std::shared_ptr<Declaration>> declaration;
     std::vector<std::shared_ptr<ComplexSelector>> complexSelectorList;
+    std::vector<std::shared_ptr<Declaration>> declaration;
 
 };
 }
