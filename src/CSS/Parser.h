@@ -9,14 +9,16 @@
 #include <memory>
 #include <vector>
 #include <CSS/Declaration.h>
+#include <DOM/Document.h>
 namespace CSS {
 class Parser
 {
 public:
-    Parser(const std::vector<std::shared_ptr<CSSToken>>& tokens);
+    Parser(const std::vector<std::shared_ptr<CSSToken>>& tokens, const std::shared_ptr<Document>& document);
     void parseStylesheet();
     std::vector<std::shared_ptr<QualifiedRule>> parseListOfRules();
     std::vector<std::shared_ptr<StyleRule> > createStyleRules();
+    std::shared_ptr<Document> document;
 private:
     std::vector<std::shared_ptr<CSSToken>> tokens;
     std::shared_ptr<Stylesheet> styleSheet;
