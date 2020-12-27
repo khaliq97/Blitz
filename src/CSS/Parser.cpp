@@ -1,12 +1,13 @@
 #include <CSS/Parser.h>
 int currentCSSToken = 0;
-CSS::Parser::Parser(const std::vector<std::shared_ptr<CSSToken>> &tokens)
+CSS::Parser::Parser(const std::vector<std::shared_ptr<CSSToken>> &tokens, const std::shared_ptr<Document>& document)
 {
     this->tokens = tokens;
+    this->document = document;
     styleSheet = std::make_shared<Stylesheet>();
     styleSheet->rules = parseListOfRules();
     styleSheet->styleRules = createStyleRules();
-    printQualifiedRules();
+    //printQualifiedRules();
     printStyleRules();
 }
 
@@ -134,6 +135,7 @@ std::shared_ptr<CSSToken> CSS::Parser::consumeComponentValue()
 
 void CSS::Parser::printStyleRules()
 {
+    printf("\n------------------CSS style rules: ------------------\n");
     for (auto styleRule: this->styleSheet->styleRules)
     {
          printf("-------Style Rule-------\n");
@@ -171,7 +173,7 @@ void CSS::Parser::printStyleRules()
 
         }
 
-         printf("    Declarations:\n");
+        printf("    Declarations:\n");
         for (auto declaration: styleRule->declaration)
         {
             printf("        Declaration\n");
@@ -179,6 +181,8 @@ void CSS::Parser::printStyleRules()
             for (auto declarationValue: declaration->value)
             {
                 printf("            Value: %s\n", declarationValue->value().c_str());
+                if (declarationValue->type == CSSTokenType::Dimension)
+                    printf("                Unit: %s\n", declarationValue->unit.c_str());
             }
 
         }
@@ -192,8 +196,6 @@ std::vector<std::shared_ptr<CSS::StyleRule>> CSS::Parser::createStyleRules()
 
     for(auto qualifiedRule: styleSheet->rules)
     {
-       // std::vector<std::shared_ptr<ComplexSelector>> complexSelector = parseQualifiedRulePrelude(qualifiedRule->prelude);
-
         std::shared_ptr<StyleRule> styleRule = std::make_shared<StyleRule>();
         styleRule->complexSelectorList = parseQualifiedRulePrelude(qualifiedRule->prelude);
         styleRule->declaration = parseQualifiedRuleBlock(qualifiedRule->simpleBlock);
@@ -202,109 +204,6 @@ std::vector<std::shared_ptr<CSS::StyleRule>> CSS::Parser::createStyleRules()
     }
 
     return styleRules;
-}
-
-std::vector<std::shared_ptr<Declaration>> CSS::Parser::parseQualifiedRuleBlock(const std::shared_ptr<SimpleBlock> &simpleBlock)
-{
-    return consumeListOfDeclarations(simpleBlock);
-}
-
-std::vector<std::shared_ptr<Declaration>> CSS::Parser::consumeListOfDeclarations(const std::shared_ptr<SimpleBlock> &simpleBlock)
-{
-    std::vector<std::shared_ptr<Declaration>> declarations;
-    int simpleBlockTokenIndex = 0;
-    for(auto simpleBlockToken: simpleBlock->values)
-    {
-        switch (simpleBlockToken->type)
-        {
-            case CSSTokenType::LeftCurlyBracket:
-            case CSSTokenType::Whitespace:
-            case CSSTokenType::Semicolon:
-                 simpleBlockTokenIndex++;
-                 continue;
-            //<at-keyword-token>
-            case CSSTokenType::IdentLike:
-                std::vector<std::shared_ptr<CSSToken>> tempList;
-
-                if (simpleBlockTokenIndex < simpleBlock->values.size() &&
-                        simpleBlock->values[simpleBlockTokenIndex]->type != CSSTokenType::Semicolon &&
-                        simpleBlock->values[simpleBlockTokenIndex]->type != CSSTokenType::EndOfFile)
-                {
-                    tempList.push_back(simpleBlock->values[simpleBlockTokenIndex]);
-                }
-
-                while(simpleBlockTokenIndex + 1 < simpleBlock->values.size())
-                {
-                    if (simpleBlock->values[simpleBlockTokenIndex + 1]->type != CSSTokenType::Semicolon &&
-                            simpleBlock->values[simpleBlockTokenIndex + 1]->type != CSSTokenType::EndOfFile)
-                    {
-                        tempList.push_back(simpleBlock->values[simpleBlockTokenIndex + 1]);
-                        simpleBlockTokenIndex++;
-                    }
-                    else
-                    {
-                       declarations.push_back(consumeDeclaration(tempList));
-                       break;
-                    }
-                }
-
-                break;
-        }
-
-    }
-
-    return declarations;
-}
-
-std::shared_ptr<Declaration> CSS::Parser::consumeDeclaration(const std::vector<std::shared_ptr<CSSToken>> &tempList)
-{
-    std::shared_ptr<Declaration> declaration = std::make_shared<Declaration>();
-    bool isDeclarationNameSet = false;
-    bool isDeclarationValueNext = false;
-
-    for(auto simpleBlockToken: tempList)
-    {
-         // First token will always be an ident like
-        if (simpleBlockToken->type == CSSTokenType::IdentLike && !isDeclarationNameSet)
-        {
-            declaration = std::make_shared<Declaration>();
-            declaration->name = simpleBlockToken->value();
-            isDeclarationNameSet = true;
-            continue;
-        }
-
-        if (simpleBlockToken->type == CSSTokenType::Whitespace)
-        {
-            continue;
-        }
-
-        if (simpleBlockToken->type == CSSTokenType::Colon)
-        {
-            isDeclarationValueNext = true;
-            continue;
-        }
-        else if (!isDeclarationValueNext)
-        {
-           printf("PARSE ERROR!\n");
-           exit(0);
-        }
-
-        if (simpleBlockToken->type != CSSTokenType::EndOfFile)
-        {
-            declaration->value.push_back(simpleBlockToken);
-            isDeclarationNameSet = false;
-            isDeclarationValueNext = false;
-            continue;
-        }
-
-        // Handle !important attributes here...
-
-        if (simpleBlockToken->type == CSSTokenType::Whitespace)
-            continue;
-
-    }
-
-    return declaration;
 }
 
 std::vector<std::shared_ptr<ComplexSelector>> CSS::Parser::parseQualifiedRulePrelude(const std::vector<std::shared_ptr<CSSToken>>& preludes)
@@ -376,7 +275,107 @@ std::vector<std::shared_ptr<ComplexSelector>> CSS::Parser::parseQualifiedRulePre
     return complexSelectorList;
 }
 
+std::vector<std::shared_ptr<Declaration>> CSS::Parser::parseQualifiedRuleBlock(const std::shared_ptr<SimpleBlock> &simpleBlock)
+{
+    return consumeListOfDeclarations(simpleBlock);
+}
 
+std::vector<std::shared_ptr<Declaration>> CSS::Parser::consumeListOfDeclarations(const std::shared_ptr<SimpleBlock> &simpleBlock)
+{
+    std::vector<std::shared_ptr<Declaration>> declarations;
+    int simpleBlockTokenIndex = 0;
+    for(auto simpleBlockToken: simpleBlock->values)
+    {
+        switch (simpleBlockToken->type)
+        {
+            case CSSTokenType::LeftCurlyBracket:
+            case CSSTokenType::Whitespace:
+            case CSSTokenType::Semicolon:
+                 simpleBlockTokenIndex++;
+                 continue;
+            //<at-keyword-token>
+            case CSSTokenType::IdentLike:
+                std::vector<std::shared_ptr<CSSToken>> tempList;
+
+                if (simpleBlockTokenIndex < simpleBlock->values.size() &&
+                        simpleBlock->values[simpleBlockTokenIndex]->type != CSSTokenType::Semicolon &&
+                        simpleBlock->values[simpleBlockTokenIndex]->type != CSSTokenType::EndOfFile)
+                {
+                    tempList.push_back(simpleBlock->values[simpleBlockTokenIndex]);
+                }
+
+                while(simpleBlockTokenIndex + 1 < simpleBlock->values.size())
+                {
+                    if (simpleBlock->values[simpleBlockTokenIndex + 1]->type != CSSTokenType::Semicolon &&
+                            simpleBlock->values[simpleBlockTokenIndex + 1]->type != CSSTokenType::EndOfFile)
+                    {
+                        tempList.push_back(simpleBlock->values[simpleBlockTokenIndex + 1]);
+                        simpleBlockTokenIndex++;
+                    }
+                    else
+                    {
+                       declarations.push_back(consumeDeclaration(tempList));
+                       break;
+                    }
+                }
+
+                break;
+        }
+    }
+
+    return declarations;
+}
+
+std::shared_ptr<Declaration> CSS::Parser::consumeDeclaration(const std::vector<std::shared_ptr<CSSToken>> &tempList)
+{
+    std::shared_ptr<Declaration> declaration = std::make_shared<Declaration>();
+    bool isDeclarationNameSet = false;
+    bool isDeclarationValueNext = false;
+
+    for(auto simpleBlockToken: tempList)
+    {
+         // First token will always be an ident like
+        if (simpleBlockToken->type == CSSTokenType::IdentLike && !isDeclarationNameSet)
+        {
+            declaration = std::make_shared<Declaration>();
+            declaration->name = simpleBlockToken->value();
+            isDeclarationNameSet = true;
+            continue;
+        }
+
+        if (simpleBlockToken->type == CSSTokenType::Whitespace)
+        {
+            continue;
+        }
+
+        if (simpleBlockToken->type == CSSTokenType::Colon)
+        {
+            isDeclarationValueNext = true;
+            continue;
+        }
+        else if (!isDeclarationValueNext)
+        {
+           printf("PARSE ERROR!\n");
+           exit(0);
+        }
+
+        if (simpleBlockToken->type != CSSTokenType::EndOfFile)
+        {
+            declaration->value.push_back(simpleBlockToken);
+            isDeclarationNameSet = false;
+            isDeclarationValueNext = false;
+            continue;
+        }
+
+        // Handle !important attributes here...
+
+        if (simpleBlockToken->type == CSSTokenType::Whitespace)
+            continue;
+
+    }
+
+    return declaration;
+}
 
 const std::shared_ptr<CSSToken>& CSS::Parser::peek()
 {
