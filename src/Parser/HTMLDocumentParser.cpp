@@ -206,7 +206,7 @@ void HTMLDocumentParser::insertDocumentTypeNode(std::shared_ptr<HTMLToken> token
     documentType->nodeName = "Document Type";
     documentType->nodeType = Node::NodeType::DocumentTypeNode;
     documentType->ownerDocument = document;
-    //parentNode->childNodes.push_back(std::move(documentType));
+    parentNode->childNodes.push_back(std::move(documentType));
 }
 
 void HTMLDocumentParser::insertHTMLElementNode(std::shared_ptr<HTMLToken> token, std::shared_ptr<Node> parentNode)
@@ -219,11 +219,17 @@ void HTMLDocumentParser::insertHTMLElementNode(std::shared_ptr<HTMLToken> token,
     htmlElement->textContent = htmlElement->getTextContent();
     htmlElement->ownerDocument = document;
 
-    if (parentNode->childNodes.size() > 0)
-        htmlElement->nextSibling = parentNode->childNodes[parentNode->childNodes.size() - 1];
+    // TODO: Add previous and next sibling assignment.
 
     if (token->getAttributes() != nullptr)
+    {
         htmlElement->attributes = token->getAttributes();
+        if (htmlElement->attributes->find("id") != htmlElement->attributes->end())
+        {
+            htmlElement->id = htmlElement->attributes->find("id")->second.c_str();
+        }
+    }
+
 
     parentNode->childNodes.push_back(htmlElement);
 
@@ -287,7 +293,10 @@ void dumpTree(std::shared_ptr<Node> node, std::string indent, bool last)
     printf("%s%s%s\n", indent.c_str(), " Text Content: ", node->getTextContent().c_str());
 
     if (node->nextSibling)
-        printf("%s%s%s\n", indent.c_str(), " Sibling Node Name: ", node->nextSibling->nodeName.c_str());
+        printf("%s%s%s\n", indent.c_str(), " Next Sibling Node Name: ", node->nextSibling->nodeName.c_str());
+
+    if (node->previousSibling)
+        printf("%s%s%s\n", indent.c_str(), " Previous Sibling Node Name: ", node->previousSibling->nodeName.c_str());
 
     if (auto commentNode = dynamic_cast<Comment*>(node.get()))
     {
@@ -339,7 +348,7 @@ void dumpTree(std::shared_ptr<Node> node, std::string indent, bool last)
 void HTMLDocumentParser::printDOMTree()
 {
 
-    printf("\n------------------DOM Tree [%ld]: ------------------\n\n", document->childNodes.size());
+    printf("\n------------------DOM Tree: ------------------\n\n");
 
     for (int i = 0; i < document->childNodes.size(); i++)
     {
@@ -728,7 +737,5 @@ void HTMLDocumentParser::run()
         }
 
     }
-
-    printDOMTree();
 
 }
