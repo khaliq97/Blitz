@@ -4,7 +4,8 @@
 #include <string>
 #include <map>
 #include <vector>
-
+#include <CSS/Declaration.h>
+#include <CSS/Selectors/ComplexSelector.h>
 class Node;
 
 class Element : public Node
@@ -24,5 +25,13 @@ class Element : public Node
         bool hasAttributes();
         std::map<std::string, std::string> *attributes;
 
+        std::shared_ptr<ComplexSelector> complexSelector;
+        std::vector<std::shared_ptr<Declaration>> declarations;
+
+        void removeDeclaration(std::string declarationPropertyName);
+        bool doesDeclarationExist(std::string decToFind);
+        bool replaceDeclaration(std::string decToReplace, std::shared_ptr<Declaration> replacementDec);
+
+        bool hasClass(std::string className);
 };
 #endif
