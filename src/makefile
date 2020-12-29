@@ -48,7 +48,8 @@ _DEPS = Blitz.h \
 		CSS/Selectors/CompoundSelector.h \
 		CSS/Selectors/SimpleSelector.h \
 		CSS/Declaration.h \
-		CSS/StyleRule.o 
+		CSS/StyleRule.h \
+		CSS/SelectorEngine.h
 
 DEPS = $(patsubst, %,$(IDIR)/%,$(_DEPS))
 
@@ -99,7 +100,8 @@ _OBJ = Main.o Blitz.o \
 		CSS/Selectors/CompoundSelector.o \
 		CSS/Selectors/SimpleSelector.o \
 		CSS/Declaration.o \
-		CSS/StyleRule.o 
+		CSS/StyleRule.o \
+		CSS/SelectorEngine.o
 
 OBJ = $(patsubst %, $(ODIR)/%,$(_OBJ))
 
