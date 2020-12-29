@@ -6,6 +6,7 @@
 #include <Parser/HTMLStateMachine.h>
 #include <CSS/Tokenizer.h>
 #include <CSS/Parser.h>
+#include <CSS/SelectorEngine.h>
 class Blitz {
     public:
         Blitz();
@@ -15,7 +16,7 @@ class Blitz {
         std::shared_ptr<HTMLDocumentParser> documentParser;
         std::shared_ptr<Tokenizer> cssTokenizer;
         std::shared_ptr<CSS::Parser> cssParser;
-        //std::unique_ptr<class Render> render;
+        std::shared_ptr<SelectorEngine> selectorEngine;
 };
 
 #endif // BLITZ_H
