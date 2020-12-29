@@ -19,9 +19,9 @@ public:
     std::vector<std::shared_ptr<QualifiedRule>> parseListOfRules();
     std::vector<std::shared_ptr<StyleRule> > createStyleRules();
     std::shared_ptr<Document> document;
+    std::shared_ptr<Stylesheet> styleSheet;
 private:
     std::vector<std::shared_ptr<CSSToken>> tokens;
-    std::shared_ptr<Stylesheet> styleSheet;
     const std::shared_ptr<CSSToken> &peek();
     const std::shared_ptr<CSSToken> &peekNext();
     void consume();

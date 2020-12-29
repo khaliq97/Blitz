@@ -157,19 +157,26 @@ void CSS::Parser::printStyleRules()
                 printf("        Sub class selectors\n");
                 for (auto subClassSelector: complexSelector->compoundSelector->subClassSelectors)
                 {
-                    if (auto idSelector = dynamic_cast<IdSelector*>(subClassSelector.get()))
+                    if (subClassSelector->type == SelectorType::Id)
                     {
                         printf("            ID Selector\n");
-                        printf("            Hash: %s\n", idSelector->hashToken->value().c_str());
+                        printf("            Hash: %s\n", subClassSelector->identToken->value().c_str());
                     }
 
-                    if (auto classSelector = dynamic_cast<ClassSelector*>(subClassSelector.get()))
+                    if (subClassSelector->type == SelectorType::Class)
                     {
                         printf("            Class Selector\n");
-                        printf("            Ident: %s\n", classSelector->identToken->value().c_str());
+                        printf("            Ident: %s\n", subClassSelector->identToken->value().c_str());
                     }
                 }
             }
+            printf("    Selector Specifity Data: \n");
+
+            printf("        A: %d\n", complexSelector->a);
+            printf("        B: %d\n", complexSelector->b);
+
+            printf("        C: %d\n", complexSelector->c);
+
 
         }
 
@@ -238,6 +245,13 @@ std::vector<std::shared_ptr<ComplexSelector>> CSS::Parser::parseQualifiedRulePre
             currentCompoundSelector->typeSelector = std::move(typeSelector);
             continue;
         }
+        else if (prelude->type == CSSTokenType::Delim && prelude->value() == "*" && !typeSelectorAdded && !isNextSelectorOfTypeClass)
+        {
+            std::shared_ptr<UniversalSelector> univerisalSelector = std::make_shared<UniversalSelector>(prelude);
+            typeSelectorAdded = true;
+            currentCompoundSelector->typeSelector = std::move(univerisalSelector);
+            continue;
+        }
         else if (prelude->type == CSSTokenType::IdentLike && typeSelectorAdded && !isNextSelectorOfTypeClass)
         {
             printf("Parsing selector returned failure\n!");
@@ -271,6 +285,7 @@ std::vector<std::shared_ptr<ComplexSelector>> CSS::Parser::parseQualifiedRulePre
     }
 
     currentComplexSelector->compoundSelector = std::move(currentCompoundSelector);
+    currentComplexSelector->calculateSelectorSpecifity();
     complexSelectorList.push_back(std::move(currentComplexSelector));
     return complexSelectorList;
 }
