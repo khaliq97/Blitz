@@ -1,7 +1,8 @@
 #include <DOM/Node.h>
 #include <DOM/Document.h>
 #include <DOM/Text.h>
-
+#include <Parser/Lexer.h>
+static Lexer lexer;
 Node::Node()
 {
     nodeType = Node::NodeType::ElementNode;
@@ -41,3 +42,16 @@ std::string Node::getTextContent()
     }
     return returnStr;
 }
+
+std::vector<std::shared_ptr<Node> > Node::getAllNodes(std::vector<std::shared_ptr<Node>> returnNodes, std::shared_ptr<Node> node)
+{
+    returnNodes.push_back(node);
+
+    for (int i = 0; i < node->childNodes.size(); i++)
+    {
+        returnNodes = getAllNodes(returnNodes, node->childNodes[i]);
+    }
+
+    return returnNodes;
+}
+

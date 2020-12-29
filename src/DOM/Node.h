@@ -53,6 +53,7 @@ class Node
         std::string textContent;
 
         std::shared_ptr<Layout> layout;
+        std::vector<std::shared_ptr<Node>> getAllNodes(std::vector<std::shared_ptr<Node> > returnNodes, std::shared_ptr<Node> node);
 };
 
 #endif
