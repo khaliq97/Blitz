@@ -23,6 +23,12 @@ class Document : public Node
 
         //std::shared_ptr<DocumentType> docType;
         //std::shared_ptr<Element> documentElement;
+        void dumpTree(std::shared_ptr<Node> node, std::string indent, bool last);
+private:
+
+
+
+
 };
 
 #endif
