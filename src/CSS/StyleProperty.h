@@ -1,0 +1,4 @@
+#ifndef STYLEPROPERTY_H
+#define STYLEPROPERTY_H
+
+#endif // STYLEPROPERTY_H

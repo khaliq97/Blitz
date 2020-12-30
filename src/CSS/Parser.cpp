@@ -350,11 +350,10 @@ std::shared_ptr<Declaration> CSS::Parser::consumeDeclaration(const std::vector<s
     for(auto simpleBlockToken: tempList)
     {
          // First token will always be an ident like
-        if (simpleBlockToken->type == CSSTokenType::IdentLike && !isDeclarationNameSet)
+        if (simpleBlockToken->type == CSSTokenType::IdentLike && !isDeclarationValueNext)
         {
             declaration = std::make_shared<Declaration>();
             declaration->name = simpleBlockToken->value();
-            isDeclarationNameSet = true;
             continue;
         }
 
@@ -377,8 +376,6 @@ std::shared_ptr<Declaration> CSS::Parser::consumeDeclaration(const std::vector<s
         if (simpleBlockToken->type != CSSTokenType::EndOfFile)
         {
             declaration->value.push_back(simpleBlockToken);
-            isDeclarationNameSet = false;
-            isDeclarationValueNext = false;
             continue;
         }
 

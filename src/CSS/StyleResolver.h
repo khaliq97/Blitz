@@ -1,0 +1,4 @@
+#ifndef STYLERESOLVER_H
+#define STYLERESOLVER_H
+
+#endif // STYLERESOLVER_H
