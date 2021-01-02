@@ -121,6 +121,11 @@ public:
         return m_numberType;
     }
 
+    double valueAsDouble()
+    {
+        return std::stod(value());
+    }
+
 private:
     std::string m_value = "";
     HashType m_hashType;
