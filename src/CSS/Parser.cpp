@@ -227,6 +227,7 @@ std::vector<std::shared_ptr<ComplexSelector>> CSS::Parser::parseQualifiedRulePre
         {
             //Reset current selectors
             currentComplexSelector->compoundSelector = std::move(currentCompoundSelector);
+            currentComplexSelector->calculateSelectorSpecifity();
             complexSelectorList.push_back(std::move(currentComplexSelector));
             currentComplexSelector = std::make_shared<ComplexSelector>();
             currentCompoundSelector = std::make_shared<CompoundSelector>();
