@@ -1,11 +1,11 @@
-#ifndef ELEMENT_H
-#define ELEMENT_H
+#pragma once
 #include <DOM/Node.h>
 #include <string>
 #include <map>
 #include <vector>
 #include <CSS/Declaration.h>
 #include <CSS/Selectors/ComplexSelector.h>
+#include <CSS/StyleProperty.h>
 class Node;
 
 class Element : public Node
@@ -28,10 +28,11 @@ class Element : public Node
         std::shared_ptr<ComplexSelector> complexSelector;
         std::vector<std::shared_ptr<Declaration>> declarations;
 
+        std::vector<std::shared_ptr<StyleProperty>> styleProperties;
+
         void removeDeclaration(std::string declarationPropertyName);
         bool doesDeclarationExist(std::string decToFind);
         bool replaceDeclaration(std::string decToReplace, std::shared_ptr<Declaration> replacementDec);
 
         bool hasClass(std::string className);
 };
-#endif

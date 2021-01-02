@@ -4,6 +4,7 @@
 #include <CSS/Stylesheet.h>
 #include <DOM/Element.h>
 #include <DOM/Document.h>
+#include <CSS/StyleProperty.h>
 class SelectorEngine
 {
 public:

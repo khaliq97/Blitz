@@ -1,10 +1,13 @@
 #include <CSS/SelectorEngine.h>
+#include <CSS/StyleResolver.h>
 SelectorEngine::SelectorEngine(const std::shared_ptr<Stylesheet> &stylesheet, std::shared_ptr<Document> document)
 {
     this->stylesheet = stylesheet;
     this->documentWithStyling = document;
     run();
     documentWithStyling->dumpTree(document, "", false);
+
+    std::shared_ptr<StyleResolver> styleResolver = std::make_shared<StyleResolver>(documentWithStyling);
 }
 
 void SelectorEngine::applyComplexSelectorToElement(const std::shared_ptr<ComplexSelector> &complexSelector, std::vector<std::shared_ptr<Declaration>> declarations, const std::shared_ptr<Node> &element)
