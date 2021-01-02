@@ -49,7 +49,12 @@ _DEPS = Blitz.h \
 		CSS/Selectors/SimpleSelector.h \
 		CSS/Declaration.h \
 		CSS/StyleRule.h \
-		CSS/SelectorEngine.h
+		CSS/SelectorEngine.h \
+		CSS/StyleProperty.h \
+		CSS/StyleResolver.h \
+		Layout/WebView.h \
+		Layout/HTMLView.h \
+		Layout/Box.h
 
 DEPS = $(patsubst, %,$(IDIR)/%,$(_DEPS))
 
@@ -101,7 +106,12 @@ _OBJ = Main.o Blitz.o \
 		CSS/Selectors/SimpleSelector.o \
 		CSS/Declaration.o \
 		CSS/StyleRule.o \
-		CSS/SelectorEngine.o
+		CSS/SelectorEngine.o \
+		CSS/StyleProperty.o \
+		CSS/StyleResolver.o \
+		Layout/WebView.o \
+		Layout/HTMLView.o \
+		Layout/Box.o
 
 OBJ = $(patsubst %, $(ODIR)/%,$(_OBJ))
 
@@ -114,4 +124,4 @@ blitz: $(OBJ)
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o $(ODIR)/Browser/*.o $(ODIR)/CSS/*.o $(ODIR)/CSS/Selectors/*.o $(ODIR)/DOM/*.o $(ODIR)/JS/*.o $(ODIR)/Parser/*.o $(ODIR)/Terminal/*.o *~ core $(INCDIR)/*~
+	rm -f $(ODIR)/*.o $(ODIR)/Browser/*.o $(ODIR)/CSS/*.o $(ODIR)/CSS/Selectors/*.o $(ODIR)/Layout/*.o $(ODIR)/DOM/*.o $(ODIR)/JS/*.o $(ODIR)/Parser/*.o $(ODIR)/Terminal/*.o *~ core $(INCDIR)/*~
