@@ -1,10 +1,8 @@
-#include <Browser/Render.h>
-#include <Browser/HTMLView.h>
 #include <Browser/Window.h>
 #include <gtkmm-3.0/gtkmm.h>
 #include <Terminal/Terminal.h>
 #include <JS/JS.h>
-#include <gtk/gtk.h>
+#include <gtkmm.h>
 #include <memory>
 #include <string>
 #include <stdio.h>
@@ -49,5 +47,8 @@ int main(int argc, char ** argv)
     blitzInstance = std::make_unique<Blitz>();
     blitzInstance->loadHTML(terminal->lexer->getFileContent(argv[1]));
 
+    std::unique_ptr<Window> window = std::make_unique<Window>();
+
     return 0;
+    //return app->run(*window);
 }
