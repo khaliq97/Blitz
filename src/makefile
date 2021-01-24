@@ -26,6 +26,8 @@ _DEPS = Blitz.h \
 		Browser/BoxModel.h \
 		Browser/Layout.h \
 		Browser/Dimension.h \
+		Browser/Core.h \
+		Browser/Inspector.h \
 		Terminal/Terminal.h \
 		JS/JS.h \
 		JS/Interpreter.h \
@@ -79,6 +81,8 @@ _OBJ = Main.o Blitz.o \
 		Browser/BoxModel.o \
 		Browser/Layout.o \
 		Browser/Dimension.o \
+		Browser/Core.o \
+		Browser/Inspector.o \
 		Terminal/Terminal.o \
 		JS/JS.o \
 		JS/Interpreter.o \
