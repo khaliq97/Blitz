@@ -2,14 +2,17 @@
 #define WEBVIEW_H
 #include <gtkmm.h>
 #include <Layout/HTMLView.h>
+class Core;
 class WebView : public Gtk::ScrolledWindow
 {
 public:
-    WebView();
+    WebView(Core* core, const std::shared_ptr<Node> renderElements);
+    std::shared_ptr<HTMLView> htmlView;
 
 private:
+    Core* m_core;
+    void test();
 
-    std::shared_ptr<HTMLView> htmlView;
 };
 
 #endif // WEBVIEW_H

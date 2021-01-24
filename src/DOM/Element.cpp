@@ -1,5 +1,7 @@
 #include <DOM/Element.h>
 #include <algorithm>
+#include <Parser/Lexer.h>
+static Lexer lexer;
 Element::Element(std::shared_ptr<Node> parentNode) : Node(parentNode)
 {
     namespaceURI = "";
@@ -93,6 +95,22 @@ bool Element::replaceDeclaration(std::string decToReplace, std::shared_ptr<Decla
     }
 
     return false;
+}
+
+std::shared_ptr<StyleProperty> Element::getStylePropertyByDeclarationName(std::string declarationName)
+{
+    for (auto styleProp: styleProperties)
+    {
+        if (lexer.caseInsensitiveStringCompare(styleProp->m_declaration->name, declarationName))
+        {
+            return styleProp;
+        }
+
+    }
+
+    std::shared_ptr<StyleProperty> stylePropDefault = std::make_shared<StyleProperty>();
+    stylePropDefault->computedValue = 0;
+    return stylePropDefault;
 }
 
 void Element::removeDeclaration(std::string declarationPropertyName)

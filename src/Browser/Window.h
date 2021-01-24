@@ -10,7 +10,7 @@ class Window : public Gtk::Window
         static std::unique_ptr<Gtk::Window> createBrowserWindow(std::string windowTitle, int width, int height);
 
     private:
-        std::shared_ptr<WebView> m_webView;
+
 };
 
 

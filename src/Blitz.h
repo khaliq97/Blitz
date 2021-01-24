@@ -7,6 +7,9 @@
 #include <CSS/Tokenizer.h>
 #include <CSS/Parser.h>
 #include <CSS/SelectorEngine.h>
+#include <Layout/WebView.h>
+#include <Browser/Window.h>
+#include <Browser/Core.h>
 class Blitz {
     public:
         Blitz();
@@ -17,6 +20,9 @@ class Blitz {
         std::shared_ptr<Tokenizer> cssTokenizer;
         std::shared_ptr<CSS::Parser> cssParser;
         std::shared_ptr<SelectorEngine> selectorEngine;
+
+        std::unique_ptr<Core> browserCoreWindow;
+
 };
 
 #endif // BLITZ_H

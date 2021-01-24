@@ -1,7 +1,7 @@
 #include <Blitz.h>
 #include <fstream>
 #include <gtkmm.h>
-#include <Browser/Window.h>
+#include <iostream>
 static Lexer lexer;
 
 Blitz::Blitz()
@@ -21,4 +21,5 @@ void Blitz::loadHTML(std::string html)
     cssParser = std::make_shared<CSS::Parser>(cssTokenizer->getTokens(), documentParser->getDocument());
     selectorEngine = std::make_shared<SelectorEngine>(cssParser->styleSheet, documentParser->getDocument());
 
+    browserCoreWindow = std::make_unique<Core>(selectorEngine->documentWithStyling);
 }

@@ -34,5 +34,7 @@ class Element : public Node
         bool doesDeclarationExist(std::string decToFind);
         bool replaceDeclaration(std::string decToReplace, std::shared_ptr<Declaration> replacementDec);
 
+        std::shared_ptr<StyleProperty> getStylePropertyByDeclarationName(std::string declarationName);
+
         bool hasClass(std::string className);
 };
