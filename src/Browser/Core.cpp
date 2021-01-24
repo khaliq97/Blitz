@@ -39,6 +39,4 @@ Core::Core(const std::shared_ptr<Node> documentWithStyling) : m_document(documen
 void Core::inspectorMenuItemActivate()
 {
     printf("Browser: Launching Inspector window\n");
-    inspectorWindow = std::make_unique<Inspector>();
-    inspectorWindow->show();
 }

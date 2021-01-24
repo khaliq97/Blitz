@@ -2,7 +2,6 @@
 #define CASPIAN_H
 #include <gtkmm.h>
 #include <DOM/Node.h>
-#include <Browser/Inspector.h>
 #include <Layout/WebView.h>
 class Core : public Gtk::Window
 {
@@ -11,7 +10,6 @@ public:
     Core(const std::shared_ptr<Node> documentWithStyling);
 
     std::shared_ptr<WebView> webView;
-    std::unique_ptr<Inspector> inspectorWindow;
 
     std::unique_ptr<Gtk::MenuBar> coreMenuBar;
     std::unique_ptr<Gtk::MenuItem> menuItem_Developer;
