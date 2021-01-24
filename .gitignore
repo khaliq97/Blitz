@@ -10,3 +10,5 @@ src/blitz
 src/index.html
 src/mfsite.html
 src/test.js
+res/default.css
+res/test.css
