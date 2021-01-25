@@ -5,6 +5,7 @@
 #include <vector>
 #include <CSS/Declaration.h>
 #include <CSS/Selectors/ComplexSelector.h>
+#include <CSS/StyleRule.h>
 #include <CSS/StyleProperty.h>
 class Node;
 
@@ -25,7 +26,7 @@ class Element : public Node
         bool hasAttributes();
         std::map<std::string, std::string> *attributes;
 
-        std::shared_ptr<ComplexSelector> complexSelector;
+        std::vector<std::shared_ptr<CSS::StyleRule>> styleRules;
         std::vector<std::shared_ptr<Declaration>> declarations;
 
         std::vector<std::shared_ptr<StyleProperty>> styleProperties;
