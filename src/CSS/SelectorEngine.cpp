@@ -47,42 +47,7 @@ void SelectorEngine::applyComplexSelectorToElement(const std::shared_ptr<Complex
 
         }
 
-        // Sort the style rules
-
         elementNode->styleRules.push_back(styleRule);
-
-
-
-
-
-
-        //if (elementNode->complexSelector)
-        //{
-        //    for (auto dec: declarations)
-        //    {
-        //        if (elementNode->doesDeclarationExist(dec->name))
-        //        {
-        //            if (complexSelector->isThisSelectorMoreSpecific(elementNode->complexSelector))
-        //            {
-        //                elementNode->complexSelector = std::move(complexSelector);
-        //                elementNode->replaceDeclaration(dec->name, dec);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            elementNode->declarations.push_back(dec);
-        //        }
-        //    }
-        //}
-        //else
-        //{
-        //    elementNode->complexSelector = std::move(complexSelector);
-        //    for (auto dec: declarations)
-        //    {
-        //        elementNode->declarations.push_back(dec);
-        //    }
-        //}
-
     }
 }
 
@@ -152,8 +117,8 @@ void SelectorEngine::run()
     std::vector<std::shared_ptr<Node>> empty = {};
     std::vector<std::shared_ptr<Node>> elements = documentWithStyling->getAllNodes(empty, documentWithStyling);
 
-    // Sort the style rules
-
+    // Adding all complex selector values to their style rule.
+    // This value is then used to sort the entire stylesheet most specifc selectors at the top.
     for (auto styleRule: stylesheet->styleRules)
     {
         for (auto complexSelector: styleRule->complexSelectorList)
@@ -165,6 +130,7 @@ void SelectorEngine::run()
 
     }
 
+    // Sort the style rules
     std::sort(stylesheet->styleRules.begin(), stylesheet->styleRules.end(), compare);
 
     for (auto styleRule: stylesheet->styleRules)
