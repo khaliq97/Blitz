@@ -105,12 +105,9 @@ std::shared_ptr<StyleProperty> Element::getStylePropertyByDeclarationName(std::s
         {
             return styleProp;
         }
-
     }
 
-    std::shared_ptr<StyleProperty> stylePropDefault = std::make_shared<StyleProperty>();
-    stylePropDefault->computedValue = 0;
-    return stylePropDefault;
+    return std::make_shared<StyleProperty>();
 }
 
 void Element::removeDeclaration(std::string declarationPropertyName)
