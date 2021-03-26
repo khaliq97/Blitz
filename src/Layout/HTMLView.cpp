@@ -9,20 +9,11 @@ HTMLView::HTMLView(Core* core, const std::shared_ptr<Node> renderElements) : m_c
     for (auto b: boxes)
     {
         b->compute();
-        printf("Box Height: %lf\n", b->height);
-        printf("Box Width: %lf\n", b->width);
-        if (b->height > 10000)
-            printf("Name that is overflowing: %s\n", b->element->getTextContent().c_str());
+
         this->maxHeight += b->height;
         if (b->width > this->maxWidth)
             this->maxWidth = b->width;
     }
-
-
-
-    printf("Viewport Height: %lf\n", maxHeight);
-    printf("Viewport Width: %lf\n", maxWidth);
-
 }
 
 bool HTMLView::isJustWhiteSpace(std::shared_ptr<Node> node)
@@ -71,9 +62,6 @@ bool HTMLView::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     this->set_vexpand(true);
     this->set_valign(Gtk::ALIGN_FILL);
 
-    printf("HTMLView Widget width: %d\n", this->get_width());
-    printf("HTMLView Widget height: %d\n", this->get_height());
-
     cr->set_source_rgb(255, 255, 255);
     cr->rectangle(0, 0, this->get_width(), this->get_height());
     cr->fill();
@@ -90,6 +78,7 @@ bool HTMLView::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 
         if (b->element->getStylePropertyByDeclarationName("display")->m_declaration->value[0]->value() == "block")
         {
+            drawCoordinates->x = 0;
             drawCoordinates->y += b->height;
         }
         else {
