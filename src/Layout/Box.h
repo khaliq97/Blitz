@@ -2,6 +2,7 @@
 #define BOX_H
 #include <gtkmm.h>
 #include <DOM/Element.h>
+#include <CSS/StyleProperty.h>
 class DrawCoordinates;
 class HTMLView;
 
@@ -30,6 +31,12 @@ public:
     double borderLeftWidth = 0;
     double borderRightWidth = 0;
 
+    std::shared_ptr<Color> borderTopColor;
+    std::shared_ptr<Color> borderBottomColor;
+    std::shared_ptr<Color> borderLeftColor;
+    std::shared_ptr<Color> borderRightColor;
+
+
     // Box Metrics
     double height = 0;
     double width = 0;
@@ -49,10 +56,20 @@ public:
     void compute();
     void createTextLayout();
     std::shared_ptr<DrawCoordinates> drawCoords;
+    Cairo::Rectangle borderRect;
 private:
 
+    enum Border {
+        Top,
+        Bottom,
+        Left,
+        Right
+    };
    Glib::RefPtr<Pango::Layout> pangoLayout;
    HTMLView* htmlView;
+   void drawBorder(Border border, const Cairo::RefPtr<Cairo::Context> &cr);
+   void drawBorder(Border border, Cairo::Rectangle borderRect, const Cairo::RefPtr<Cairo::Context> &cr);
+
 };
 
 #endif // BOX_H
