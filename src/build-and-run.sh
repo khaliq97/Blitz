@@ -1,5 +1,3 @@
 #!/bin/bash
-clear
-make clean
 make
-./lumber
+./blitz index.html
