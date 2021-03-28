@@ -1,15 +1,14 @@
 #include <CSS/StyleResolver.h>
 #include <Parser/Lexer.h>
+
 static Lexer lexer;
 
-
-
-StyleResolver::StyleResolver(const std::shared_ptr<Document>& document)
+StyleResolver::StyleResolver(const std::shared_ptr<Document> &document)
 {
-    this->documentWithCssDeclrations = document;
+    this->documentWithCSSDeclrations = document;
 
     std::vector<std::shared_ptr<Node>> empty = {};
-    std::vector<std::shared_ptr<Node>> elements = documentWithCssDeclrations->getAllNodes(empty, documentWithCssDeclrations);
+    std::vector<std::shared_ptr<Node>> elements = documentWithCSSDeclrations->getAllNodes(empty, documentWithCSSDeclrations);
 
     for (auto elementNode: elements)
     {
@@ -17,137 +16,11 @@ StyleResolver::StyleResolver(const std::shared_ptr<Document>& document)
         {
             for (auto dec: element->declarations)
             {
-                if (lexer.caseInsensitiveStringCompare(dec->name, "padding"))
-                {
-                    for (auto styleProp: resolvePosistionalPropertyValues(ShortHandPropertyNameType::Padding, dec))
-                    {
-                         element->styleProperties.push_back(resolveStyleFromDeclaration(styleProp->m_declaration, elementNode));
-                    }
-                }
-                else if (lexer.caseInsensitiveStringCompare(dec->name, "margin"))
-                {
-                    for (auto styleProp: resolvePosistionalPropertyValues(ShortHandPropertyNameType::Margin, dec))
-                    {
-                         element->styleProperties.push_back(resolveStyleFromDeclaration(styleProp->m_declaration, elementNode));
-                    }
-                }
-                else if (lexer.caseInsensitiveStringCompare(dec->name, "border"))
-                {
-                    for (auto styleProp: resolvePosistionalPropertyValues(ShortHandPropertyNameType::Border, dec))
-                    {
-                         element->styleProperties.push_back(resolveStyleFromDeclaration(styleProp->m_declaration, elementNode));
-                    }
-                }
-                else
-                {
-                    element->styleProperties.push_back(resolveStyleFromDeclaration(dec, elementNode));
-                }
+                element->styleProperties.push_back(resolveStyleFromDeclaration(dec, elementNode));
             }
         }
     }
-}
 
-std::shared_ptr<StyleProperty> StyleResolver::createPositionalStyleProperty(std::string declarationName, const std::shared_ptr<CSSToken>& declarationValue)
-{
-    std::shared_ptr<Declaration> declaration = std::make_shared<Declaration>();
-    declaration->name = declarationName;
-    declaration->value.push_back(declarationValue);
-
-    return std::make_shared<StyleProperty>(declaration);
-}
-
-std::vector<std::shared_ptr<StyleProperty>> StyleResolver::resolvePosistionalPropertyValues(ShortHandPropertyNameType type, const std::shared_ptr<Declaration> declaration)
-{
-    std::vector<std::shared_ptr<StyleProperty>> resovledStyleProperties;
-    int declarationValueCount = declaration->value.size();
-
-
-    switch (type)
-    {
-        case ShortHandPropertyNameType::Margin:
-            if (declarationValueCount == 1)
-            {
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-top", declaration->value[0])));
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-bottom", declaration->value[0])));
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-left", declaration->value[0])));
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-right", declaration->value[0])));
-            }
-            else if (declarationValueCount == 2)
-            {
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-top", declaration->value[0])));
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-bottom", declaration->value[0])));
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-left", declaration->value[1])));
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-right", declaration->value[1])));
-            }
-            else if (declarationValueCount == 3)
-            {
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-top", declaration->value[0])));
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-bottom", declaration->value[2])));
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-left", declaration->value[1])));
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-right", declaration->value[1])));
-            }
-            else if (declarationValueCount == 4)
-            {
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-top", declaration->value[0])));
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-bottom", declaration->value[2])));
-                resovledStyleProperties.push_back(std::move(createPositionalStyleProperty("margin-left", declaration->value[3])));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("margin-right", declaration->value[1]));
-            }
-            break;
-
-        case ShortHandPropertyNameType::Padding:
-            if (declarationValueCount == 1)
-            {
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-top", declaration->value[0]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-bottom", declaration->value[0]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-left", declaration->value[0]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-right", declaration->value[0]));
-            }
-            else if (declarationValueCount == 2)
-            {
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-top", declaration->value[0]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-bottom", declaration->value[0]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-left", declaration->value[1]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-right", declaration->value[1]));
-            }
-            else if (declarationValueCount == 3)
-            {
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-top", declaration->value[0]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-bottom", declaration->value[2]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-left", declaration->value[1]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-right", declaration->value[1]));
-            }
-            else if (declarationValueCount == 4)
-            {
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-top", declaration->value[0]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-bottom", declaration->value[2]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("padding-left", declaration->value[3]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("margin-padding", declaration->value[1]));
-            }
-            break;
-        case ShortHandPropertyNameType::Border:
-            if (declarationValueCount == 3)
-            {
-                resovledStyleProperties.push_back(createPositionalStyleProperty("border-top-width", declaration->value[0]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("border-bottom-width", declaration->value[0]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("border-left-width", declaration->value[0]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("border-right-width", declaration->value[0]));
-
-                resovledStyleProperties.push_back(createPositionalStyleProperty("border-top-style", declaration->value[1]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("border-bottom-style", declaration->value[1]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("border-left-style", declaration->value[1]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("border-right-style", declaration->value[1]));
-
-                resovledStyleProperties.push_back(createPositionalStyleProperty("border-top-color", declaration->value[2]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("border-bottom-color", declaration->value[2]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("border-left-color", declaration->value[2]));
-                resovledStyleProperties.push_back(createPositionalStyleProperty("border-right-color", declaration->value[2]));
-            }
-
-
-    }
-
-    return resovledStyleProperties;
 }
 
 std::shared_ptr<StyleProperty> StyleResolver::resolveStyleFromDeclaration(const std::shared_ptr<Declaration> declaration, const std::shared_ptr<Node>& node)
@@ -161,21 +34,16 @@ std::shared_ptr<StyleProperty> StyleResolver::resolveStyleFromDeclaration(const 
            //font-size (em)
            if (lexer.caseInsensitiveStringCompare("em", declarationValue->unit))
            {
-               // TODO: It needs to check if font-size already exists as a computed value
-               // i.e. if the font-size already on the element is a dimension and has the "em" unit then we go back to the parent node.
                if (!findFirstDeclarationOccurence("font-size", node->parentNode))
                {
                     // Fallback font-size
                     styleProp->computedValue = 16 * declarationValue->valueAsDouble();
-                    //printf("Element: %s\n", node->nodeName.c_str());
-                    //printf("Fallback %s: %lf\n", declaration->name.c_str(), styleProp->computedValue);
                     return styleProp;
                }
                else
                {
+                   // Declaration defined font-size
                    styleProp->computedValue = findFirstDeclarationOccurence("font-size", node->parentNode)->computedValue * declarationValue->valueAsDouble();
-                   //printf("Element: %s\n", node->nodeName.c_str());
-                   //printf("Relative %s: %lf\n", declaration->name.c_str(), styleProp->computedValue);
                    return styleProp;
                }
            }

@@ -1,5 +1,7 @@
 #include <CSS/Parser.h>
 int currentCSSToken = 0;
+
+static Lexer lexer;
 CSS::Parser::Parser(const std::vector<std::shared_ptr<CSSToken>> &tokens, const std::shared_ptr<Document>& document)
 {
     this->tokens = tokens;
@@ -330,7 +332,10 @@ std::vector<std::shared_ptr<Declaration>> CSS::Parser::consumeListOfDeclarations
                     }
                     else
                     {
-                       declarations.push_back(consumeDeclaration(tempList));
+                       for (auto resolvedDeclaration: resolveShorthandDeclaration(consumeDeclaration(tempList)))
+                       {
+                           declarations.push_back(resolvedDeclaration);
+                       }
                        break;
                     }
                 }
@@ -389,6 +394,144 @@ std::shared_ptr<Declaration> CSS::Parser::consumeDeclaration(const std::vector<s
 
     return declaration;
 }
+
+std::vector<std::shared_ptr<Declaration>> CSS::Parser::resolveShorthandDeclaration(std::shared_ptr<Declaration> declaration)
+{
+    std::vector<std::shared_ptr<Declaration>> longHandDeclarations;
+    if (lexer.caseInsensitiveStringCompare(declaration->name, "padding"))
+    {
+        for (auto resolvedLongHandDeclaration: resolvePosistionalShorthandDeclarationValues(ShortHandPropertyNameType::Padding, declaration))
+        {
+            longHandDeclarations.push_back(resolvedLongHandDeclaration);
+        }
+
+    }
+    else if (lexer.caseInsensitiveStringCompare(declaration->name, "margin"))
+    {
+        for (auto resolvedLongHandDeclaration: resolvePosistionalShorthandDeclarationValues(ShortHandPropertyNameType::Margin, declaration))
+        {
+            longHandDeclarations.push_back(resolvedLongHandDeclaration);
+        }
+    }
+    else if (lexer.caseInsensitiveStringCompare(declaration->name, "border"))
+    {
+        for (auto resolvedLongHandDeclaration: resolvePosistionalShorthandDeclarationValues(ShortHandPropertyNameType::Border, declaration))
+        {
+            longHandDeclarations.push_back(resolvedLongHandDeclaration);
+        }
+    }
+    else
+    {
+        longHandDeclarations.push_back(declaration);
+    }
+
+    return longHandDeclarations;
+}
+
+std::shared_ptr<Declaration> CSS::Parser::createPositionalDeclaration(std::string declarationName, const std::shared_ptr<CSSToken>& declarationValue)
+{
+    std::shared_ptr<Declaration> declaration = std::make_shared<Declaration>();
+    declaration->name = declarationName;
+    declaration->value.push_back(declarationValue);
+
+    return declaration;
+}
+
+
+std::vector<std::shared_ptr<Declaration>> CSS::Parser::resolvePosistionalShorthandDeclarationValues(ShortHandPropertyNameType type, const std::shared_ptr<Declaration> declaration)
+{
+    std::vector<std::shared_ptr<Declaration>> resolvedDeclarations;
+    int declarationValueCount = declaration->value.size();
+
+
+    switch (type)
+    {
+        case ShortHandPropertyNameType::Margin:
+            if (declarationValueCount == 1)
+            {
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-top", declaration->value[0])));
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-bottom", declaration->value[0])));
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-left", declaration->value[0])));
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-right", declaration->value[0])));
+            }
+            else if (declarationValueCount == 2)
+            {
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-top", declaration->value[0])));
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-bottom", declaration->value[0])));
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-left", declaration->value[1])));
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-right", declaration->value[1])));
+            }
+            else if (declarationValueCount == 3)
+            {
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-top", declaration->value[0])));
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-bottom", declaration->value[2])));
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-left", declaration->value[1])));
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-right", declaration->value[1])));
+            }
+            else if (declarationValueCount == 4)
+            {
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-top", declaration->value[0])));
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-bottom", declaration->value[2])));
+                resolvedDeclarations.push_back(std::move(createPositionalDeclaration("margin-left", declaration->value[3])));
+                resolvedDeclarations.push_back(createPositionalDeclaration("margin-right", declaration->value[1]));
+            }
+            break;
+
+        case ShortHandPropertyNameType::Padding:
+            if (declarationValueCount == 1)
+            {
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-top", declaration->value[0]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-bottom", declaration->value[0]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-left", declaration->value[0]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-right", declaration->value[0]));
+            }
+            else if (declarationValueCount == 2)
+            {
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-top", declaration->value[0]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-bottom", declaration->value[0]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-left", declaration->value[1]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-right", declaration->value[1]));
+            }
+            else if (declarationValueCount == 3)
+            {
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-top", declaration->value[0]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-bottom", declaration->value[2]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-left", declaration->value[1]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-right", declaration->value[1]));
+            }
+            else if (declarationValueCount == 4)
+            {
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-top", declaration->value[0]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-bottom", declaration->value[2]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-left", declaration->value[3]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("padding-right", declaration->value[1]));
+            }
+            break;
+        case ShortHandPropertyNameType::Border:
+            if (declarationValueCount == 3)
+            {
+                resolvedDeclarations.push_back(createPositionalDeclaration("border-top-width", declaration->value[0]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("border-bottom-width", declaration->value[0]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("border-left-width", declaration->value[0]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("border-right-width", declaration->value[0]));
+
+                resolvedDeclarations.push_back(createPositionalDeclaration("border-top-style", declaration->value[1]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("border-bottom-style", declaration->value[1]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("border-left-style", declaration->value[1]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("border-right-style", declaration->value[1]));
+
+                resolvedDeclarations.push_back(createPositionalDeclaration("border-top-color", declaration->value[2]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("border-bottom-color", declaration->value[2]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("border-left-color", declaration->value[2]));
+                resolvedDeclarations.push_back(createPositionalDeclaration("border-right-color", declaration->value[2]));
+            }
+
+
+    }
+
+    return resolvedDeclarations;
+}
+
 
 const std::shared_ptr<CSSToken>& CSS::Parser::peek()
 {

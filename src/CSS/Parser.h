@@ -10,6 +10,8 @@
 #include <vector>
 #include <CSS/Declaration.h>
 #include <DOM/Document.h>
+#include <Parser/Lexer.h>
+
 namespace CSS {
 class Parser
 {
@@ -20,6 +22,17 @@ public:
     std::vector<std::shared_ptr<StyleRule> > createStyleRules();
     std::shared_ptr<Document> document;
     std::shared_ptr<Stylesheet> styleSheet;
+    enum ShortHandPropertyNameType
+    {
+        Margin,
+        Padding,
+        Border,
+        BorderWidth,
+        BorderStyle,
+        BorderColor,
+        None
+    };
+
 private:
     std::vector<std::shared_ptr<CSSToken>> tokens;
     const std::shared_ptr<CSSToken> &peek();
@@ -37,6 +50,9 @@ private:
     std::vector<std::shared_ptr<Declaration> > parseQualifiedRuleBlock(const std::shared_ptr<SimpleBlock> &simpleBlock);
     std::vector<std::shared_ptr<Declaration> > consumeListOfDeclarations(const std::shared_ptr<SimpleBlock> &simpleBlock);
     std::shared_ptr<Declaration> consumeDeclaration(const std::vector<std::shared_ptr<CSSToken> > &tempList);
+    std::vector<std::shared_ptr<Declaration>> resolveShorthandDeclaration(std::shared_ptr<Declaration> declaration);
+    std::vector<std::shared_ptr<Declaration> > resolvePosistionalShorthandDeclarationValues(ShortHandPropertyNameType type, const std::shared_ptr<Declaration> declaration);
+    std::shared_ptr<Declaration> createPositionalDeclaration(std::string declarationName, const std::shared_ptr<CSSToken> &declarationValue);
 };
 
 }
