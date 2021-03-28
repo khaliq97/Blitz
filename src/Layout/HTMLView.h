@@ -1,7 +1,7 @@
 #pragma once
 
 #include <gtkmm.h>
-#include <Layout/Box.h>
+#include <Layout/LayoutBox.h>
 class Core;
 
 class DrawCoordinates

@@ -1,4 +1,4 @@
-#include <Layout/Box.h>
+#include <Layout/LayoutBox.h>
 #include <Layout/HTMLView.h>
 #include <gtkmm-3.0/gtkmm.h>
 #include <gtkmm.h>
@@ -6,9 +6,7 @@
 #include <pangomm/init.h>
 #include <cairomm/cairomm.h>
 
-bool paintMarginBox = true;
-
-
+bool paintMarginBox = false;
 
 Box::Box(const Glib::RefPtr<Pango::Layout>& pangoLayout, const std::shared_ptr<DrawCoordinates>& drawCoords, const std::shared_ptr<Element> &element) : pangoLayout(std::move(pangoLayout)), drawCoords(drawCoords), element(element)
 {
