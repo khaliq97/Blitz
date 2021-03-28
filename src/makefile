@@ -56,7 +56,7 @@ _DEPS = Blitz.h \
 		CSS/StyleResolver.h \
 		Layout/WebView.h \
 		Layout/HTMLView.h \
-		Layout/Box.h
+		Layout/LayoutBox.h
 
 DEPS = $(patsubst, %,$(IDIR)/%,$(_DEPS))
 
@@ -115,7 +115,7 @@ _OBJ = Main.o Blitz.o \
 		CSS/StyleResolver.o \
 		Layout/WebView.o \
 		Layout/HTMLView.o \
-		Layout/Box.o
+		Layout/LayoutBox.o
 
 OBJ = $(patsubst %, $(ODIR)/%,$(_OBJ))
 

@@ -41,7 +41,7 @@ void HTMLView::createBoxForElement(std::shared_ptr<Node> node)
     {
         if (!isJustWhiteSpace(node) && elementNode->tagName != "title")
         {
-            std::shared_ptr<Box> box = std::make_shared<Box>(this->create_pango_layout(elementNode->getTextContent()), drawCoordinates, elementNode);
+            std::shared_ptr<LayoutBox> box = std::make_shared<LayoutBox>(this->create_pango_layout(elementNode->getTextContent()), drawCoordinates, elementNode);
             this->boxes.push_back(std::move(box));
         }
 

@@ -8,7 +8,7 @@
 
 bool paintMarginBox = false;
 
-Box::Box(const Glib::RefPtr<Pango::Layout>& pangoLayout, const std::shared_ptr<DrawCoordinates>& drawCoords, const std::shared_ptr<Element> &element) : pangoLayout(std::move(pangoLayout)), drawCoords(drawCoords), element(element)
+LayoutBox::LayoutBox(const Glib::RefPtr<Pango::Layout>& pangoLayout, const std::shared_ptr<DrawCoordinates>& drawCoords, const std::shared_ptr<Element> &element) : pangoLayout(std::move(pangoLayout)), drawCoords(drawCoords), element(element)
 {
 
     this->paddingTop = element->getStylePropertyByDeclarationName("padding-top")->computedValue;
@@ -34,7 +34,7 @@ Box::Box(const Glib::RefPtr<Pango::Layout>& pangoLayout, const std::shared_ptr<D
     this->fontSize = element->getStylePropertyByDeclarationName("font-size")->computedValue;
 }
 
-void Box::createTextLayout()
+void LayoutBox::createTextLayout()
 {
     Pango::FontDescription font;
 
@@ -50,7 +50,7 @@ void Box::createTextLayout()
     this->contentWidth = logicalRect.get_width() / Pango::SCALE;
 }
 
-void Box::compute()
+void LayoutBox::compute()
 {
     createTextLayout();
 
@@ -58,7 +58,7 @@ void Box::compute()
     this->width = this->width + contentWidth + paddingLeft + paddingRight + borderLeftWidth + borderRightWidth + marginLeft + marginRight;
 }
 
-void Box::drawBorder(Border border, Cairo::Rectangle borderRect, const Cairo::RefPtr<Cairo::Context> &cr)
+void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cairo::RefPtr<Cairo::Context> &cr)
 {
 
     double stepX = 0;
@@ -238,7 +238,7 @@ void Box::drawBorder(Border border, Cairo::Rectangle borderRect, const Cairo::Re
     localDrawX -= marginLeft;
 }
 
-bool Box::paint(const Cairo::RefPtr<Cairo::Context> &cr)
+bool LayoutBox::paint(const Cairo::RefPtr<Cairo::Context> &cr)
 {
 
     borderRect.x = localDrawX;

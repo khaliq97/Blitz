@@ -6,11 +6,13 @@
 class DrawCoordinates;
 class HTMLView;
 
-class Box
+class LayoutBox
 {
 public:
-    Box(const Glib::RefPtr<Pango::Layout>& pangoLayout, const std::shared_ptr<DrawCoordinates>& drawCoords, const std::shared_ptr<Element>& element);
+    LayoutBox(const Glib::RefPtr<Pango::Layout>& pangoLayout, const std::shared_ptr<DrawCoordinates>& drawCoords, const std::shared_ptr<Element>& element);
 
+    std::shared_ptr<LayoutBox> parent;
+    std::vector<std::shared_ptr<LayoutBox>> children;
     // Font metrics
     double fontSize = 0;
 

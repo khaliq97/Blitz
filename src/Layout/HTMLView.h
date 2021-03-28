@@ -27,6 +27,7 @@ public:
 private:
     Core* m_core;
     std::shared_ptr<Node> renderElements;
-    std::vector<std::shared_ptr<Box>> boxes;
+    std::vector<std::shared_ptr<LayoutBox>> boxes;
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
+    std::shared_ptr<LayoutBox> root;
 };;
