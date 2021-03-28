@@ -34,6 +34,12 @@ std::shared_ptr<StyleProperty> StyleResolver::resolveStyleFromDeclaration(const 
            //font-size (em)
            if (lexer.caseInsensitiveStringCompare("em", declarationValue->unit))
            {
+               if (findFirstDeclarationOccurence("font-size", node))
+               {
+                   styleProp->computedValue = findFirstDeclarationOccurence("font-size", node)->computedValue * declarationValue->valueAsDouble();
+                   return styleProp;
+               }
+
                if (!findFirstDeclarationOccurence("font-size", node->parentNode))
                {
                     // Fallback font-size
