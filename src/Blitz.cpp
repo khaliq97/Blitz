@@ -17,7 +17,7 @@ void Blitz::loadHTML(std::string html)
     documentParser = std::make_shared<HTMLDocumentParser>(html, stateMachine->getParsedTokens());
     documentParser->run();
 
-    cssTokenizer = std::make_shared<Tokenizer>(lexer.getFileContent("../res/test.css"));
+    cssTokenizer = std::make_shared<Tokenizer>(lexer.getFileContent("../res/default.css"));
     cssParser = std::make_shared<CSS::Parser>(cssTokenizer->getTokens(), documentParser->getDocument());
     selectorEngine = std::make_shared<SelectorEngine>(cssParser->styleSheet, documentParser->getDocument());
 
