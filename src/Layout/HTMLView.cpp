@@ -166,7 +166,7 @@ bool HTMLView::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     cr->stroke();
 
     root = {};
-    createBoxForElement(renderElements, {}, 0);
+    createBoxForElement(renderElements, {});
 
     if (!isSizeSet)
     {
