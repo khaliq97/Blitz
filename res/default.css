@@ -1,58 +1,135 @@
-p {
+* {
+    font-size: 16px;
     display: block;
-    margin-top: 1em;
-    margin-bottom: 1em;
-    margin-left: 0;
-    margin-right: 0;
-    padding-left: 0;
+}
+/* blocks */
+
+article,
+aside,
+details,
+div,
+dt,
+figcaption,
+footer,
+form,
+header,
+hgroup,
+html,
+main,
+nav,
+section,
+summary 
+{
+  display: block;
+}
+
+body {
+  display: block;
+  margin: 8px;
+}
+
+div {
+  display: block;
+  padding: 12px;
+}
+
+header {
+  display: block;
+}
+
+p, dl, multicol {
+  display: block;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+}
+
+dd {
+  display: block;
+  margin-inline-start: 40px;
+}
+
+blockquote, figure {
+  display: block;
+  margin-inline-end: 40px;
+}
+
+address {
+  display: block;
+  font-style: italic;
+}
+
+center {
+  display: block;
+  /* text-align: -moz-center; */
 }
 h1 {
-    display: block;
-    font-size: 2em;
-    margin-top: 0.67em;
-    margin-bottom: 0.67em;
-    font-weight: bold;
+  display: block;
+  font-size: 2em;
+  font-weight: bold;
+  margin-block-start: 0.67em;
+  margin-block-end: 0.67em;
 }
+
 h2 {
-    display: block;
-    font-size: 1.5em;
-    margin-top: 0.83em;
-    margin-bottom: 0.83em;
-    margin-left: 0;
-    margin-right: 0;
-    font-weight: bold;
+  display: block;
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-block-start: 0.83em;
+  margin-block-end: 0.83em;
 }
+
 h3 {
     display: block;
     font-size: 1.17em;
-    margin-top: 1em;
-    margin-bottom: 1em;
-    margin-left: 0;
-    margin-right: 0;
     font-weight: bold;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
 }
-aside {
-    display: block;
+
+.regular {
+  border-top-width: 5px;
+  border-right-width: 5px;
+  border-bottom-width: 5px;
+  border-left-width: 5px;
+  border-top-color: red;
+  border-right-color: green;
+  border-bottom-color: red;
+  border-left-color: green;
+  border-top-style: solid;
+  border-bottom-style: solid;
+  border-left-style: solid;
+  border-right-style: solid;
+  padding: 10px;
 }
-li {
-    display: block;
+
+.funky {
+  border-top-width: 5px;
+  border-right-width: 5px;
+  border-bottom-width: 5px;
+  border-left-width: 5px;
+  border-top-color: yellow;
+  border-right-color: blue;
+  border-bottom-color: yellow;
+  border-left-color: blue;
+  border-top-style: solid;
+  border-bottom-style: solid;
+  border-left-style: solid;
+  border-right-style: solid;
+  padding: 10px;
 }
-ul {
-    display: block;
-    list-style-type: disc;
-    margin-top: 1em;
-    margin-bottom: 1 em;
-    margin-left: 0;
-    margin-right: 0;
-    padding-left: 40px;
+
+.simple-box {
+  border: 5px solid blue;
 }
-blockquote {
-    display: block;
-    margin-top: 1em;
-    margin-bottom: 1em;
-    margin-left: 40px;
-    margin-right: 40px;
+
+.green-box {
+  border: 5px solid green;
 }
-* {
-    font-size: 16px;
-}
+
+.a { background-color: red; margin-bottom: 10px;}
+.b { background-color: yellow; }
+.c { background-color: orange; }
+.d { background-color: green; }
+.e { background-color: blue; }
+.f { background-color: fuchsia; }
+.g { background-color: purple; }
