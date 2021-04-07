@@ -3,16 +3,18 @@
 #include <gtkmm.h>
 #include <DOM/Element.h>
 #include <CSS/StyleProperty.h>
+#include <optional>
 class DrawCoordinates;
 class HTMLView;
 
 class LayoutBox
 {
 public:
-    LayoutBox(const Glib::RefPtr<Pango::Layout>& pangoLayout, const std::shared_ptr<DrawCoordinates>& drawCoords, const std::shared_ptr<Element>& element);
+    LayoutBox(const Glib::RefPtr<Pango::Layout>& pangoLayout, const std::shared_ptr<Element>& element);
 
     std::shared_ptr<LayoutBox> parent;
     std::vector<std::shared_ptr<LayoutBox>> children;
+
     // Font metrics
     double fontSize = 0;
 
@@ -38,6 +40,7 @@ public:
     std::shared_ptr<Color> borderLeftColor;
     std::shared_ptr<Color> borderRightColor;
 
+    std::shared_ptr<Color> backgroundColor;
 
     // Box Metrics
     double height = 0;
@@ -52,11 +55,14 @@ public:
     double localDrawX = 0;
     double localDrawY = 0;
 
-    // TODO: Text node support!
+    // TODO: Text node support (line boxes)
     std::shared_ptr<Element> element;
     bool paint(const Cairo::RefPtr<Cairo::Context>& cr);
     void compute();
     void createTextLayout();
+    bool isBlockBox();
+    bool isInlineBox();
+    void updateAllParentHeights();
     std::shared_ptr<DrawCoordinates> drawCoords;
     Cairo::Rectangle borderRect;
 private:
@@ -69,7 +75,6 @@ private:
     };
    Glib::RefPtr<Pango::Layout> pangoLayout;
    HTMLView* htmlView;
-   void drawBorder(Border border, const Cairo::RefPtr<Cairo::Context> &cr);
    void drawBorder(Border border, Cairo::Rectangle borderRect, const Cairo::RefPtr<Cairo::Context> &cr);
 
 };
