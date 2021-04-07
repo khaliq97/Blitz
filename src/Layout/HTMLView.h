@@ -2,6 +2,7 @@
 
 #include <gtkmm.h>
 #include <Layout/LayoutBox.h>
+#include <DOM/Text.h>
 class Core;
 
 class DrawCoordinates
@@ -21,7 +22,7 @@ public:
     double maxHeight = 0;
     double maxWidth = 0;
 
-    void createBoxForElement(std::shared_ptr<Node> node);
+    void createBoxForElement(std::shared_ptr<Node> node, std::shared_ptr<LayoutBox> layoutBox);
     Glib::RefPtr<Pango::Layout> createTextLayout(const std::shared_ptr<Node> renderNode);
     bool isJustWhiteSpace(std::shared_ptr<Node> node);
 private:
@@ -30,4 +31,5 @@ private:
     std::vector<std::shared_ptr<LayoutBox>> boxes;
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
     std::shared_ptr<LayoutBox> root;
+    void paintLayoutBox(const Cairo::RefPtr<Cairo::Context>& cr, std::string indent, std::shared_ptr<LayoutBox> layoutBox);
 };;
