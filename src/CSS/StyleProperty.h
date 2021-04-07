@@ -1,13 +1,15 @@
 #pragma once
 #include <CSS/Declaration.h>
+#include <gtkmm.h>
 class Color
 {
 public:
     Color();
-    Color(int r, int g, int b);
-    int r = 0;
-    int g = 0;
-    int b = 0;
+    Color(double r, double g, double b);
+    double r = 0.0;
+    double g = 0.0;
+    double b = 0.0;
+    Gdk::RGBA displayColor;
 };
 
 class StyleProperty
