@@ -6,7 +6,14 @@ Core::Core()
 
 Core::Core(const std::shared_ptr<Node> documentWithStyling) : m_document(documentWithStyling)
 {
-    this->set_title("Blitz Web Engine");
+    std::vector<std::shared_ptr<Node>> nodeList = documentWithStyling->getAllNodes({}, documentWithStyling);
+    std::string windowName;
+    for (auto node: nodeList)
+    {
+        if (node->nodeName == "title")
+            windowName = node->getTextContent();
+    }
+    this->set_title(windowName);
     this->set_default_size(1280, 720);
 
     // Menu Bar
