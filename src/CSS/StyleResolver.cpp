@@ -120,8 +120,12 @@ std::shared_ptr<Color> StyleResolver::convertColorToRGB(std::string color)
     }else if (lexer.caseInsensitiveStringCompare("aqua", color))
     {
         return std::make_shared<Color>(0, 255, 255);
+    }else if (lexer.caseInsensitiveStringCompare("orange", color))
+    {
+        return std::make_shared<Color>(255, 165, 0);
     }
     else {
+        printf("\033[1;33mbold [WARN] CSS: Color not supported (%s) \033[0m\n", color.c_str());
         return std::make_shared<Color>(0, 0, 0);
     }
 }
@@ -143,7 +147,8 @@ bool StyleResolver::isColor(std::string value)
         value == "navy" ||
         value == "blue" ||
         value == "teal" ||
-        value == "aqua")
+        value == "aqua" ||
+        value == "orange")
     {
         return true;
     }
