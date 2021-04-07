@@ -37,7 +37,7 @@ class Node
 
         std::string baseURI;
 
-        bool isConnected;
+
         std::shared_ptr<Document> ownerDocument;
         std::shared_ptr<Node> parentNode;
         std::vector<std::shared_ptr<Node>> childNodes;
@@ -54,6 +54,11 @@ class Node
 
         std::shared_ptr<Layout> layout;
         std::vector<std::shared_ptr<Node>> getAllNodes(std::vector<std::shared_ptr<Node> > returnNodes, std::shared_ptr<Node> node);
+        std::string getIsConnected() const;
+
+    private:
+        bool m_isConnected;
+
 };
 
 #endif

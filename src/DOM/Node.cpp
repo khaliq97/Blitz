@@ -8,7 +8,6 @@ Node::Node()
     nodeType = Node::NodeType::ElementNode;
     nodeName = "";
     baseURI = "";
-    isConnected = false;
     nodeValue = "";
     textContent = "";
 }
@@ -18,7 +17,6 @@ Node::Node(std::shared_ptr<Node> parentNode) : parentNode(parentNode)
     nodeType = Node::NodeType::ElementNode;
     nodeName = "";
     baseURI = "";
-    isConnected = false;
     nodeValue = "";
     textContent = "";
 }
@@ -43,6 +41,7 @@ std::string Node::getTextContent()
     return returnStr;
 }
 
+
 std::vector<std::shared_ptr<Node> > Node::getAllNodes(std::vector<std::shared_ptr<Node>> returnNodes, std::shared_ptr<Node> node)
 {
     returnNodes.push_back(node);
@@ -53,5 +52,10 @@ std::vector<std::shared_ptr<Node> > Node::getAllNodes(std::vector<std::shared_pt
     }
 
     return returnNodes;
+}
+
+std::string Node::getIsConnected() const
+{
+    return childNodes.size() > 0 ? "true" : "false"; ;
 }
 

@@ -21,7 +21,7 @@ void Document::dumpTree(std::shared_ptr<Node> node, std::string indent, bool las
     printf("%s%s%s\n", indent.c_str(), " Node Name: ", node->nodeName.c_str());
     printf("%s%s%s\n", indent.c_str(), " Node Value: ", node->nodeValue.c_str());
     printf("%s%s%s\n", indent.c_str(), " Base URI: ", node->baseURI.c_str());
-    printf("%s%s%d\n", indent.c_str(), " Is Connected: ", node->isConnected);
+    printf("%s%s%s\n", indent.c_str(), " Is Connected: ", node->getIsConnected().c_str());
     printf("%s%s%s\n", indent.c_str(), " Text Content: ", node->getTextContent().c_str());
 
     if (node->nextSibling)
