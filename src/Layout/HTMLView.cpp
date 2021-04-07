@@ -106,9 +106,9 @@ void HTMLView::createBoxForElement(std::shared_ptr<Node> node, std::shared_ptr<L
                     }
                 }
 
-                // Increase all of the containing block heights
                 box->parent->children.push_back(box);
 
+                // Update all of the containing block heights
                 box->updateAllParentHeights();
 
                 // Update the box in this function to be the new box
