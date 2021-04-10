@@ -70,8 +70,9 @@ void LayoutBox::createTextLayout()
 
     // Set content metrics after font has been set
     Pango::Rectangle logicalRect = pangoLayout->get_logical_extents();
-    this->contentHeight = logicalRect.get_height() / Pango::SCALE;
-    this->contentWidth = logicalRect.get_width() / Pango::SCALE;
+
+    contentRect.height = logicalRect.get_height() / Pango::SCALE;
+    contentRect.width = logicalRect.get_width() / Pango::SCALE;
 }
 
 bool LayoutBox::isBlockBox()
@@ -90,39 +91,36 @@ bool LayoutBox::isInlineBox()
     return false;
 }
 
+
+
 void LayoutBox::updateAllParentHeights()
 {
     if (parent)
     {
-
-        double boxHeight = 0;
+        double allContainingLayoutBoxHeight = 0;
         for (int i = 0; i < parent->children.size(); i++)
         {
-            boxHeight += parent->children[i]->height;
+            allContainingLayoutBoxHeight += parent->children[i]->marginRect.height;
         }
 
-        parent->borderRect.height = parent->borderTopWidth + parent->paddingTop + boxHeight + parent->borderBottomWidth + parent->paddingBottom;
+        parent->borderRect.height = parent->borderTopWidth + parent->paddingTop + allContainingLayoutBoxHeight + parent->borderBottomWidth + parent->paddingBottom;
 
-        parent->height = parent->marginTop + parent->borderBottomWidth + parent->paddingTop + boxHeight + parent->borderBottomWidth + parent->paddingBottom + parent->marginBottom;
+        parent->marginRect.height = parent->marginTop + parent->borderBottomWidth + parent->paddingTop + allContainingLayoutBoxHeight + parent->borderBottomWidth + parent->paddingBottom + parent->marginBottom;
 
         parent->updateAllParentHeights();
     }
-    else
-    {
-        this->borderRect.height += height;
-        this->height += height;
-    }
+    // TODO: Need a IF condition for the root layout box (i.e. html tag)
 }
 
 void LayoutBox::compute()
 {
     createTextLayout();
 
-    this->height = marginTop + borderTopWidth + paddingTop + contentHeight + paddingBottom  + borderBottomWidth + marginBottom;
-    this->width = marginLeft + borderLeftWidth + paddingLeft + contentWidth + paddingRight + borderRightWidth + marginRight;
+    marginRect.height = marginTop + borderTopWidth + paddingTop + contentRect.height + paddingBottom  + borderBottomWidth + marginBottom;
+    marginRect.width = marginLeft + borderLeftWidth + paddingLeft + contentRect.width + paddingRight + borderRightWidth + marginRight;
 
-    borderRect.height = borderTopWidth + paddingTop + contentHeight + paddingBottom + borderBottomWidth;
-    borderRect.width = borderLeftWidth + paddingLeft + contentWidth + paddingRight + borderRightWidth;
+    borderRect.height = borderTopWidth + paddingTop + contentRect.height + paddingBottom + borderBottomWidth;
+    borderRect.width = borderLeftWidth + paddingLeft + contentRect.width + paddingRight + borderRightWidth;
 }
 
 void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cairo::RefPtr<Cairo::Context> &cr)
@@ -142,11 +140,11 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
             for (int i = 0; i < borderTopWidth; i++)
             {
                 // Drawing from right to left (starting from the beginning of the border rect)
-                cr->line_to(borderRect.x + borderRect.width / 2, localDrawY);
-                cr->move_to(stepX, ++localDrawY);
+                cr->line_to(borderRect.x + borderRect.width / 2, layoutBoxDrawCursor_Y);
+                cr->move_to(stepX, ++layoutBoxDrawCursor_Y);
                 stepX += leftHalfStep;
             }
-            localDrawY -= borderTopWidth;
+            layoutBoxDrawCursor_Y -= borderTopWidth;
             cr->set_source_rgb(borderTopColor->displayColor.get_red(), borderTopColor->displayColor.get_green(), borderTopColor->displayColor.get_blue());
             cr->stroke();
 
@@ -157,15 +155,15 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
             for (int i = 0; i < borderTopWidth; i++)
             {
                 // Drawing from left to right (starting from the max width of the border rect)
-                cr->line_to(borderRect.x + borderRect.width / 2, localDrawY);
-                cr->move_to(stepX, ++localDrawY);
+                cr->line_to(borderRect.x + borderRect.width / 2, layoutBoxDrawCursor_Y);
+                cr->move_to(stepX, ++layoutBoxDrawCursor_Y);
                 stepX -=  rightHalfStep;
 
             }
-            localDrawY -= borderTopWidth;
+            layoutBoxDrawCursor_Y -= borderTopWidth;
             cr->stroke();
 
-            localDrawY -= borderRect.y;
+            layoutBoxDrawCursor_Y -= borderRect.y;
             break;
 
         }
@@ -176,17 +174,17 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
 
             double leftHalfStep = borderLeftWidth / borderBottomWidth;
             cr->move_to(borderRect.x, borderRect.y + borderRect.height);
-            localDrawY += borderRect.y + borderRect.height;
+            layoutBoxDrawCursor_Y += borderRect.y + borderRect.height;
 
             stepX = borderRect.x;
             for (int i = 0; i < borderBottomWidth; i++)
             {
                 // Drawing from right to left (starting from the beginning of the border rect)
-                cr->line_to(borderRect.x + borderRect.width / 2, localDrawY);
-                cr->move_to(stepX, --localDrawY);
+                cr->line_to(borderRect.x + borderRect.width / 2, layoutBoxDrawCursor_Y);
+                cr->move_to(stepX, --layoutBoxDrawCursor_Y);
                 stepX += leftHalfStep;
             }
-            localDrawY += borderBottomWidth;
+            layoutBoxDrawCursor_Y += borderBottomWidth;
             cr->set_source_rgb(borderBottomColor->displayColor.get_red(), borderBottomColor->displayColor.get_green(), borderBottomColor->displayColor.get_blue());
             cr->stroke();
 
@@ -197,12 +195,12 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
             for (int i = 0; i < borderBottomWidth; i++)
             {
                 // Drawing from left to right (starting from the max width of the border rect)
-                cr->line_to(borderRect.x + borderRect.width / 2, localDrawY);
-                cr->move_to(stepX, --localDrawY);
+                cr->line_to(borderRect.x + borderRect.width / 2, layoutBoxDrawCursor_Y);
+                cr->move_to(stepX, --layoutBoxDrawCursor_Y);
                 stepX -= rightHalfStep;
 
             }
-            localDrawY += borderBottomWidth;
+            layoutBoxDrawCursor_Y += borderBottomWidth;
             cr->stroke();
             break;
         }
@@ -217,11 +215,11 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
             for (int i = 0; i < borderLeftWidth; i++)
             {
                 // Drawing from right to left (starting from the beginning of the border rect)
-                cr->line_to(localDrawX, borderRect.y + borderRect.height / 2);
-                cr->move_to(++localDrawX, stepY);
+                cr->line_to(layoutBoxDrawCursor_X, borderRect.y + borderRect.height / 2);
+                cr->move_to(++layoutBoxDrawCursor_X, stepY);
                 stepY += topHalfStep;
             }
-            localDrawX -= borderLeftWidth;
+            layoutBoxDrawCursor_X -= borderLeftWidth;
             cr->set_source_rgb(borderLeftColor->displayColor.get_red(), borderLeftColor->displayColor.get_green(), borderLeftColor->displayColor.get_blue());
             cr->stroke();
 
@@ -232,12 +230,12 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
             for (int i = 0; i < borderLeftWidth; i++)
             {
                 // Drawing from left to right (starting from the max width of the border rect)
-                cr->line_to(localDrawX, borderRect.y + borderRect.height / 2);
-                cr->move_to(++localDrawX, stepY);
+                cr->line_to(layoutBoxDrawCursor_X, borderRect.y + borderRect.height / 2);
+                cr->move_to(++layoutBoxDrawCursor_X, stepY);
                 stepY -= bottomHalfStep;
 
             }
-            localDrawX -= borderLeftWidth;
+            layoutBoxDrawCursor_X -= borderLeftWidth;
             cr->stroke();
             break;
         }
@@ -247,17 +245,17 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
             // Top half:
             double topHalfStep = borderTopWidth / borderRightWidth;
             cr->move_to(borderRect.x + borderRect.width, borderRect.y);
-            localDrawX += borderRect.width;
+            layoutBoxDrawCursor_X += borderRect.width;
 
             stepY = borderRect.y;
             for (int i = 0; i < borderRightWidth; i++)
             {
                 // Drawing from right to left (starting from the beginning of the border rect)
-                cr->line_to(localDrawX, borderRect.y + borderRect.height / 2);
-                cr->move_to(--localDrawX, stepY);
+                cr->line_to(layoutBoxDrawCursor_X, borderRect.y + borderRect.height / 2);
+                cr->move_to(--layoutBoxDrawCursor_X, stepY);
                 stepY += topHalfStep;
             }
-            localDrawX += borderRightWidth;
+            layoutBoxDrawCursor_X += borderRightWidth;
             cr->set_source_rgb(borderRightColor->displayColor.get_red(), borderRightColor->displayColor.get_green(), borderRightColor->displayColor.get_blue());
             cr->stroke();
 
@@ -268,33 +266,28 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
             for (int i = 0; i < borderRightWidth; i++)
             {
                 // Drawing from left to right (starting from the max width of the border rect)
-                cr->line_to(localDrawX, borderRect.y + borderRect.height / 2);
-                cr->move_to(--localDrawX, stepY);
+                cr->line_to(layoutBoxDrawCursor_X, borderRect.y + borderRect.height / 2);
+                cr->move_to(--layoutBoxDrawCursor_X, stepY);
                 stepY -= bottomHalfStep;
 
             }
-            localDrawX += borderRightWidth;
+            layoutBoxDrawCursor_X += borderRightWidth;
             cr->stroke();
             break;
         }
-
-
 
     }
 }
 
 bool LayoutBox::paint(const Cairo::RefPtr<Cairo::Context> &cr)
 {
-    // Border Rectange: Top, Bottom, Right, Left borders, padding and content
-
     // Paint Phase: Margin:
-
     // Margin drawing - Red
     if (paintMarginBox)
     {
         cr->set_source_rgb(255, 0, 0);
-        cr->rectangle(borderRect.x - marginLeft, borderRect.y - marginTop, this->width,
-                      this->height);
+        cr->rectangle(borderRect.x - marginLeft, borderRect.y - marginTop, marginRect.width,
+                      marginRect.height);
 
         // Paint margin
         cr->set_line_width(2);
@@ -303,8 +296,8 @@ bool LayoutBox::paint(const Cairo::RefPtr<Cairo::Context> &cr)
 
 
     // Update local draw cursor
-    localDrawX = borderRect.x;
-    localDrawY = borderRect.y;
+    layoutBoxDrawCursor_X = borderRect.x;
+    layoutBoxDrawCursor_Y = borderRect.y;
 
     // Paint Phase: Border:
     drawBorder(Border::Top, borderRect, cr);
@@ -313,8 +306,6 @@ bool LayoutBox::paint(const Cairo::RefPtr<Cairo::Context> &cr)
     drawBorder(Border::Right, borderRect, cr);
 
     // Paint Phase: Background Color:
-
-
     if (backgroundColor)
     {
         cr->set_source_rgb(backgroundColor->displayColor.get_red(), backgroundColor->displayColor.get_green(), backgroundColor->displayColor.get_blue());
@@ -326,15 +317,20 @@ bool LayoutBox::paint(const Cairo::RefPtr<Cairo::Context> &cr)
         cr->fill();
     }
 
+    // Update position of content in border rectangle.
+    contentRect.y = borderRect.y + borderTopWidth + paddingTop;
+    contentRect.x = borderRect.x + borderLeftWidth + paddingLeft;
+
 
     // TODO: This is a very primitive way to render text, these should exist as LineBox objects and be
     // drawn how boxes are drawn in HTMLView (i.e. a box within a box and not text).
 
     // Paint Phase: Content:
     cr->set_source_rgb(textColor->displayColor.get_red(), textColor->displayColor.get_green(), textColor->displayColor.get_blue());
-    cr->move_to(borderRect.x + borderLeftWidth + paddingLeft, borderRect.y + borderTopWidth + paddingTop);
+    cr->move_to(contentRect.x, contentRect.y);
     pangoLayout->show_in_cairo_context(cr);
 
+    // Reset back to white
     cr->set_source_rgb(0.0, 0.0, 0.0);
 
 
