@@ -41,6 +41,7 @@ public:
     std::shared_ptr<Color> borderRightColor;
 
     std::shared_ptr<Color> backgroundColor;
+    std::shared_ptr<Color> textColor;
 
     // Box Metrics
     double height = 0;

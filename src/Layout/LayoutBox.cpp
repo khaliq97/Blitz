@@ -46,6 +46,8 @@ LayoutBox::LayoutBox(const Glib::RefPtr<Pango::Layout>& pangoLayout, const std::
 
     this->fontSize = element->getStylePropertyByDeclarationName("font-size")->computedValue;
 
+    this->textColor = element->getStylePropertyByDeclarationName("color")->color;
+
     if (element->doesDeclarationExist("background-color"))
     {
         this->backgroundColor = element->getStylePropertyByDeclarationName("background-color")->color;
@@ -145,7 +147,7 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
                 stepX += leftHalfStep;
             }
             localDrawY -= borderTopWidth;
-            cr->set_source_rgb(borderTopColor->r, borderTopColor->g, borderTopColor->b);
+            cr->set_source_rgb(borderTopColor->displayColor.get_red(), borderTopColor->displayColor.get_green(), borderTopColor->displayColor.get_blue());
             cr->stroke();
 
             // Right Half:
@@ -161,7 +163,6 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
 
             }
             localDrawY -= borderTopWidth;
-            cr->set_source_rgb(borderTopColor->r, borderTopColor->g, borderTopColor->b);
             cr->stroke();
 
             localDrawY -= borderRect.y;
@@ -186,7 +187,7 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
                 stepX += leftHalfStep;
             }
             localDrawY += borderBottomWidth;
-            cr->set_source_rgb(borderBottomColor->r, borderBottomColor->g, borderBottomColor->b);
+            cr->set_source_rgb(borderBottomColor->displayColor.get_red(), borderBottomColor->displayColor.get_green(), borderBottomColor->displayColor.get_blue());
             cr->stroke();
 
             // Right Half:
@@ -202,7 +203,6 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
 
             }
             localDrawY += borderBottomWidth;
-            cr->set_source_rgb(borderBottomColor->r, borderBottomColor->g, borderBottomColor->b);
             cr->stroke();
             break;
         }
@@ -222,7 +222,7 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
                 stepY += topHalfStep;
             }
             localDrawX -= borderLeftWidth;
-            cr->set_source_rgb(borderLeftColor->r, borderLeftColor->g, borderLeftColor->b);
+            cr->set_source_rgb(borderLeftColor->displayColor.get_red(), borderLeftColor->displayColor.get_green(), borderLeftColor->displayColor.get_blue());
             cr->stroke();
 
             // Bottom Half:
@@ -258,7 +258,7 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
                 stepY += topHalfStep;
             }
             localDrawX += borderRightWidth;
-            cr->set_source_rgb(borderRightColor->r, borderRightColor->g, borderRightColor->b);
+            cr->set_source_rgb(borderRightColor->displayColor.get_red(), borderRightColor->displayColor.get_green(), borderRightColor->displayColor.get_blue());
             cr->stroke();
 
             // Bottom Half:
@@ -331,9 +331,11 @@ bool LayoutBox::paint(const Cairo::RefPtr<Cairo::Context> &cr)
     // drawn how boxes are drawn in HTMLView (i.e. a box within a box and not text).
 
     // Paint Phase: Content:
-    cr->set_source_rgb(0.0, 0.0, 0.0);
+    cr->set_source_rgb(textColor->displayColor.get_red(), textColor->displayColor.get_green(), textColor->displayColor.get_blue());
     cr->move_to(borderRect.x + borderLeftWidth + paddingLeft, borderRect.y + borderTopWidth + paddingTop);
     pangoLayout->show_in_cairo_context(cr);
+
+    cr->set_source_rgb(0.0, 0.0, 0.0);
 
 
     return true;
