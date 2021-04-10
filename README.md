@@ -1,5 +1,5 @@
 # Blitz Web
-A web engine for fun that can render a sub set of the HTML, CSS and JavaScript spec.
+A web engine for fun that can render a sub set of the HTML and CSS as well as a very early stage JavaScript interpreter.
 
 ## About
 This is a project to build a somewhat HTML5 compatible browser and learn a ton about web rendering along the way. Everything is written from scratch and a good way to learn C++. Blitz is still very much at the earlier stages of development, so plently more to come.
