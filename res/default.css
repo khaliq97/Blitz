@@ -1,6 +1,7 @@
 * {
-    font-size: 16px;
     display: block;
+    font-size: 16px;
+    color: black;
 }
 /* blocks */
 
@@ -132,4 +133,5 @@ h3 {
 .d { background-color: green; }
 .e { background-color: blue; }
 .f { background-color: fuchsia; }
-.g { background-color: purple; }
+.g { background-color: purple;}
+.white-text { color: white; }
