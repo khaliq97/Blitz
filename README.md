@@ -18,7 +18,7 @@ This is a project to build a somewhat HTML5 compatible browser and learn a ton a
 
 ## How do I build and run this?
 
-Currently you can only build Blitz on Ubuntu Linux. A bit limited for now, yes I know.
+Currently you can only build Blitz on Ubuntu Linux (tested on 20.04). A bit limited for now, yes I know.
 
 ## Bash
 ### Required Depenencies
