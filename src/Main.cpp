@@ -5,7 +5,6 @@
 #include <memory>
 #include <string>
 #include <stdio.h>
-#include <curl/curl.h>
 #include <thread>
 #include <Blitz.h>
 

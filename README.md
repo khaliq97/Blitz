@@ -22,9 +22,12 @@ Currently you can only build Blitz on Ubuntu Linux (tested on 20.04). A bit limi
 
 ## Bash
 ### Required Depenencies
-```sudo apt-get install gtkmm-3.0```
+##### Required Library
+```sudo apt install gtkmm-3.0```
+##### Build Tools
+```sudo apt-get install make```
 <br/>
-```sudo apt-get install libcurl4```
+```sudo apt-get install g++```
 </br>
 
 ### Download

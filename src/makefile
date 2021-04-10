@@ -120,10 +120,10 @@ _OBJ = Main.o Blitz.o \
 OBJ = $(patsubst %, $(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.cpp $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS) `pkg-config --libs --cflags gtk+-3.0 gtkmm-3.0 cairo libcurl`
+	$(CC) -c -o $@ $< $(CFLAGS) `pkg-config --libs --cflags gtkmm-3.0`
 
 blitz: $(OBJ)
-	$(CC) -g -o $@ $^ $(CFLAGS) `pkg-config --libs --cflags gtk+-3.0 gtkmm-3.0 cairo libcurl`
+	$(CC) -g -o $@ $^ $(CFLAGS) `pkg-config --libs --cflags gtkmm-3.0`
 
 .PHONY: clean
 

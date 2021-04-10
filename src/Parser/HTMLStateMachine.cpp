@@ -3,7 +3,6 @@
 #include <Parser/HTMLToken.h>
 #include <stack>
 #include <memory>
-#include <curl/curl.h>
 #include <Parser/Lexer.h>
 
 enum HTMLState

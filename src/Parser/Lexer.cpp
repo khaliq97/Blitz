@@ -5,7 +5,6 @@
 #include <vector>
 #include <algorithm>
 #include <DOM/HTMLElement.h>
-#include <curl/curl.h>
 #include <stdlib.h>
 #include <Parser/Lexer.h>
 
