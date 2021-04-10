@@ -2,7 +2,7 @@
 A web engine for fun that can render a sub set of the HTML and CSS as well as a very early stage JavaScript interpreter.
 
 ## About
-This is a project to build a somewhat HTML5 compatible browser and learn a ton about web rendering along the way. Everything is written from scratch and and I'm still very much learning C++. Blitz is still very much at the earlier stages of development, so plently more to come.
+This is a project to build a somewhat HTML5 compatible browser and learn a ton about web rendering along the way. Everything is written from scratch and I'm still very much learning C++. Blitz is still very much at the earlier stages of development, so plently more to come.
 
 ## Features (Broadly)
 * HTML Parsing
@@ -23,7 +23,7 @@ Currently you can only build Blitz on Ubuntu Linux (tested on 20.04). A bit limi
 ## Bash
 ### Required Depenencies
 ##### Required Library
-```sudo apt install gtkmm-3.0```
+```sudo apt-get install gtkmm-3.0```
 ##### Build Tools
 ```sudo apt-get install make```
 <br/>
@@ -36,12 +36,15 @@ Currently you can only build Blitz on Ubuntu Linux (tested on 20.04). A bit limi
 ### Build
 ```cd Blitz/src```
 <br/>
-```make```
-
-### Run 
-```sudo chmod u+x blitz.sh```
+```./setup.sh```
 <br/>
-```./blitz <HTML File Path e.g. index.html>```
+```make```
+### Run
+```./blitz <HTML File Name>```
+#### This will run the html page shown in the preview screenshot:
+```./blitz ../res/index.html```
+#### 
+
 
 Hopefully that all builds and it will launch the browser window (well more of a preview for now). 
 
