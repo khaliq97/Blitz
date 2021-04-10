@@ -82,8 +82,14 @@ bool SelectorEngine::doAllSelectorsMatchOnAnElement(const std::shared_ptr<Comple
 
 // NOTE: This is the same logic for checking the selector specifity
 //       but instead now works on a style rules a, b and c values.
-bool compare(const std::shared_ptr<CSS::StyleRule> l, const std::shared_ptr<CSS::StyleRule>& r)
+bool compare(const std::shared_ptr<CSS::StyleRule>& l, const std::shared_ptr<CSS::StyleRule>& r)
 {
+    // FIXME: Sometimes when we have lots of class selctors in the stylesheet,
+    // either the left or right style rule is null and causes it to crash. This needs to be investigated.
+
+    if (!l->a || !r->a)
+        return false;
+
     if (l->a > r->a)
     {
         return true;
