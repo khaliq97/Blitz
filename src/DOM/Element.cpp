@@ -68,6 +68,22 @@ bool Element::hasClass(std::string className)
     return false;
 }
 
+bool Element::isDisplayNone()
+{
+    if (getStylePropertyByDeclarationName("display"))
+        return getStylePropertyByDeclarationName("display")->m_declaration->value[0]->value() == "none";
+
+    return false;
+}
+
+bool Element::isDisplayBlock()
+{
+    if (getStylePropertyByDeclarationName("display"))
+        return getStylePropertyByDeclarationName("display")->m_declaration->value[0]->value() == "block";
+
+    return false;
+}
+
 bool Element::doesDeclarationExist(std::string decToFind)
 {
     for (auto dec: declarations)

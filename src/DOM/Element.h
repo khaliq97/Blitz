@@ -38,4 +38,8 @@ class Element : public Node
         std::shared_ptr<StyleProperty> getStylePropertyByDeclarationName(std::string declarationName);
 
         bool hasClass(std::string className);
+
+        bool isDisplayNone();
+        bool isDisplayBlock();
+
 };
