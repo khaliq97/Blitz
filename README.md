@@ -6,7 +6,7 @@ This is a project to build a somewhat HTML5 compatible browser and learn a ton a
 
 ## Features (Broadly)
 * HTML Parsing
-* CSS ENGINE
+* CSS Engine
 * Render Tree Construction
 * Layout Box Painting
 * Very much WIP JS interpreter
