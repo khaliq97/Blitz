@@ -8,7 +8,6 @@
 #include <CSS/Parser.h>
 #include <CSS/SelectorEngine.h>
 #include <Layout/WebView.h>
-#include <Browser/Window.h>
 #include <Browser/Core.h>
 class Blitz {
     public:

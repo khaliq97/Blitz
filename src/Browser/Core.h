@@ -3,7 +3,6 @@
 #include <gtkmm.h>
 #include <DOM/Node.h>
 #include <Layout/WebView.h>
-#include <Blitz.h>
 class Core : public Gtk::Window
 {
 public:

@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <Browser/Layout.h>
 class Document;
 class Element;
 class CharacterData;
@@ -52,7 +51,6 @@ class Node
         std::string nodeValue;
         std::string textContent;
 
-        std::shared_ptr<Layout> layout;
         std::vector<std::shared_ptr<Node>> getAllNodes(std::vector<std::shared_ptr<Node> > returnNodes, std::shared_ptr<Node> node);
         std::string getIsConnected() const;
 

@@ -21,11 +21,6 @@ _DEPS = Blitz.h \
 		DOM/NamedNodeMap.h \
 		DOM/DocumentType.h \
 		DOM/Text.h \
-		Browser/Window.h \
-		Browser/Render.h \
-		Browser/BoxModel.h \
-		Browser/Layout.h \
-		Browser/Dimension.h \
 		Browser/Core.h \
 		Terminal/Terminal.h \
 		JS/JS.h \
@@ -75,11 +70,6 @@ _OBJ = Main.o Blitz.o \
 		DOM/NamedNodeMap.o \
 		DOM/DocumentType.o \
 		DOM/Text.o \
-		Browser/Window.o \
-		Browser/Render.o \
-		Browser/BoxModel.o \
-		Browser/Layout.o \
-		Browser/Dimension.o \
 		Browser/Core.o \
 		Terminal/Terminal.o \
 		JS/JS.o \
