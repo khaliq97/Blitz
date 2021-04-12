@@ -3,6 +3,7 @@
 #include <gtkmm.h>
 #include <DOM/Node.h>
 #include <Layout/WebView.h>
+#include <Blitz.h>
 class Core : public Gtk::Window
 {
 public:
@@ -28,6 +29,7 @@ public:
 private:
     std::shared_ptr<Node> m_document;
 
+    bool onWindowKeyPress(GdkEventKey *event);
 };
 
 

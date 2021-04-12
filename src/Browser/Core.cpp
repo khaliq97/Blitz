@@ -1,11 +1,15 @@
 #include <Browser/Core.h>
+#include <Parser/Lexer.h>
+
+static Lexer lexer;
 Core::Core()
 {
 
 }
 
-Core::Core(const std::shared_ptr<Node> documentWithStyling) : m_document(documentWithStyling)
+Core::Core(const std::shared_ptr<Node> documentWithStyling)
 {
+    m_document = documentWithStyling;
     std::vector<std::shared_ptr<Node>> nodeList = documentWithStyling->getAllNodes({}, documentWithStyling);
     std::string windowName;
     for (auto node: nodeList)
@@ -31,6 +35,9 @@ Core::Core(const std::shared_ptr<Node> documentWithStyling) : m_document(documen
     // Menu Item event handler set up
     menuItem_Inspector->signal_activate().connect(sigc::mem_fun(*this, &Core::inspectorMenuItemActivate));
 
+    // Key event handler setup
+    this->signal_key_press_event().connect(sigc::mem_fun(*this, &Core::onWindowKeyPress), false);
+
     vbox = std::make_unique<Gtk::VBox>();
     vbox->pack_start(*coreMenuBar, false, false);
 
@@ -46,4 +53,19 @@ Core::Core(const std::shared_ptr<Node> documentWithStyling) : m_document(documen
 void Core::inspectorMenuItemActivate()
 {
     printf("Browser: Launching Inspector window\n");
+}
+
+bool Core::onWindowKeyPress(GdkEventKey* event)
+{
+
+    switch(event->keyval)
+    {
+        case GDK_KEY_r:
+            if (event->state & GDK_CONTROL_MASK)
+            {
+                printf("Reloading page event triggered\n");
+            }
+            break;
+    }
+    return false;
 }
