@@ -7,13 +7,17 @@
 class Terminal
 {
     public:
-        std::unique_ptr<Lexer> lexer;
+
+
         Terminal();
         void start();
         void processCommand();
         std::string consumeUntilChar(char tokenData);
         std::unique_ptr<Blitz> lumberInstance;
     private:
+        std::string input;
+        int inputIndex = 0;
+        std::vector<std::string> tokenStream;
 
 };
 

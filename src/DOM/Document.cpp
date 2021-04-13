@@ -2,8 +2,6 @@
 #include <vector>
 #include <DOM/Document.h>
 #include <Parser/Lexer.h>
-static Lexer lexer;
-//std::vector<std::shared_ptr<Node>> childNodes;
 Document::Document()
 {
 
@@ -14,8 +12,7 @@ Document::Document(std::shared_ptr<Node> parentNode) : Node(parentNode)
 
 }
 
-
-void Document::dumpTree(std::shared_ptr<Node> node, std::string indent, bool last)
+void Document::printTree(const std::shared_ptr<Node>& node, std::string indent, bool last)
 {
     printf("%s%s\033[1;32m%d\033[0m\n", indent.c_str(), "\033[1;32m+- \033[0m", node->nodeType);
     printf("%s%s%s\n", indent.c_str(), " Node Name: ", node->nodeName.c_str());
@@ -72,16 +69,11 @@ void Document::dumpTree(std::shared_ptr<Node> node, std::string indent, bool las
         }
     }
 
-
-    // Owner Document
-    // Parent Node
-    // Child Nodes
-
     indent += last ? " " : "|  ";
 
     for (int i = 0; i < node->childNodes.size(); i++)
     {
 
-        dumpTree(node->childNodes[i], indent, i == node->childNodes.size() - 1);
+        printTree(node->childNodes[i], indent, i == node->childNodes.size() - 1);
     }
 }

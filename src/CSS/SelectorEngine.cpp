@@ -1,17 +1,16 @@
 #include <CSS/SelectorEngine.h>
 #include <CSS/StyleResolver.h>
 #include <algorithm>
-SelectorEngine::SelectorEngine(const std::shared_ptr<Stylesheet> &stylesheet, std::shared_ptr<Document> document)
+SelectorEngine::SelectorEngine(const std::shared_ptr<Stylesheet> &stylesheet, std::shared_ptr<Document> document) : documentWithStyling(document)
 {
     this->stylesheet = stylesheet;
-    this->documentWithStyling = document;
     run();
-    documentWithStyling->dumpTree(document, "", false);
+    documentWithStyling->printTree(document, "", false);
 
     std::shared_ptr<StyleResolver> styleResolver = std::make_shared<StyleResolver>(documentWithStyling);
 }
 
-void SelectorEngine::applyComplexSelectorToElement(const std::shared_ptr<ComplexSelector> &complexSelector, std::shared_ptr<CSS::StyleRule> styleRule, const std::shared_ptr<Node> &element)
+void SelectorEngine::applyComplexSelectorToElement(const std::shared_ptr<ComplexSelector> &complexSelector, std::shared_ptr<CSS::StyleRule> styleRule, std::shared_ptr<Node> element)
 {
     if (auto elementNode = dynamic_cast<Element*>(element.get()))
     {

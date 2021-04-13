@@ -7,9 +7,9 @@ class Core : public Gtk::Window
 {
 public:
     Core();
-    Core(const std::shared_ptr<Node> documentWithStyling);
+    Core(std::shared_ptr<Node> documentWithStyling);
 
-    std::shared_ptr<WebView> webView;
+    std::unique_ptr<WebView> webView;
 
     std::unique_ptr<Gtk::MenuBar> coreMenuBar;
     std::unique_ptr<Gtk::MenuItem> menuItem_Developer;

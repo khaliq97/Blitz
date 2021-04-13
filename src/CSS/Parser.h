@@ -10,7 +10,7 @@
 #include <vector>
 #include <CSS/Declaration.h>
 #include <DOM/Document.h>
-#include <Parser/Lexer.h>
+#include <LexerUtils.h>
 
 namespace CSS {
 class Parser
@@ -34,6 +34,7 @@ public:
     };
 
 private:
+    int currentCSSToken = 0;
     std::vector<std::shared_ptr<CSSToken>> tokens;
     const std::shared_ptr<CSSToken> &peek();
     const std::shared_ptr<CSSToken> &peekNext();

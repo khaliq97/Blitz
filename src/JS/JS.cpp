@@ -1,13 +1,12 @@
 #include <JS/JS.h>
 #include <iostream>
-#include <Parser/Lexer.h>
 #include <JS/Scanner.h>
 #include <JS/Token.h>
 #include <JS/Parser.h>
 #include <vector>
 #include <memory>
 #include <JS/Interpreter.h>
-static Lexer lexer;
+#include <LexerUtils.h>
 bool hadError = false;
 
 JS::JS(std::string fileName)
@@ -37,7 +36,7 @@ void JS::runPrompt()
 
 void JS::runFile(std::string path)
 {
-    run(lexer.getFileContent(path));
+    run(Tools::getFileContent(path));
 
     if (hadError)
         exit(0);

@@ -1,7 +1,6 @@
 #include <DOM/Element.h>
 #include <algorithm>
-#include <Parser/Lexer.h>
-static Lexer lexer;
+#include <LexerUtils.h>
 Element::Element(std::shared_ptr<Node> parentNode) : Node(parentNode)
 {
     namespaceURI = "";
@@ -117,7 +116,7 @@ std::shared_ptr<StyleProperty> Element::getStylePropertyByDeclarationName(std::s
 {
     for (auto styleProp: styleProperties)
     {
-        if (lexer.caseInsensitiveStringCompare(styleProp->m_declaration->name, declarationName))
+        if (Tools::caseInsensitiveStringCompare(styleProp->m_declaration->name, declarationName))
         {
             return styleProp;
         }

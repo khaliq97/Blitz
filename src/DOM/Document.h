@@ -12,23 +12,19 @@ class HTMLHeadElement;
 
 class Document : public Node
 {
-    public:
-        Document();
-        Document(std::shared_ptr<Node> parentNode);
-        std::string PrintDocument();
+public:
+    Document();
+    Document(std::shared_ptr<Node> parentNode);
+    std::string PrintDocument();
 
-        //std::string URL;
-        //std::string documentURI;
-        //std::string contentType;
+    //std::string URL;
+    //std::string documentURI;
+    //std::string contentType;
 
-        //std::shared_ptr<DocumentType> docType;
-        //std::shared_ptr<Element> documentElement;
-        void dumpTree(std::shared_ptr<Node> node, std::string indent, bool last);
+    //std::shared_ptr<DocumentType> docType;
+    //std::shared_ptr<Element> documentElement;
+    void printTree(const std::shared_ptr<Node>& node, std::string indent, bool last);
 private:
-
-
-
-
 };
 
 #endif

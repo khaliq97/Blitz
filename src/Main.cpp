@@ -8,9 +8,6 @@
 #include <thread>
 #include <Blitz.h>
 
-std::unique_ptr<Terminal> terminal;
-std::unique_ptr<Blitz> blitzInstance;
-
 size_t WriteCallback(char *contents, size_t size, size_t nmemb, void *userp)
 {
     ((std::string*)userp)->append((char*)contents, size * nmemb);
@@ -41,10 +38,8 @@ int main(int argc, char ** argv)
     auto app = Gtk::Application::create(argc, argv, "blitz.web.browser", Gio::ApplicationFlags::APPLICATION_HANDLES_COMMAND_LINE);
     app->signal_command_line().connect(sigc::bind(sigc::ptr_fun(onCommandLine), app), false);
 
-    terminal = std::make_unique<Terminal>();
-    blitzInstance = std::make_unique<Blitz>();
-    blitzInstance->loadHTML(terminal->lexer->getFileContent(argv[1]));
+    std::shared_ptr<Blitz> blitzWebEngineInstance = std::make_shared<Blitz>();
+    blitzWebEngineInstance->loadHTML(Tools::getFileContent(argv[1]));
 
-    //return 0;
-    return app->run(*blitzInstance->browserCoreWindow);
+    return app->run(*blitzWebEngineInstance->browserCoreWindow);
 }

@@ -3,6 +3,7 @@
 #include <CSS/Declaration.h>
 #include <CSS/StyleProperty.h>
 #include <DOM/Document.h>
+#include <LexerUtils.h>
 
 enum class CSSColor {
     black,
@@ -26,7 +27,7 @@ enum class CSSColor {
 class StyleResolver
 {
 public:
-    StyleResolver(const std::shared_ptr<Document>& document);
+    StyleResolver(std::shared_ptr<Document> document);
     std::shared_ptr<Document> documentWithCSSDeclrations;
     std::shared_ptr<StyleProperty> findFirstDeclarationOccurence(std::string declarationName, const std::shared_ptr<Node> &node);
     std::shared_ptr<StyleProperty> resolveStyleFromDeclaration(const std::shared_ptr<Declaration> declaration, const std::shared_ptr<Node> &node);

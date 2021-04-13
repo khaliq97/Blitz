@@ -4,13 +4,7 @@
 #include <vector>
 #include <map>
 
-Terminal::Terminal()
-{
-    lexer = std::make_unique<Lexer>();
-}
-std::string input;
-int inputIndex = 0;
-std::vector<std::string> tokenStream;
+Terminal::Terminal() { }
 
 enum TerminalToken {
     URL

@@ -13,7 +13,7 @@ public:
     std::shared_ptr<Document> documentWithStyling;
 
 private:
-    void applyComplexSelectorToElement(const std::shared_ptr<ComplexSelector> &complexSelector, std::shared_ptr<CSS::StyleRule>, const std::shared_ptr<Node> &element);
+    void applyComplexSelectorToElement(const std::shared_ptr<ComplexSelector> &complexSelector, std::shared_ptr<CSS::StyleRule>, std::shared_ptr<Node> element);
     void run();
     bool matches(const std::shared_ptr<SimpleSelector>& simpleSelector, const std::shared_ptr<Node> &element);
     bool doAllSelectorsMatchOnAnElement(const std::shared_ptr<ComplexSelector> &complexSelector, const std::shared_ptr<Node> &element);

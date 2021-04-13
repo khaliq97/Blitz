@@ -15,7 +15,7 @@ public:
 class HTMLView : public Gtk::DrawingArea
 {
 public:
-    HTMLView(Core* core, const std::shared_ptr<Node> renderElements);
+    HTMLView(Core* core, std::shared_ptr<Node> renderElements);
 
     std::shared_ptr<DrawCoordinates> drawCoordinates;
 
@@ -32,5 +32,5 @@ private:
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
     std::shared_ptr<LayoutBox> root;
     void paintLayoutBox(const Cairo::RefPtr<Cairo::Context>& cr, std::string indent, std::shared_ptr<LayoutBox> layoutBox);
-    std::shared_ptr<LayoutBox> createBlockBox(const std::shared_ptr<Element> elementNode, std::shared_ptr<LayoutBox> parentLayoutBox);
+    std::shared_ptr<LayoutBox> createBlockBox(std::shared_ptr<Element> elementNode, std::shared_ptr<LayoutBox> parentLayoutBox);
 };

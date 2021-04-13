@@ -6,7 +6,7 @@ class Core;
 class WebView : public Gtk::ScrolledWindow
 {
 public:
-    WebView(Core* core, const std::shared_ptr<Node> renderElements);
+    WebView(Core* core, std::shared_ptr<Node> renderElements);
     std::shared_ptr<HTMLView> htmlView;
 
 private:

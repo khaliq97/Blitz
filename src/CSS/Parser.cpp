@@ -1,7 +1,5 @@
 #include <CSS/Parser.h>
-int currentCSSToken = 0;
 
-static Lexer lexer;
 CSS::Parser::Parser(const std::vector<std::shared_ptr<CSSToken>> &tokens, const std::shared_ptr<Document>& document)
 {
     this->tokens = tokens;
@@ -9,8 +7,6 @@ CSS::Parser::Parser(const std::vector<std::shared_ptr<CSSToken>> &tokens, const 
     styleSheet = std::make_shared<Stylesheet>();
     styleSheet->rules = parseListOfRules();
     styleSheet->styleRules = createStyleRules();
-    //printQualifiedRules();
-    printStyleRules();
 }
 
 void CSS::Parser::parseStylesheet()
@@ -398,7 +394,7 @@ std::shared_ptr<Declaration> CSS::Parser::consumeDeclaration(const std::vector<s
 std::vector<std::shared_ptr<Declaration>> CSS::Parser::resolveShorthandDeclaration(std::shared_ptr<Declaration> declaration)
 {
     std::vector<std::shared_ptr<Declaration>> longHandDeclarations;
-    if (lexer.caseInsensitiveStringCompare(declaration->name, "padding"))
+    if (Tools::caseInsensitiveStringCompare(declaration->name, "padding"))
     {
         for (auto resolvedLongHandDeclaration: resolvePosistionalShorthandDeclarationValues(ShortHandPropertyNameType::Padding, declaration))
         {
@@ -406,14 +402,14 @@ std::vector<std::shared_ptr<Declaration>> CSS::Parser::resolveShorthandDeclarati
         }
 
     }
-    else if (lexer.caseInsensitiveStringCompare(declaration->name, "margin"))
+    else if (Tools::caseInsensitiveStringCompare(declaration->name, "margin"))
     {
         for (auto resolvedLongHandDeclaration: resolvePosistionalShorthandDeclarationValues(ShortHandPropertyNameType::Margin, declaration))
         {
             longHandDeclarations.push_back(resolvedLongHandDeclaration);
         }
     }
-    else if (lexer.caseInsensitiveStringCompare(declaration->name, "border"))
+    else if (Tools::caseInsensitiveStringCompare(declaration->name, "border"))
     {
         for (auto resolvedLongHandDeclaration: resolvePosistionalShorthandDeclarationValues(ShortHandPropertyNameType::Border, declaration))
         {

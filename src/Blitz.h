@@ -15,10 +15,10 @@ class Blitz {
         std::string getFileContent(std::string fileName);
         void loadHTML(std::string html);
         std::unique_ptr<HTMLStateMachine> stateMachine;
-        std::shared_ptr<HTMLDocumentParser> documentParser;
-        std::shared_ptr<Tokenizer> cssTokenizer;
-        std::shared_ptr<CSS::Parser> cssParser;
-        std::shared_ptr<SelectorEngine> selectorEngine;
+        std::unique_ptr<HTMLDocumentParser> documentParser;
+        std::unique_ptr<Tokenizer> cssTokenizer;
+        std::unique_ptr<CSS::Parser> cssParser;
+        std::unique_ptr<SelectorEngine> selectorEngine;
 
         std::unique_ptr<Core> browserCoreWindow;
 

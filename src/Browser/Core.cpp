@@ -1,13 +1,11 @@
 #include <Browser/Core.h>
-#include <Parser/Lexer.h>
 
-static Lexer lexer;
 Core::Core()
 {
 
 }
 
-Core::Core(const std::shared_ptr<Node> documentWithStyling)
+Core::Core(std::shared_ptr<Node> documentWithStyling)
 {
     m_document = documentWithStyling;
     std::vector<std::shared_ptr<Node>> nodeList = documentWithStyling->getAllNodes({}, documentWithStyling);
@@ -41,8 +39,7 @@ Core::Core(const std::shared_ptr<Node> documentWithStyling)
     vbox = std::make_unique<Gtk::VBox>();
     vbox->pack_start(*coreMenuBar, false, false);
 
-
-    webView = std::make_shared<WebView>(this, m_document);
+    webView = std::make_unique<WebView>(this, m_document);
 
     vbox->add(*webView);
     this->add(*vbox);

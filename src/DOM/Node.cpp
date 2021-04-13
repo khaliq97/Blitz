@@ -1,8 +1,6 @@
 #include <DOM/Node.h>
 #include <DOM/Document.h>
 #include <DOM/Text.h>
-#include <Parser/Lexer.h>
-static Lexer lexer;
 Node::Node()
 {
     nodeType = Node::NodeType::ElementNode;

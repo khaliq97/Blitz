@@ -2,10 +2,8 @@
 
 bool isSizeSet = false;
 
-HTMLView::HTMLView(Core* core, const std::shared_ptr<Node> renderElements) : m_core(core)
+HTMLView::HTMLView(Core* core, std::shared_ptr<Node> renderElements) : m_core(core), renderElements(renderElements)
 {
-    this->drawCoordinates = std::make_shared<DrawCoordinates>();
-    this->renderElements = renderElements;
 }
 
 bool HTMLView::isJustWhiteSpace(const std::shared_ptr<Node>& node)
@@ -65,7 +63,7 @@ void HTMLView::createBoxForElement(std::shared_ptr<Node> node, std::shared_ptr<L
     }
 }
 
-std::shared_ptr<LayoutBox> HTMLView::createBlockBox(const std::shared_ptr<Element> elementNode, std::shared_ptr<LayoutBox> parentLayoutBox)
+std::shared_ptr<LayoutBox> HTMLView::createBlockBox(std::shared_ptr<Element> elementNode, std::shared_ptr<LayoutBox> parentLayoutBox)
 {
     std::shared_ptr<LayoutBox> layoutBlockBox;
     if (elementNode->tagName == "body")
@@ -170,6 +168,7 @@ bool HTMLView::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     cr->stroke();
 
     root = {};
+
     createBoxForElement(renderElements, {});
 
     this->maxHeight += root->marginRect.height;

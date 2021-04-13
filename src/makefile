@@ -6,6 +6,7 @@ ODIR=obj
 LDIR=../lib
 
 _DEPS = Blitz.h \
+		LexerUtils.h \
 		Parser/HTMLStateMachine.h \
 		Parser/HTMLDocumentParser.h \
 		Parser/Lexer.h \
@@ -54,7 +55,7 @@ _DEPS = Blitz.h \
 
 DEPS = $(patsubst, %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = Main.o Blitz.o \
+_OBJ = Main.o Blitz.o LexerUtils.o \
 		Parser/HTMLStateMachine.o \
 		Parser/HTMLDocumentParser.o \
 		Parser/Lexer.o \
