@@ -7,17 +7,25 @@ class ComplexSelector
 {
 public:
     ComplexSelector();
-    std::shared_ptr<CompoundSelector> compoundSelector;
-    // TODO: Add Combinator support
 
+    // TODO: Add Combinator supports
+    std::shared_ptr<CompoundSelector> compoundSelector() { return m_compoundSelector; }
 
     void calculateSelectorSpecifity();
     bool isThisSelectorMoreSpecific(const std::shared_ptr<ComplexSelector>& complexSelectorCompare);
+
+    std::shared_ptr<CompoundSelector> m_compoundSelector;
 
     // Selector Specifity
     int a = 0;
     int b = 0;
     int c = 0;
+
+private:
+    int m_a = 0;
+    int m_b = 0;
+    int m_c = 0;
+
 };
 
 #endif // COMPLEXSELECTOR_H

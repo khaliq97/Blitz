@@ -27,13 +27,17 @@ enum class CSSColor {
 class StyleResolver
 {
 public:
-    StyleResolver(std::shared_ptr<Document> document);
-    std::shared_ptr<Document> documentWithCSSDeclrations;
-    std::shared_ptr<StyleProperty> findFirstDeclarationOccurence(std::string declarationName, const std::shared_ptr<Node> &node);
-    std::shared_ptr<StyleProperty> resolveStyleFromDeclaration(const std::shared_ptr<Declaration> declaration, const std::shared_ptr<Node> &node);
-    std::shared_ptr<StyleProperty> createPositionalStyleProperty(std::string declarationName, const std::shared_ptr<CSSToken> &declarationValue);
-    bool isColor(std::string value);
-    std::shared_ptr<Color> convertColorToRGB(std::string color);
+    StyleResolver(std::shared_ptr<Document>& documentWithStyling);
+
+    std::shared_ptr<Document> documentWithResolvedStyles() { return m_documentWithResolvedStyles; }
+private:
+     std::shared_ptr<Document> m_documentWithResolvedStyles;
+
+     std::shared_ptr<StyleProperty> findFirstDeclarationOccurence(std::string declarationName, const std::shared_ptr<Node> &node);
+     std::shared_ptr<StyleProperty> resolveStyleFromDeclaration(const std::shared_ptr<Declaration>& declaration, const std::shared_ptr<Node> &node);
+     std::shared_ptr<StyleProperty> createPositionalStyleProperty(std::string declarationName, const std::shared_ptr<CSSToken> &declarationValue);
+     bool isColor(std::string value);
+     std::shared_ptr<Color> convertColorToRGB(std::string color);
 };
 
 #endif // STYLERESOLVER_H

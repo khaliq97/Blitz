@@ -6,23 +6,23 @@
 
 class Element;
 class HTMLElement : public Element {
-    public:
-        HTMLElement(std::shared_ptr<Node> parentNode);
+public:
+    HTMLElement(std::weak_ptr<Node> parentNode);
 
-        std::string title;
-        std::string lang;
-        std::string translate;
-        std::string dir;
+    std::string title = "";
+    std::string lang = "";
+    std::string translate = "";
+    std::string dir = "";
 
-        bool hidden;
-        std::string accessKey;
-        std::string accessKeyLabel;
-        bool draggable;
-        bool spellcheck;
-        std::string autoCapitalize;
+    bool hidden = false;
+    std::string accessKey = "";
+    std::string accessKeyLabel = "";
+    bool draggable = false;
+    bool spellcheck = false;
+    std::string autoCapitalize = "";
 
-        // Legacy
-        std::string innerText;
+    // Legacy
+    std::string innerText = "";
 
 };
 #endif

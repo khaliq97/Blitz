@@ -72,6 +72,8 @@ static std::string CSSTokenTypes[] =
 class CSSToken
 {
 public:
+
+    CSSToken() { }
     CSSToken(CSSTokenType type) : type(type)
     {
         if (type == CSSTokenType::Hash)

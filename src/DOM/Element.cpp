@@ -1,27 +1,15 @@
 #include <DOM/Element.h>
 #include <algorithm>
 #include <LexerUtils.h>
-Element::Element(std::shared_ptr<Node> parentNode) : Node(parentNode)
+Element::Element(std::weak_ptr<Node> parentNode) : Node(parentNode)
 {
-    namespaceURI = "";
-    prefix = "Prefix";
-    localName = "";
-    tagName = "";
-    id = "";
-    className = "";
-    slot = "";
-    attributes = new std::map<std::string, std::string>();
 }
-
 
 bool Element::hasAttributes()
 {
-    if (attributes)
+    if (attributes.size() > 0)
     {
-        if (attributes->size() > 0)
-        {
-            return true;
-        }
+        return true;
     }
 
     return false;
@@ -29,10 +17,10 @@ bool Element::hasAttributes()
 
 bool Element::hasClass(std::string className)
 {
-    if (attributes->find("class") != attributes->end())
+    if (attributes.find("class") != attributes.end())
     {
         std::string tempClassName = "";
-        std::string elementClassAttributeValue = attributes->find("class")->second;
+        std::string elementClassAttributeValue = attributes.find("class")->second;
 
         std::vector<std::string> classes;
         for(int i = 0; i < elementClassAttributeValue.length(); i++)
@@ -50,18 +38,14 @@ bool Element::hasClass(std::string className)
 
                 if (tempClassName == className)
                 {
-                    printf("Matched Class: %s\n", tempClassName.c_str());
                     return true;
                 }
                 else
                 {
-                    printf("Ignored Class: %s\n", tempClassName.c_str());
                     tempClassName = "";
                 }
             }
         }
-
-
     }
 
     return false;
@@ -70,7 +54,7 @@ bool Element::hasClass(std::string className)
 bool Element::isDisplayNone()
 {
     if (getStylePropertyByDeclarationName("display"))
-        return getStylePropertyByDeclarationName("display")->m_declaration->value[0]->value() == "none";
+        return getStylePropertyByDeclarationName("display")->m_declaration->value[0].value() == "none";
 
     return false;
 }
@@ -78,7 +62,7 @@ bool Element::isDisplayNone()
 bool Element::isDisplayBlock()
 {
     if (getStylePropertyByDeclarationName("display"))
-        return getStylePropertyByDeclarationName("display")->m_declaration->value[0]->value() == "block";
+        return getStylePropertyByDeclarationName("display")->m_declaration->value[0].value() == "block";
 
     return false;
 }

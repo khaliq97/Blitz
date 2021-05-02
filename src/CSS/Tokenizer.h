@@ -7,6 +7,11 @@ class Tokenizer
 {
 public:
     Tokenizer(std::string css);
+    const std::vector<CSSToken> tokens() { return m_tokens; }
+private:
+    std::string source;
+    int current;
+    std::vector<CSSToken> m_tokens;
     void scanTokens();
     void scanToken();
     bool isAtEnd();
@@ -14,26 +19,20 @@ public:
     char nextInputChar();
     char peek();
     char peekNext();
-    //void addToken(CSS::TokenType type);
     bool match(char expected);
     void consume();
     void consumeSpecific(char c);
     void addToken(CSSTokenType type);
     void string();
     void hash();
-    const std::vector<std::shared_ptr<CSSToken>>& getTokens() { return tokens; }
-private:
-    std::string source;
-    int current;
-    std::vector<std::shared_ptr<CSSToken>> tokens;
     bool isNameStartCodePoint(char c);
     bool isNameCodePoint(char c);
     char peekAtOffset(int index);
     bool wouldStartIdentifier(char c1, char c2, char c3);
     std::string consumeName();
     bool wouldStartNumber(char c1, char c2, char c3);
-    const std::shared_ptr<Number> consumeNumber();
-    std::shared_ptr<CSSToken> createNumericToken();
+    Number consumeNumber();
+    CSSToken createNumericToken();
     void notSupported(std::string tokenName);
     void printTokens();
 };

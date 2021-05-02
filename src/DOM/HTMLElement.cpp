@@ -3,18 +3,7 @@
 #include <string>
 #include <DOM/HTMLElement.h>
 
-HTMLElement::HTMLElement(std::shared_ptr<Node> parentNode) : Element(parentNode)
+HTMLElement::HTMLElement(std::weak_ptr<Node> parentNode) : Element(parentNode)
 {
-    tagName = "";
-    title = "";
-    lang = "";
-    translate = "";
-    dir = "";
-    hidden = false;
-    accessKey = "";
-    accessKeyLabel = "";
-    draggable = false;
-    spellcheck = false;
-    autoCapitalize = "";
-    innerText = "";
+
 }

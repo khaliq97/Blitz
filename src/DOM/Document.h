@@ -6,6 +6,7 @@
 #include <DOM/Comment.h>
 #include <DOM/DocumentType.h>
 #include <DOM/Node.h>
+#include <DOM/Text.h>
 #include <memory>
 class HTMLElement;
 class HTMLHeadElement;
@@ -14,8 +15,7 @@ class Document : public Node
 {
 public:
     Document();
-    Document(std::shared_ptr<Node> parentNode);
-    std::string PrintDocument();
+    Document(std::weak_ptr<Node> parentNode);
 
     //std::string URL;
     //std::string documentURI;
@@ -23,7 +23,7 @@ public:
 
     //std::shared_ptr<DocumentType> docType;
     //std::shared_ptr<Element> documentElement;
-    void printTree(const std::shared_ptr<Node>& node, std::string indent, bool last);
+    void printDocument(const std::shared_ptr<Node>& node, std::string indentation);
 private:
 };
 

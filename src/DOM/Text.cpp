@@ -1,5 +1,5 @@
 #include <DOM/Text.h>
-Text::Text(std::shared_ptr<Node> parentNode) : CharacterData(parentNode)
+Text::Text(std::weak_ptr<Node> parentNode) : CharacterData(parentNode)
 {
 
 }

@@ -1,26 +1,23 @@
 #include <CSS/SelectorEngine.h>
 #include <CSS/StyleResolver.h>
 #include <algorithm>
-SelectorEngine::SelectorEngine(const std::shared_ptr<Stylesheet> &stylesheet, std::shared_ptr<Document> document) : documentWithStyling(document)
+SelectorEngine::SelectorEngine(std::shared_ptr<Stylesheet>& stylesheet, std::shared_ptr<Document>& document) : m_styleSheet(stylesheet), m_documentWithStyles(document)
 {
-    this->stylesheet = stylesheet;
     run();
-    documentWithStyling->printTree(document, "", false);
-
-    std::shared_ptr<StyleResolver> styleResolver = std::make_shared<StyleResolver>(documentWithStyling);
 }
 
-void SelectorEngine::applyComplexSelectorToElement(const std::shared_ptr<ComplexSelector> &complexSelector, std::shared_ptr<CSS::StyleRule> styleRule, std::shared_ptr<Node> element)
+void SelectorEngine::applyComplexSelectorToElement(const std::shared_ptr<ComplexSelector> &complexSelector, std::shared_ptr<CSS::StyleRule> styleRule, std::weak_ptr<Node> element)
 {
-    if (auto elementNode = dynamic_cast<Element*>(element.get()))
+    if (element.lock()->isElement())
     {
+        auto elementNode = element.lock()->asNodeTypeElement(element);
         for (auto dec: styleRule->declaration)
         {
             // Checks if the declaration exist in the elements existing declarations.
-            if (elementNode->doesDeclarationExist(dec->name))
+            if (elementNode.lock()->doesDeclarationExist(dec->name))
             {
                 // Loop over all matched style rules for this element.
-                for (auto styleRuleInElement: elementNode->styleRules)
+                for (auto styleRuleInElement: elementNode.lock()->styleRules)
                 {
                     // Loops over all declarations in all matching style rules.
                     for (auto decInStyleRule: styleRuleInElement->declaration)
@@ -30,7 +27,7 @@ void SelectorEngine::applyComplexSelectorToElement(const std::shared_ptr<Complex
                         {
                             if (complexSelector->isThisSelectorMoreSpecific(styleRuleInElement->complexSelectorList[0]))
                             {
-                                elementNode->replaceDeclaration(dec->name, dec);
+                                elementNode.lock()->replaceDeclaration(dec->name, dec);
                             }
                         }
                     }
@@ -41,12 +38,12 @@ void SelectorEngine::applyComplexSelectorToElement(const std::shared_ptr<Complex
             }
             else
             {
-                elementNode->declarations.push_back(dec);
+                elementNode.lock()->declarations.push_back(dec);
             }
 
         }
 
-        elementNode->styleRules.push_back(styleRule);
+        elementNode.lock()->styleRules.push_back(styleRule);
     }
 }
 
@@ -54,15 +51,15 @@ bool SelectorEngine::doAllSelectorsMatchOnAnElement(const std::shared_ptr<Comple
 {
     bool allSelectorsMatchingMatchOnElement = false;
 
-    if (complexSelector->compoundSelector->typeSelector)
+    if (complexSelector->m_compoundSelector->m_typeSelector)
     {
-        if (matches(complexSelector->compoundSelector->typeSelector, element))
+        if (matches(complexSelector->m_compoundSelector->m_typeSelector, element))
         {
             allSelectorsMatchingMatchOnElement = true;
         }
     }
 
-    for (auto subClassSelector: complexSelector->compoundSelector->subClassSelectors)
+    for (auto subClassSelector: complexSelector->m_compoundSelector->m_subClassSelectors)
     {
         if (matches(subClassSelector, element))
         {
@@ -119,12 +116,12 @@ bool compare(const std::shared_ptr<CSS::StyleRule>& l, const std::shared_ptr<CSS
 
 void SelectorEngine::run()
 {
-    std::vector<std::shared_ptr<Node>> empty = {};
-    std::vector<std::shared_ptr<Node>> elements = documentWithStyling->getAllNodes(empty, documentWithStyling);
+    std::vector<std::weak_ptr<Node>> empty;
+    std::vector<std::weak_ptr<Node>> elements = m_documentWithStyles->getAllNodes(empty, m_documentWithStyles);
 
     // Adding all complex selector values to their style rule.
     // This value is then used to sort the entire stylesheet most specifc selectors at the top.
-    for (auto styleRule: stylesheet->styleRules)
+    for (auto styleRule: m_styleSheet->styleRules)
     {
         for (auto complexSelector: styleRule->complexSelectorList)
         {
@@ -136,18 +133,19 @@ void SelectorEngine::run()
     }
 
     // Sort the style rules
-    std::sort(stylesheet->styleRules.begin(), stylesheet->styleRules.end(), compare);
+    std::sort(m_styleSheet->styleRules.begin(), m_styleSheet->styleRules.end(), compare);
 
-    for (auto styleRule: stylesheet->styleRules)
+    for (auto styleRule: m_styleSheet->styleRules)
     {
         for (auto complexSelector: styleRule->complexSelectorList)
         {
             for (auto element: elements)
             {
-                if (doAllSelectorsMatchOnAnElement(complexSelector, element))
+                if (doAllSelectorsMatchOnAnElement(complexSelector, element.lock()))
                 {
-                    if (auto elementNode = dynamic_cast<Element*>(element.get()))
+                    if (element.lock()->isElement())
                     {
+                        auto elementNode = element.lock()->asNodeTypeElement(element.lock());
                         applyComplexSelectorToElement(complexSelector, styleRule, element);
                     }
 
@@ -162,15 +160,15 @@ bool SelectorEngine::matches(const std::shared_ptr<SimpleSelector>& simpleSelect
 {
     if (auto elementNode = dynamic_cast<Element*>(element.get()))
     {
-        switch (simpleSelector->type) {
+        switch (simpleSelector->type()) {
             case SelectorType::Type:
-                return simpleSelector->identToken->value() == elementNode->tagName;
+                return simpleSelector->value() == elementNode->tagName();
             case SelectorType::Universal:
                 return true;
             case SelectorType::Id:
-                return simpleSelector->identToken->value() == elementNode->id;
+                return simpleSelector->value() == elementNode->id;
             case SelectorType::Class:
-                return elementNode->hasClass(simpleSelector->identToken->value());
+                return elementNode->hasClass(simpleSelector->value());
         }
     }
 

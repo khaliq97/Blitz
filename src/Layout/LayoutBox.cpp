@@ -8,7 +8,7 @@
 
 bool paintMarginBox = false;
 
-LayoutBox::LayoutBox(const Glib::RefPtr<Pango::Layout>& pangoLayout, const std::shared_ptr<Element> &element) : pangoLayout(std::move(pangoLayout)), element(element)
+LayoutBox::LayoutBox(const Glib::RefPtr<Pango::Layout>& pangoLayout, std::shared_ptr<Element>element) : pangoLayout(std::move(pangoLayout)), element(element)
 {
 
     // TODO: Move all of these property setters to a box model class
@@ -69,16 +69,15 @@ void LayoutBox::createTextLayout()
     pangoLayout->set_font_description(font);
 
     // Set content metrics after font has been set
-    Pango::Rectangle logicalRect = pangoLayout->get_logical_extents();
 
-    contentRect.height = logicalRect.get_height() / Pango::SCALE;
-    contentRect.width = logicalRect.get_width() / Pango::SCALE;
+    contentRect.height = pangoLayout->get_logical_extents().get_height() / Pango::SCALE;
+    contentRect.width = pangoLayout->get_logical_extents().get_width() / Pango::SCALE;
 }
 
 bool LayoutBox::isBlockBox()
 {
     if (element->getStylePropertyByDeclarationName("display"))
-        return element->getStylePropertyByDeclarationName("display")->m_declaration->value[0]->value() == "block";
+        return element->getStylePropertyByDeclarationName("display")->m_declaration->value[0].value() == "block";
 
     return false;
 }
@@ -86,28 +85,33 @@ bool LayoutBox::isBlockBox()
 bool LayoutBox::isInlineBox()
 {
     if (element->getStylePropertyByDeclarationName("display"))
-        return element->getStylePropertyByDeclarationName("display")->m_declaration->value[0]->value() == "inline";
+        return element->getStylePropertyByDeclarationName("display")->m_declaration->value[0].value() == "inline";
 
     return false;
 }
 
+void LayoutBox::appendChildAndUpdateParentHeights(std::shared_ptr<LayoutBox> layoutBox)
+{
+    parent.lock()->children.push_back(std::move(layoutBox));
+    updateAllParentHeights();
+}
 
 
 void LayoutBox::updateAllParentHeights()
 {
-    if (parent)
+    if (parent.lock())
     {
         double allContainingLayoutBoxHeight = 0;
-        for (int i = 0; i < parent->children.size(); i++)
+        for (int i = 0; i < parent.lock()->children.size(); i++)
         {
-            allContainingLayoutBoxHeight += parent->children[i]->marginRect.height;
+            allContainingLayoutBoxHeight += parent.lock()->children[i]->marginRect.height;
         }
 
-        parent->borderRect.height = parent->borderTopWidth + parent->paddingTop + allContainingLayoutBoxHeight + parent->borderBottomWidth + parent->paddingBottom;
+        parent.lock()->borderRect.height = parent.lock()->borderTopWidth + parent.lock()->paddingTop + allContainingLayoutBoxHeight + parent.lock()->borderBottomWidth + parent.lock()->paddingBottom;
 
-        parent->marginRect.height = parent->marginTop + parent->borderBottomWidth + parent->paddingTop + allContainingLayoutBoxHeight + parent->borderBottomWidth + parent->paddingBottom + parent->marginBottom;
+        parent.lock()->marginRect.height = parent.lock()->marginTop + parent.lock()->borderBottomWidth + parent.lock()->paddingTop + allContainingLayoutBoxHeight + parent.lock()->borderBottomWidth + parent.lock()->paddingBottom + parent.lock()->marginBottom;
 
-        parent->updateAllParentHeights();
+        parent.lock()->updateAllParentHeights();
     }
     // TODO: Need a IF condition for the root layout box (i.e. html tag)
 }

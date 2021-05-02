@@ -1,11 +1,13 @@
 #ifndef HTMLTOKEN_H
 #define HTMLTOKEN_H
 #include <string>
-#include <map>
 #include <memory>
+#include <vector>
 
 class HTMLToken
 {
+    friend class HTMLStateMachine;
+    friend class HTMLDocumentParser;
     public:
         HTMLToken();
         enum Type
@@ -21,28 +23,28 @@ class HTMLToken
         Type getType() const { return this->type; }
         void setType(Type type) { this->type = type; }
 
-        bool isDoctypeToken() { return type == Type::Doctype; }
-        bool isStartTagToken() { return getType() == Type::StartTag; }
-        bool isEndTagToken() { return getType() == Type::EndTag; }
-        bool isCommentToken() { return getType() == Type::Comment; }
-        bool isCharacterToken() { return getType() == Type::Character; }
-        bool isEndOfFileToken() { return getType() == Type::EndOfFile; }
+        bool isDoctypeToken() const { return type == Type::Doctype; }
+        bool isStartTagToken() const { return getType() == Type::StartTag; }
+        bool isEndTagToken() const { return getType() == Type::EndTag; }
+        bool isCommentToken() const { return getType() == Type::Comment; }
+        bool isCharacterToken() const { return getType() == Type::Character; }
+        bool isEndOfFileToken() const { return getType() == Type::EndOfFile; }
 
-        std::string getCommentOrCharacterData();
+        std::string getCommentOrCharacterData() const;
         void appendCommentOrCharacterData(char data) { this->commentOrCharacter.data.push_back(data); }
 
-        std::string getDoctypeName() { return doctype.name; }
-        std::string getPublicIdentifier() { return doctype.publicIdentifier; }
-        std::string getSystemIdentifier() { return doctype.systemIdentifier; }
+        std::string getDoctypeName() const { return doctype.name; }
+        std::string getPublicIdentifier() const { return doctype.publicIdentifier; }
+        std::string getSystemIdentifier() const { return doctype.systemIdentifier; }
 
         void appendDoctypeName(char data) { this->doctype.name.push_back(data); }
 
-        std::string getTagName() { return tag.name; }
+        std::string getTagName() const { return tag.name; }
         void appendTagName(char data) { this->tag.name.push_back(data); }
-        bool getTagIsSelfClosing() { return tag.isSelfClosing; }
+        bool getTagIsSelfClosing() const { return tag.isSelfClosing; }
         void setTagIsSelfClosing(bool val) {this->tag.isSelfClosing = val; }
 
-        bool isParserWhitespace()
+        bool isParserWhitespace() const
         {
             if (!isCharacterToken())
                 return false;
@@ -53,10 +55,14 @@ class HTMLToken
             return false;
         }
 
-        std::map<std::string, std::string> *getAttributes() { return this->tag.attributes; }
-
     private:
         Type type;
+
+        struct Attribute
+        {
+           std::string name;
+           std::string value;
+        };
 
         struct
         {
@@ -70,7 +76,7 @@ class HTMLToken
         {
             std::string name;
             bool isSelfClosing;
-            std::map<std::string, std::string> *attributes;
+            std::vector<Attribute> attributes;
         } tag;
 
         struct

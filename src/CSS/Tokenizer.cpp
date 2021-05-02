@@ -10,24 +10,24 @@ Tokenizer::Tokenizer(std::string css)
 void Tokenizer::printTokens()
 {
     printf("Tokens: \n");
-    for (auto token: tokens)
+    for (CSSToken token: m_tokens)
     {
-        if (token->type == CSSTokenType::Whitespace)
+        if (token.type == CSSTokenType::Whitespace)
         {
             continue;
         }
-        printf("%s\n", CSSTokenTypes[(int) token->type].c_str());
-        printf("    Value: %s\n", token->value().c_str());
+        printf("%s\n", CSSTokenTypes[(int) token.type].c_str());
+        printf("    Value: %s\n", token.value().c_str());
 
-        if (token->type == CSSTokenType::Dimension)
+        if (token.type == CSSTokenType::Dimension)
         {
-            printf("    Unit: %s\n", token->unit.c_str());
+            printf("    Unit: %s\n", token.unit.c_str());
         }
 
-        if (token->type == CSSTokenType::Number)
+        if (token.type == CSSTokenType::Number)
         {
-            printf("    Number Repr: %s\n", token->value().c_str());
-            printf("    Number Type: %d\n", (int) token->numberType());
+            printf("    Number Repr: %s\n", token.value().c_str());
+            printf("    Number Type: %d\n", (int) token.numberType());
         }
     }
 }
@@ -55,7 +55,6 @@ void Tokenizer::scanToken()
         case '/':
             if (peekNext() == '*')
             {
-                printf("Comment!\n");
                 consumeSpecific('/');
                 consumeSpecific('*');
 
@@ -100,12 +99,12 @@ void Tokenizer::scanToken()
             if (wouldStartNumber(peek(), peekNext(), peekAtOffset(2)))
             {
                 consume();
-                tokens.push_back(createNumericToken());
+                m_tokens.push_back(createNumericToken());
             }
             else
             {
-                std::shared_ptr<CSSToken> delimToken = std::make_shared<CSSToken>(CSSTokenType::Delim);
-                delimToken->appendValue(peek());
+                CSSToken delimToken = CSSToken(CSSTokenType::Delim);
+                delimToken.appendValue(peek());
                 consume();
             }
             break;
@@ -119,14 +118,14 @@ void Tokenizer::scanToken()
             if (wouldStartNumber(peek(), peekNext(), peekAtOffset(2)))
             {
                 consume();
-                tokens.push_back(createNumericToken());
+                m_tokens.push_back(createNumericToken());
             }
             else
             {
-                std::shared_ptr<CSSToken> delimToken = std::make_shared<CSSToken>(CSSTokenType::Delim);
-                delimToken->appendValue(peek());
+                CSSToken delimToken = CSSToken(CSSTokenType::Delim);
+                delimToken.appendValue(peek());
                 consume();
-                tokens.push_back(delimToken);
+                m_tokens.push_back(delimToken);
             }
             break;
         case ':':
@@ -162,22 +161,22 @@ void Tokenizer::scanToken()
         default:
             if (std::isdigit(peek()))
             {
-                tokens.push_back(createNumericToken());
+                m_tokens.push_back(createNumericToken());
             }
             else if (isNameStartCodePoint(peek()))
             {
                 //printf("HERE!\n");
-                std::shared_ptr<CSSToken> identLikeToken = std::make_shared<CSSToken>(CSSTokenType::IdentLike);
+                CSSToken identLikeToken = CSSToken(CSSTokenType::IdentLike);
                 //printf("consume name returns: %s\n", consumeName().c_str());
-                identLikeToken->setValue(consumeName());
-                tokens.push_back(identLikeToken);
+                identLikeToken.setValue(consumeName());
+                m_tokens.push_back(identLikeToken);
             }
             else
             {
-                std::shared_ptr<CSSToken> delimToken = std::make_shared<CSSToken>(CSSTokenType::Delim);
-                delimToken->appendValue(peek());
+                CSSToken delimToken = CSSToken(CSSTokenType::Delim);
+                delimToken.appendValue(peek());
                 consume();
-                tokens.push_back(delimToken);
+                m_tokens.push_back(delimToken);
             }
             break;
 
@@ -259,20 +258,18 @@ bool Tokenizer::isNameCodePoint(char c)
     return (isNameStartCodePoint(c)) || std::isdigit(c) || c == '-';
 }
 
-std::shared_ptr<CSSToken> Tokenizer::createNumericToken()
+CSSToken Tokenizer::createNumericToken()
 {
-    std::shared_ptr<Number> result = consumeNumber();
-    std::shared_ptr<CSSToken> token;
-
+    const Number& result = consumeNumber();
+    CSSToken token;
 
     if (wouldStartIdentifier(peek(), peekNext(), peekAtOffset(2)))
     {
-        //printf("Result: %s\n", result->repr.c_str());
-        token = std::make_shared<CSSToken>(CSSTokenType::Dimension);
-        token->setValue(result->repr);
-        token->setNumberType(NumberType::Number);
+        token = CSSToken(CSSTokenType::Dimension);
+        token.setValue(result.repr);
+        token.setNumberType(NumberType::Number);
 
-        token->unit = consumeName();
+        token.unit = consumeName();
 
         return token;
     }
@@ -280,45 +277,45 @@ std::shared_ptr<CSSToken> Tokenizer::createNumericToken()
     if (peek() == '%')
     {
         consumeSpecific('%');
-        token = std::make_shared<CSSToken>(CSSTokenType::Percentage);
-        token->setValue(result->repr);
+        token = CSSToken(CSSTokenType::Percentage);
+        token.setValue(result.repr);
 
         return token;
     }
 
-    token = std::make_shared<CSSToken>(CSSTokenType::Number);
-    token->setValue(result->repr);
-    token->setNumberType(result->type);
+    token = CSSToken(CSSTokenType::Number);
+    token.setValue(result.repr);
+    token.setNumberType(result.type);
 
     return token;
 }
 
-const std::shared_ptr<Number> Tokenizer::consumeNumber()
+Number Tokenizer::consumeNumber()
 {
-    std::shared_ptr<Number> number = std::make_shared<Number>();
-    number->type = NumberType::Integer;
-    number->repr = "";
+    Number number;
+    number.type = NumberType::Integer;
+    number.repr = "";
 
     if (peek() == '+' || peek() == '-')
     {
-        number->repr += peek();
+        number.repr += peek();
         consume();
     }
 
     while (std::isdigit(peek()) && !isAtEnd())
     {
-        number->repr += peek();
+        number.repr += peek();
         consume();
 
         if (peek() == '.' && std::isdigit(peekNext()))
         {
-            number->repr += peek();
-            number->repr += peekNext();
+            number.repr += peek();
+            number.repr += peekNext();
 
             consumeSpecific('.');
             consume();
 
-            number->type = NumberType::Number;
+            number.type = NumberType::Number;
         }
     }
 
@@ -334,16 +331,13 @@ std::string Tokenizer::consumeName()
     std::string result = "";
     while (!isAtEnd())
     {
-        // printf("isNameCodePoint is: %d\n", isNameCodePoint(peek()));
         if (isNameCodePoint(peek()))
         {
-            //printf("Result state: %s\n", result.c_str());
             result += peek();
             consume();
         }
         else
         {
-            //printf("Returned: %s\n", result.c_str());
             return result;
         }
 
@@ -355,57 +349,54 @@ std::string Tokenizer::consumeName()
 
 void Tokenizer::hash()
 {
-    std::shared_ptr<CSSToken> token;
+    CSSToken token;
 
     if (isNameCodePoint(peek()))
     {
-        token = std::make_shared<CSSToken>(CSSTokenType::Hash);
+        token = CSSToken(CSSTokenType::Hash);
         if (wouldStartIdentifier(peek(), peekNext(), peekAtOffset(2)))
         {
-            token->setHashTokenType(HashType::ID);
+            token.setHashTokenType(HashType::ID);
         }
 
-        token->setValue(consumeName());
-        tokens.push_back(token);
+        token.setValue(consumeName());
+        m_tokens.push_back(token);
     }
     else
     {
-        token = std::make_shared<CSSToken>(CSSTokenType::Delim);
-        token->appendValue(peek());
+        token = CSSToken(CSSTokenType::Delim);
+        token.appendValue(peek());
         consume();
     }
 }
 
 void Tokenizer::string()
 {
-    std::shared_ptr<CSSToken> stringToken = std::make_shared<CSSToken>(CSSTokenType::String);
+    CSSToken stringToken = CSSToken(CSSTokenType::String);
     std::string stringValue = "";
-    printf("Consuming string\n");
     while (peek() != '\"')
     {
         if (isAtEnd())
         {
-            tokens.push_back(stringToken);
+            m_tokens.push_back(stringToken);
             printf("Parse error!\n");
             exit(0);
         }
         else if (peek() =='\n')
         {
             consumeSpecific('\n');
-            tokens.push_back(std::make_shared<CSSToken>(CSSTokenType::BadString));
+            m_tokens.push_back((CSSTokenType::BadString));
             printf("Parse error!\n");
             exit(0);
         }
         else
         {
-            printf("String consumption yields char: %c\n", peek());
             stringValue += peek();
             consume();
         }
     }
     consumeSpecific('\"');
-    tokens.push_back(stringToken);
-    printf("Finished consuming string\n");
+    m_tokens.push_back(stringToken);
 
     //Todo: U+005C REVERSE SOLIDUS (\)
 
@@ -413,8 +404,8 @@ void Tokenizer::string()
 
 void Tokenizer::addToken(CSSTokenType type)
 {
-    std::shared_ptr<CSSToken> token = std::make_shared<CSSToken>(type);
-    tokens.push_back(std::move(token));
+    CSSToken token = CSSToken(type);
+    m_tokens.push_back(token);
 }
 
 bool Tokenizer::match(char expected)

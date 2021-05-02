@@ -7,7 +7,7 @@ class SimpleBlock
 {
 public:
 
-    std::vector<std::shared_ptr<CSSToken>> values;
+    std::vector<CSSToken> values;
 };
 
 #endif // SIMPLEBLOCK_H

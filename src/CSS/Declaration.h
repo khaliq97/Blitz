@@ -8,7 +8,7 @@ class Declaration
 public:
     Declaration();
     std::string name;
-    std::vector<std::shared_ptr<CSSToken>> value;
+    std::vector<CSSToken> value;
 };
 
 #endif // DECLARATION_H

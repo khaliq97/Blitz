@@ -8,7 +8,7 @@ class QualifiedRule
 {
 public:
     QualifiedRule();
-    std::vector<std::shared_ptr<CSSToken>> prelude;
+    std::vector<CSSToken> prelude;
     std::shared_ptr<SimpleBlock> simpleBlock;
 };
 

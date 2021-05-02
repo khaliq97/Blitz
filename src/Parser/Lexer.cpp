@@ -8,29 +8,17 @@
 #include <stdlib.h>
 #include <Parser/Lexer.h>
 
-std::vector<char> charTokens;
-
-int tokenIndex = 0;
-int tokensLength = 0;
-
-std::string Lexer::getFileContent(std::string fileName)
+Lexer::Lexer(std::string source)
 {
-    std::string fileContent;
-
-    std::ifstream file;
-
-    file.open(fileName);
-
-    char token[0];
-    while(file.peek() != EOF)
+    if (!source.empty())
     {
-        file.read(token, 1);
-        fileContent += token[0];
+        for (int i = 0; i < source.length(); i++)
+        {
+            charStream.push_back(source.at(i));
+            tokensLength++;
+        }
     }
-
-    return fileContent;
 }
-
 
 int Lexer::getTokensLength()
 {
@@ -44,10 +32,10 @@ int Lexer::getTokenIndex()
 
 std::vector<char> Lexer::getTokens()
 {
-    return charTokens;
+    return charStream;
 }
 
-bool compareChar(char &c1, char &c2)
+bool Lexer::compareChar(char &c1, char &c2)
 {
     if(c1 == c2)
     {
@@ -66,22 +54,9 @@ bool Lexer::caseInsensitiveStringCompare(std::string val1, std::string val2)
     return val1.size() == val2.size() && std::equal(val1.begin(), val1.end(), val2.begin(), &compareChar);
 }
 
-void Lexer::loadContent(std::string content)
-{
-    std::string file;
-    if (!content.empty())
-    {
-        for (int i = 0; i < content.length(); i++)
-        {
-            charTokens.push_back(content.at(i));
-            tokensLength++;
-        }
-    }
-}
-
 char Lexer::consumeToken()
 {
-    char curTok = charTokens[tokenIndex];
+    char curTok = charStream[tokenIndex];
     tokenIndex++;
     return curTok;
 }
@@ -92,9 +67,9 @@ std::string Lexer::peekWhile(std::string tokenData)
     int previousTokenIndex = tokenIndex;
     for (int i = 0; i < tokenData.length(); i++)
     {
-        if (charTokens[tokenIndex] == tokenData.at(i))
+        if (charStream[tokenIndex] == tokenData.at(i))
         {
-            returnStr.push_back(charTokens[tokenIndex]);
+            returnStr.push_back(charStream[tokenIndex]);
         }
 
         tokenIndex++;
@@ -110,9 +85,9 @@ std::string Lexer::peekWhileCaseInsesitive(std::string tokenData)
     int previousTokenIndex = tokenIndex;
     for (int i = 0; i < tokenData.length(); i++)
     {
-        if (compareChar(charTokens[tokenIndex], tokenData.at(i)))
+        if (compareChar(charStream[tokenIndex], tokenData.at(i)))
         {
-            returnStr.push_back(charTokens[tokenIndex]);
+            returnStr.push_back(charStream[tokenIndex]);
         }
 
         tokenIndex++;
@@ -126,7 +101,7 @@ bool Lexer::consumeTokenWhile(std::string tokenData)
 {
     for (int i = 0; i < tokenData.length(); i++)
     {
-        if (charTokens[tokenIndex] != tokenData.at(i))
+        if (charStream[tokenIndex] != tokenData.at(i))
         {
             return false;
         }
@@ -141,7 +116,7 @@ bool Lexer::consumeTokenWhileCaseInsesitive(std::string tokenData)
 {
     for (int i = 0; i < tokenData.length(); i++)
     {
-        if (!(compareChar(charTokens[tokenIndex], tokenData.at(i))))
+        if (!(compareChar(charStream[tokenIndex], tokenData.at(i))))
         {
             return false;
         }
@@ -153,7 +128,7 @@ bool Lexer::consumeTokenWhileCaseInsesitive(std::string tokenData)
 
 void Lexer::consumeToken(char token)
 {
-    if (charTokens[tokenIndex] == token)
+    if (charStream[tokenIndex] == token)
     {
         tokenIndex++;
     }
@@ -162,20 +137,20 @@ void Lexer::consumeToken(char token)
 
 char Lexer::peek()
 {
-    return charTokens[tokenIndex];
+    return charStream[tokenIndex];
 }
 
 char Lexer::peekAtOffset(int offset)
 {
-    return charTokens[tokenIndex + offset];
+    return charStream[tokenIndex + offset];
 }
 
 char Lexer::peekAt(int index)
 {
-    return charTokens[index];
+    return charStream[index];
 }
 
 char Lexer::consume()
 {
-    return charTokens[tokenIndex++];
+    return charStream[tokenIndex++];
 }

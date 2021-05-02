@@ -1,4 +1,4 @@
 #include <DOM/HTMLHeadElement.h>
 
-HTMLHeadElement::HTMLHeadElement(std::shared_ptr<Node> parentNode, std::string tagName) : HTMLElement(parentNode) { }
+HTMLHeadElement::HTMLHeadElement(std::weak_ptr<Node> parentNode, std::string tagName) : HTMLElement(parentNode) { }
 

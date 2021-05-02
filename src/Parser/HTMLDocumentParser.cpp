@@ -10,33 +10,7 @@
 #include <stack>
 #include <unordered_set>
 #include <Parser/Lexer.h>
-
-enum InsertionMode
-{
-    Initial,
-    BeforeHTML,
-    BeforeHead,
-    BeforeHeadNoScript,
-    InHead,
-    AfterHead,
-    InBody,
-    Text,
-    InTable,
-    InTableText,
-    InCaption,
-    InColumnGroup,
-    InTableBody,
-    InRow,
-    InCell,
-    InSelect,
-    InSelectInTable,
-    InTemplate,
-    AfterBody,
-    InFrameset,
-    AfterFrameset,
-    AfterAfterBody,
-    AfterAfterFrameset
-};
+#include <Logger.h>
 
 std::string InsertionModeDictionary[] =
 {
@@ -73,23 +47,6 @@ std::string TokenTypesDocParser[] =
     "Comment",
     "Character",
     "EndOfFile",
-
-};
-
-std::string NodeTypes[] =
-{
-    "ElementNode",
-    "Attribute_Node",
-    "TextNode",
-    "CDATASectionNode",
-    "EntityReferenceNode",// Historical
-    "EntityNode", // Historical
-    "ProcessingInstructionNode",
-    "CommentNode",
-    "DocumentNode",
-    "DocumentTypeNode",
-    "DoucmentFragmentNode",
-    "NotationNode" // Historical
 
 };
 
@@ -131,11 +88,6 @@ std::unordered_set<std::string> InBodyFormattingTags
     "a", "b", "big", "code", "em", "font", "i", "s", "small", "strike", "strong", "tt", "u"
 };
 
-std::stack<std::shared_ptr<HTMLElement>> openElements;
-
-InsertionMode insertionMode;
-
-
 bool containsTagName(std::unordered_set<std::string> tagNames, std::string tagName)
 {
     if (tagNames.count(tagName) != 0)
@@ -146,20 +98,20 @@ bool containsTagName(std::unordered_set<std::string> tagNames, std::string tagNa
 }
 
 
-HTMLDocumentParser::HTMLDocumentParser(std::string html, std::vector<std::shared_ptr<HTMLToken>> tokens) : tokens(tokens)
+HTMLDocumentParser::HTMLDocumentParser(std::vector<HTMLToken> tokens) : tokens(tokens)
 {
-    lexer = std::make_shared<Lexer>();
-    lexer->loadContent(html);
-
     insertionMode = InsertionMode::Initial;
-    document = std::make_shared<Document>();
-    //headElement = std::make_shared<HTMLHeadElement>(nullptr, "");
+    m_document = std::make_unique<Document>();
+    m_document->nodeName = "Document";
+    m_document->nodeType = Node::NodeType::DocumentNode;
 }
 
 
-void switchToState(InsertionMode newMode)
+void HTMLDocumentParser::switchToState(InsertionMode newMode)
 {
+#ifdef PRINT_STATE_SWITCHING_DEBUG
     printf("Switching state from [%s] to [%s]\n", InsertionModeDictionary[insertionMode].c_str(), InsertionModeDictionary[newMode].c_str());
+#endif
     insertionMode = newMode;
 }
 
@@ -176,213 +128,95 @@ void Todo()
     exit(0);
 }
 
-std::shared_ptr<HTMLElement> HTMLDocumentParser::findApproriatePlaceForInsertingNode()
+std::weak_ptr<HTMLElement> HTMLDocumentParser::findApproriatePlaceForInsertingNode()
 {
     // Foster Parenting?
+
     return openElements.top();
 }
 
-std::string lookupNodeTypeFromDictionary(Node::NodeType nodeType)
-{
-    return NodeTypes[nodeType - 1];
-}
-
-void HTMLDocumentParser::insertCommentNode(std::shared_ptr<HTMLToken> token, std::shared_ptr<Node> parentNode)
-{
-    std::shared_ptr<Comment> comment = std::make_shared<Comment>(parentNode);
-    comment->parentNode = parentNode;
-    comment->data = token->getCommentOrCharacterData();
-    comment->nodeName = "Comment";
-    comment->nodeType = Node::NodeType::CommentNode;
-    comment->ownerDocument = document;
-    //parentNode->childNodes.push_back(std::move(comment));
-}
-
-void HTMLDocumentParser::insertDocumentTypeNode(std::shared_ptr<HTMLToken> token, std::shared_ptr<Node> parentNode)
-{
-    std::unique_ptr<DocumentType> documentType = std::make_unique<DocumentType>(parentNode);
-    documentType->parentNode = parentNode;
-    documentType->name = token->getDoctypeName();
-    documentType->nodeName = "Document Type";
-    documentType->nodeType = Node::NodeType::DocumentTypeNode;
-    documentType->ownerDocument = document;
-    parentNode->childNodes.push_back(std::move(documentType));
-}
-
-void HTMLDocumentParser::insertHTMLElementNode(std::shared_ptr<HTMLToken> token, std::shared_ptr<Node> parentNode)
+void HTMLDocumentParser::insertHTMLElementNode(const HTMLToken& token, std::weak_ptr<Node> parentNode)
 {
     std::shared_ptr<HTMLElement> htmlElement = std::make_shared<HTMLElement>(parentNode);
-    htmlElement->parentNode = parentNode;
-    htmlElement->tagName = token->getTagName();
-    htmlElement->nodeName = token->getTagName();
+    htmlElement->setTagName(token.getTagName());
+    htmlElement->nodeName = token.getTagName();
     htmlElement->nodeType = Node::NodeType::ElementNode;
     htmlElement->textContent = htmlElement->getTextContent();
-    htmlElement->ownerDocument = document;
+    htmlElement->ownerDocument = m_document;
 
     // TODO: Add previous and next sibling assignment.
 
-    if (token->getAttributes() != nullptr)
+    for (auto attr: token.tag.attributes)
+        htmlElement->attributes.insert(std::pair<std::string, std::string>(attr.name, attr.value));
+
+    if (htmlElement->attributes.find("id") != htmlElement->attributes.end())
     {
-        htmlElement->attributes = token->getAttributes();
-        if (htmlElement->attributes->find("id") != htmlElement->attributes->end())
-        {
-            htmlElement->id = htmlElement->attributes->find("id")->second.c_str();
-        }
+        htmlElement->id = htmlElement->attributes.find("id")->second.c_str();
     }
 
-
-    parentNode->childNodes.push_back(htmlElement);
+    // Multiple references are needed here (possibly weak_ptr the openElements?)
 
     openElements.push(htmlElement);
+    htmlElement->parentNode.lock()->childNodes.push_back(std::move(htmlElement));
 }
 
-void HTMLDocumentParser::insertTextNode(std::shared_ptr<HTMLToken> token, std::shared_ptr<Node> parentNode)
+void HTMLDocumentParser::insertTextNode(const HTMLToken& token)
 {
-    if (auto documentNode = dynamic_cast<Document*>(parentNode.get()))
+    if (auto documentNode = dynamic_cast<Document*>(findApproriatePlaceForInsertingNode().lock().get()))
     {
         return;
     }
 
     auto nodeInsertLocation = findApproriatePlaceForInsertingNode();
 
-    if (nodeInsertLocation->childNodes.size() > 0 && nodeInsertLocation->childNodes[nodeInsertLocation->childNodes.size() - 1]->nodeType == Node::NodeType::TextNode)
+    if (nodeInsertLocation.lock()->childNodes.size() > 0 && nodeInsertLocation.lock()->childNodes[nodeInsertLocation.lock()->childNodes.size() - 1]->nodeType == Node::NodeType::TextNode)
     {
-        if (auto textNode = dynamic_cast<class Text*>(nodeInsertLocation->childNodes[nodeInsertLocation->childNodes.size() - 1].get()))
+        if (auto textNode = dynamic_cast<class Text*>(nodeInsertLocation.lock()->childNodes[nodeInsertLocation.lock()->childNodes.size() - 1].get()))
         {
-            textNode->appendData(token->getCommentOrCharacterData());
-            nodeInsertLocation->childNodes[nodeInsertLocation->childNodes.size() - 1]->nodeValue += token->getCommentOrCharacterData();
+            textNode->appendData(token.getCommentOrCharacterData());
+            nodeInsertLocation.lock()->childNodes[nodeInsertLocation.lock()->childNodes.size() - 1]->nodeValue += token.getCommentOrCharacterData();
             return;
         }
     }
 
-    std::shared_ptr<class Text> text = std::make_shared<class Text>(findApproriatePlaceForInsertingNode());
-    text->data = token->getCommentOrCharacterData();
+    std::shared_ptr<class Text> text = std::make_shared<class Text>(findApproriatePlaceForInsertingNode().lock());
+    text->data = token.getCommentOrCharacterData();
     text->nodeName = "Text";
     text->nodeType = Node::NodeType::TextNode;
-    text->nodeValue = token->getCommentOrCharacterData();
-    text->ownerDocument = document;
-    nodeInsertLocation->childNodes.push_back(std::move(text));
+    text->nodeValue = token.getCommentOrCharacterData();
+    text->ownerDocument = m_document;
+    nodeInsertLocation.lock()->childNodes.push_back(std::move(text));
 }
 
-std::shared_ptr<Node> HTMLDocumentParser::findElementByTagName(std::shared_ptr<Node> node, std::string tagName)
+void HTMLDocumentParser::processInitial(const HTMLToken& token)
 {
-    std::shared_ptr<Node> returnNode;
-    if (node != nullptr && lexer->caseInsensitiveStringCompare(tagName, node->nodeName))
-    {
-        return node;
-    }
-    else
-    {
-        for (int i = 0; i < node->childNodes.size(); i++)
-        {
-            if (returnNode == nullptr)
-                returnNode = findElementByTagName(node->childNodes[i], tagName);
-        }
-    }
-
-    return returnNode;
-}
-
-void dumpTree(std::shared_ptr<Node> node, std::string indent, bool last)
-{
-    printf("%s%s\033[1;32m%s\033[0m\n", indent.c_str(), "\033[1;32m+- \033[0m", lookupNodeTypeFromDictionary(node->nodeType).c_str());
-    printf("%s%s%s\n", indent.c_str(), " Node Name: ", node->nodeName.c_str());
-    printf("%s%s%s\n", indent.c_str(), " Node Value: ", node->nodeValue.c_str());
-    printf("%s%s%s\n", indent.c_str(), " Base URI: ", node->baseURI.c_str());
-    printf("%s%s%s\n", indent.c_str(), " Is Connected: ", node->getIsConnected().c_str());
-    printf("%s%s%s\n", indent.c_str(), " Text Content: ", node->getTextContent().c_str());
-
-    if (node->nextSibling)
-        printf("%s%s%s\n", indent.c_str(), " Next Sibling Node Name: ", node->nextSibling->nodeName.c_str());
-
-    if (node->previousSibling)
-        printf("%s%s%s\n", indent.c_str(), " Previous Sibling Node Name: ", node->previousSibling->nodeName.c_str());
-
-    if (auto commentNode = dynamic_cast<Comment*>(node.get()))
-    {
-        printf("%s%s%s\n", indent.c_str(), " Data: ", commentNode->data.c_str());
-        printf("%s%s%d\n", indent.c_str(), " Length: ", commentNode->length);
-    }
-
-    if (auto documentTypeNode = dynamic_cast<DocumentType*>(node.get()))
-    {
-        printf("%s%s%s\n", indent.c_str(), " Name: ", documentTypeNode->name.c_str());
-        printf("%s%s%s\n", indent.c_str(), " Public ID: ", documentTypeNode->publicId.c_str());
-        printf("%s%s%s\n", indent.c_str(), " System ID: ", documentTypeNode->systemId.c_str());
-    }
-
-    if (auto elementNode = dynamic_cast<HTMLElement*>(node.get()))
-    {
-        printf("%s%s%s\n", indent.c_str(), " Namespace URI: ", elementNode->namespaceURI.c_str());
-        printf("%s%s%s\n", indent.c_str(), " Prefix: ", elementNode->prefix.c_str());
-        printf("%s%s%s\n", indent.c_str(), " Local Name: ", elementNode->localName.c_str());
-        printf("%s%s%s\n", indent.c_str(), " Tag Name: ", elementNode->tagName.c_str());
-        if (elementNode->hasAttributes())
-        {
-            printf("%s%s\n", indent.c_str(), " Attributes: ");
-            for (auto &attribute: *elementNode->attributes)
-            {
-                printf("	%s%s=%s\n", indent.c_str(), attribute.first.c_str(), attribute.second.c_str());
-            }
-        }
-    }
-
-    if (auto textNode = dynamic_cast<class Text*>(node.get()))
-    {
-        printf("%s%s%s\n", indent.c_str(), " Data: ", textNode->data.c_str());
-        printf("%s%s%d\n", indent.c_str(), " Length: ", textNode->length);
-    }
-    // Owner Document
-    // Parent Node
-    // Child Nodes
-
-    indent += last ? " " : "|  ";
-
-    for (int i = 0; i < node->childNodes.size(); i++)
-    {
-
-        dumpTree(node->childNodes[i], indent, i == node->childNodes.size() - 1);
-    }
-}
-
-void HTMLDocumentParser::printDOMTree()
-{
-
-    printf("\n------------------DOM Tree: ------------------\n\n");
-
-    for (int i = 0; i < document->childNodes.size(); i++)
-    {
-        dumpTree(document->childNodes[i], "", false);
-    }
-
-}
-
-void HTMLDocumentParser::processInitial(std::shared_ptr<HTMLToken> token)
-{
-    if (token->isCharacterToken() && token->isParserWhitespace())
+    if (token.isCharacterToken() && token.isParserWhitespace())
     {
         return;
     }
 
-    if (token->isCommentToken())
+    if (token.isCommentToken())
     {
-        insertCommentNode(token, document);
+        std::shared_ptr<Comment> comment = std::make_shared<Comment>(m_document, token.getCommentOrCharacterData());
+        m_document->childNodes.push_back(std::move(comment));
         return;
     }
 
-    if (token->isDoctypeToken())
+    if (token.isDoctypeToken())
     {
 
-        if (token->getDoctypeName() != "html" |
-            !token->getPublicIdentifier().empty() |
-            !token->getSystemIdentifier().empty() |
-            token->getSystemIdentifier() == "about:legacy-compat")
+        if (token.getDoctypeName() != "html" |
+            !token.getPublicIdentifier().empty() |
+            !token.getSystemIdentifier().empty() |
+            token.getSystemIdentifier() == "about:legacy-compat")
         {
             ParseError();
         }
         else
         {
-            insertDocumentTypeNode(token, document);
+            std::shared_ptr<DocumentType> documentType = std::make_shared<DocumentType>(m_document);
+            documentType->setName(token.getDoctypeName());
+            m_document->childNodes.push_back(std::move(documentType));
             switchToState(InsertionMode::BeforeHTML);
             return;
         }
@@ -392,38 +226,40 @@ void HTMLDocumentParser::processInitial(std::shared_ptr<HTMLToken> token)
     return;
 }
 
-void HTMLDocumentParser::processBeforeHTML(std::shared_ptr<HTMLToken> token)
+void HTMLDocumentParser::processBeforeHTML(const HTMLToken& token)
 {
-    if (token->isCharacterToken() && token->isParserWhitespace())
+    if (token.isCharacterToken() && token.isParserWhitespace())
     {
         return;
     }
 
-    if (token->isDoctypeToken())
+    if (token.isDoctypeToken())
     {
         ParseError();
         exit(0);
     }
 
-    if (token->isCommentToken())
+    if (token.isCommentToken())
     {
-        insertCommentNode(token, document);
+        std::shared_ptr<Comment> comment = std::make_shared<Comment>(m_document, token.getCommentOrCharacterData());
+        m_document->childNodes.push_back(std::move(comment));
         return;
     }
 
-    if (token->isStartTagToken() && token->getTagName() == "html")
+    if (token.isStartTagToken() && token.getTagName() == "html")
     {
-        insertHTMLElementNode(token, document);
+        insertHTMLElementNode(token, m_document);
         switchToState(InsertionMode::BeforeHead);
         return;
     }
 
-    if ((token->isEndTagToken() && token->getTagName() == "head") |
-             (token->isEndTagToken() && token->getTagName() == "body") |
-             (token->isEndTagToken() && token->getTagName() == "html") |
-            (token->isEndTagToken() && token->getTagName() == "br"))
+    if ((token.isEndTagToken() && token.getTagName() == "head") |
+             (token.isEndTagToken() && token.getTagName() == "body") |
+             (token.isEndTagToken() && token.getTagName() == "html") |
+            (token.isEndTagToken() && token.getTagName() == "br"))
     {
-        insertHTMLElementNode(token, document);
+        std::shared_ptr<Comment> comment = std::make_shared<Comment>(m_document, token.getCommentOrCharacterData());
+        m_document->childNodes.push_back(std::move(comment));
         switchToState(InsertionMode::BeforeHead);
         return;
     }
@@ -431,31 +267,32 @@ void HTMLDocumentParser::processBeforeHTML(std::shared_ptr<HTMLToken> token)
     ParseError();
 }
 
-void HTMLDocumentParser::processBeforeHead(std::shared_ptr<HTMLToken> token)
+void HTMLDocumentParser::processBeforeHead(const HTMLToken& token)
 {
-    if (token->isCharacterToken() && token->isParserWhitespace())
+    if (token.isCharacterToken() && token.isParserWhitespace())
     {
         return;
     }
 
-    if (token->isCommentToken())
+    if (token.isCommentToken())
     {
-        insertCommentNode(token, findApproriatePlaceForInsertingNode());
+        std::shared_ptr<Comment> comment = std::make_shared<Comment>(findApproriatePlaceForInsertingNode(), token.getCommentOrCharacterData());
+        m_document->childNodes.push_back(std::move(comment));
         return;
     }
 
-    if (token->isDoctypeToken())
+    if (token.isDoctypeToken())
     {
         ParseError();
     }
 
-    if (token->isStartTagToken() && token->getTagName() == "html")
+    if (token.isStartTagToken() && token.getTagName() == "html")
     {
         switchToState(InsertionMode::BeforeHTML);
         return;
     }
 
-    if (token->isStartTagToken() && token->getTagName() == "head")
+    if (token.isStartTagToken() && token.getTagName() == "head")
     {
         insertHTMLElementNode(token, findApproriatePlaceForInsertingNode());
         switchToState(InsertionMode::InHead);
@@ -463,40 +300,41 @@ void HTMLDocumentParser::processBeforeHead(std::shared_ptr<HTMLToken> token)
     }
 }
 
-void HTMLDocumentParser::processInHead(std::shared_ptr<HTMLToken> token)
+void HTMLDocumentParser::processInHead(const HTMLToken& token)
 {
-    if (token->isCharacterToken() && token->isParserWhitespace())
+    if (token.isCharacterToken() && token.isParserWhitespace())
     {
-        insertTextNode(token, findApproriatePlaceForInsertingNode());
+        insertTextNode(token);
         return;
     }
 
-    if (token->isCommentToken())
+    if (token.isCommentToken())
     {
-        insertCommentNode(token, findApproriatePlaceForInsertingNode());
+        std::shared_ptr<Comment> comment = std::make_shared<Comment>(findApproriatePlaceForInsertingNode(), token.getCommentOrCharacterData());
+        findApproriatePlaceForInsertingNode().lock()->childNodes.push_back(std::move(comment));
         return;
     }
 
-    if (token->isDoctypeToken())
+    if (token.isDoctypeToken())
     {
         ParseError();
     }
 
-    if (token->isEndTagToken() && token->getTagName() == "head")
+    if (token.isEndTagToken() && token.getTagName() == "head")
     {
         openElements.pop();
         switchToState(InsertionMode::AfterHead);
         return;
     }
 
-    if (token->isStartTagToken() && token->getTagName() == "title")
+    if (token.isStartTagToken() && token.getTagName() == "title")
     {
         insertHTMLElementNode(token, findApproriatePlaceForInsertingNode());
         switchToState(InsertionMode::Text);
         return;
     }
 
-    if (token->isStartTagToken() && token->getTagName() == "style")
+    if (token.isStartTagToken() && token.getTagName() == "style")
     {
         insertHTMLElementNode(token, findApproriatePlaceForInsertingNode());
         switchToState(InsertionMode::Text);
@@ -504,26 +342,27 @@ void HTMLDocumentParser::processInHead(std::shared_ptr<HTMLToken> token)
     }
 }
 
-void HTMLDocumentParser::processAfterHead(std::shared_ptr<HTMLToken> token)
+void HTMLDocumentParser::processAfterHead(const HTMLToken& token)
 {
-    if (token->isCharacterToken() && token->isParserWhitespace())
+    if (token.isCharacterToken() && token.isParserWhitespace())
     {
-        insertTextNode(token, findApproriatePlaceForInsertingNode());
+        insertTextNode(token);
         return;
     }
 
-    if (token->isCommentToken())
+    if (token.isCommentToken())
     {
-        insertCommentNode(token, findApproriatePlaceForInsertingNode());
+        std::shared_ptr<Comment> comment = std::make_shared<Comment>(findApproriatePlaceForInsertingNode(), token.getCommentOrCharacterData());
+        findApproriatePlaceForInsertingNode().lock()->childNodes.push_back(std::move(comment));
         return;
     }
 
-    if (token->isDoctypeToken())
+    if (token.isDoctypeToken())
     {
         ParseError();
     }
 
-    if (token->isStartTagToken() && token->getTagName() == "body")
+    if (token.isStartTagToken() && token.getTagName() == "body")
     {
         insertHTMLElementNode(token, findApproriatePlaceForInsertingNode());
         switchToState(InsertionMode::InBody);
@@ -532,50 +371,51 @@ void HTMLDocumentParser::processAfterHead(std::shared_ptr<HTMLToken> token)
     }
 }
 
-void HTMLDocumentParser::processInBody(std::shared_ptr<HTMLToken> token)
+void HTMLDocumentParser::processInBody(const HTMLToken& token)
 {
     //TODO: Reconstruct the active formatting elements.
-    if (token->isCharacterToken() && token->isParserWhitespace())
+    if (token.isCharacterToken() && token.isParserWhitespace())
     {
-        insertTextNode(token, findApproriatePlaceForInsertingNode());
+        insertTextNode(token);
         return;
     }
-    else if (token->isCharacterToken())
+    else if (token.isCharacterToken())
     {
         //TODO: Reconstruct the active formatting elements.
-        insertTextNode(token, findApproriatePlaceForInsertingNode());
+        insertTextNode(token);
         return;
         //TODO: Set frame-set flag to false
     }
 
-    if (token->isCommentToken())
+    if (token.isCommentToken())
     {
-        insertCommentNode(token, findApproriatePlaceForInsertingNode());
+        std::shared_ptr<Comment> comment = std::make_shared<Comment>(findApproriatePlaceForInsertingNode(), token.getCommentOrCharacterData());
+        findApproriatePlaceForInsertingNode().lock()->childNodes.push_back(std::move(comment));
         return;
     }
 
-    if (token->isDoctypeToken())
+    if (token.isDoctypeToken())
     {
         printf("1\n");
         ParseError();
     }
 
-    if (token->isStartTagToken() && token->getTagName() == "html")
+    if (token.isStartTagToken() && token.getTagName() == "html")
     {
         printf("2\n");
         ParseError();
     }
 
 
-    if (token->isStartTagToken() && token->getTagName() == "body")
+    if (token.isStartTagToken() && token.getTagName() == "body")
     {
         printf("3\n");
         ParseError();
     }
 
-    if (token->isEndTagToken() && token->getTagName() == "body")
+    if (token.isEndTagToken() && token.getTagName() == "body")
     {
-        if (findApproriatePlaceForInsertingNode()->tagName != token->getTagName())
+        if (findApproriatePlaceForInsertingNode().lock()->tagName() != token.getTagName())
         {
             printf("4\n");
             ParseError();
@@ -588,17 +428,16 @@ void HTMLDocumentParser::processInBody(std::shared_ptr<HTMLToken> token)
         }
     }
 
-    if (token->isStartTagToken() && containsTagName(InBodyTagNames, token->getTagName()))
+    if (token.isStartTagToken() && containsTagName(InBodyTagNames, token.getTagName()))
     {
         insertHTMLElementNode(token, findApproriatePlaceForInsertingNode());
         return;
     }
 
-    if (token->isEndTagToken() && containsTagName(InBodyTagNames, token->getTagName()))
+    if (token.isEndTagToken() && containsTagName(InBodyTagNames, token.getTagName()))
     {
-        if (findApproriatePlaceForInsertingNode()->tagName != token->getTagName())
+        if (findApproriatePlaceForInsertingNode().lock()->tagName() != token.getTagName())
         {
-            printf("5\n");
             ParseError();
         }
         else
@@ -608,25 +447,24 @@ void HTMLDocumentParser::processInBody(std::shared_ptr<HTMLToken> token)
         }
     }
 
-    if (token->isStartTagToken() && lexer->caseInsensitiveStringCompare(token->getTagName(), "br"))
+    if (token.isStartTagToken() && Tools::caseInsensitiveStringCompare(token.getTagName(), "br"))
     {
         insertHTMLElementNode(token, findApproriatePlaceForInsertingNode());
         openElements.pop();
         return;
     }
 
-    if (token->isStartTagToken() && containsTagName(InBodyHeaderTagNames, token->getTagName()))
+    if (token.isStartTagToken() && containsTagName(InBodyHeaderTagNames, token.getTagName()))
     {
         insertHTMLElementNode(token, findApproriatePlaceForInsertingNode());
         return;
     }
 
-    if (token->isEndTagToken() && containsTagName(InBodyHeaderTagNames, token->getTagName()))
+    if (token.isEndTagToken() && containsTagName(InBodyHeaderTagNames, token.getTagName()))
     {
         //printf("find: %s\n", findApproriatePlaceForInsertingNode()->tagName.c_str());
-        if (findApproriatePlaceForInsertingNode()->tagName != token->getTagName())
+        if (findApproriatePlaceForInsertingNode().lock()->tagName()!= token.getTagName())
         {
-            printf("6\n");
             ParseError();
         }
         else
@@ -636,16 +474,16 @@ void HTMLDocumentParser::processInBody(std::shared_ptr<HTMLToken> token)
         }
     }
 
-    if (token->isStartTagToken() && containsTagName(InBodyFormattingTags, token->getTagName()))
+    if (token.isStartTagToken() && containsTagName(InBodyFormattingTags, token.getTagName()))
     {
         //TODO: Push onto the list of active formatting elements that element.
         insertHTMLElementNode(token, findApproriatePlaceForInsertingNode());
         return;
     }
 
-    if (token->isEndTagToken() && containsTagName(InBodyFormattingTags, token->getTagName()))
+    if (token.isEndTagToken() && containsTagName(InBodyFormattingTags, token.getTagName()))
     {
-        if (findApproriatePlaceForInsertingNode()->tagName != token->getTagName())
+        if (findApproriatePlaceForInsertingNode().lock()->tagName() != token.getTagName())
         {
             printf("7\n");
             ParseError();
@@ -660,36 +498,37 @@ void HTMLDocumentParser::processInBody(std::shared_ptr<HTMLToken> token)
 
 }
 
-void HTMLDocumentParser::processAfterBody(std::shared_ptr<HTMLToken> token)
+void HTMLDocumentParser::processAfterBody(const HTMLToken& token)
 {
-    if (token->isCharacterToken() && token->isParserWhitespace())
+    if (token.isCharacterToken() && token.isParserWhitespace())
     {
         //switchToState(InsertionMode::InBody);
         return;
     }
 
-    if (token->isCommentToken())
+    if (token.isCommentToken())
     {
-        insertCommentNode(token, findApproriatePlaceForInsertingNode());
+        std::shared_ptr<Comment> comment = std::make_shared<Comment>(findApproriatePlaceForInsertingNode(), token.getCommentOrCharacterData());
+        findApproriatePlaceForInsertingNode().lock()->childNodes.push_back(std::move(comment));
         return;
     }
 
-    if (token->isDoctypeToken())
+    if (token.isDoctypeToken())
     {
         ParseError();
     }
 
-    if (token->isEndTagToken() && token->getTagName() == "html")
+    if (token.isEndTagToken() && token.getTagName() == "html")
     {
         return;
     }
 }
 
-void HTMLDocumentParser::processText(std::shared_ptr<HTMLToken> token)
+void HTMLDocumentParser::processText(const HTMLToken& token)
 {
-    if (token->isCharacterToken())
+    if (token.isCharacterToken())
     {
-        insertTextNode(token, findApproriatePlaceForInsertingNode());
+        insertTextNode(token);
         return;
     }
     else
@@ -707,7 +546,7 @@ void HTMLDocumentParser::run()
 {
     for (auto token: tokens)
     {
-        //printf("\nCurrent Token: \n	Type: %s\n Tag Name: %s\n", TokenTypesDocParser[token->getType()].c_str(), token->getTagName().c_str());
+        //printf("\nCurrent Token: \n	Type: %s\n Tag Name: %s\n", TokenTypesDocParser[token.getType()].c_str(), token.getTagName().c_str());
 
         switch (insertionMode) {
             case Initial:
@@ -737,5 +576,4 @@ void HTMLDocumentParser::run()
         }
 
     }
-
 }

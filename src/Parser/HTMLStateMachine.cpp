@@ -4,6 +4,7 @@
 #include <stack>
 #include <memory>
 #include <Parser/Lexer.h>
+#include <fmt/core.h>
 
 enum HTMLState
 {
@@ -30,8 +31,6 @@ enum HTMLState
     AfterAttributeValueQuotedState
 };
 
-#define debug_print(fmt, ...) \
-            do { if (DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
 
 std::string HTMLStateTypes[] =
 {
@@ -58,8 +57,6 @@ std::string HTMLStateTypes[] =
     "AfterAttributeValueQuotedState"
 };
 
-std::unique_ptr<Lexer> lexer;
-
 std::string TokenTypes[] =
 {
     "Doctype",
@@ -72,16 +69,17 @@ std::string TokenTypes[] =
 
 HTMLState htmlTokenizerState;
 
-HTMLStateMachine::HTMLStateMachine(std::string content)
+HTMLStateMachine::HTMLStateMachine(std::string source)
 {
-    lexer = std::make_unique<Lexer>();
-    lexer->loadContent(content);
+    lexer = std::make_unique<Lexer>(source);
     htmlTokenizerState = HTMLState::Data;
 }
 
 void switchToState(HTMLState newState)
 {
+#ifdef PRINT_STATE_SWITCHING_DEBUG
     printf("Switching state from [%s] to [%s]\n", HTMLStateTypes[htmlTokenizerState].c_str(), HTMLStateTypes[newState].c_str());
+#endif
     htmlTokenizerState = newState;
 }
 
@@ -94,32 +92,41 @@ void HTMLStateMachine::printAllTokens()
 {
     printf("\n");
 
-    for (auto const& token: tokens)
+    for (auto const& token: m_tokens)
     {
-        if (token->getType() == HTMLToken::Type::StartTag || token->getType() == HTMLToken::Type::EndTag)
+        if (token.getType() == HTMLToken::Type::StartTag || token.getType() == HTMLToken::Type::EndTag)
         {
-             printf("%s:\n   Name:%s\n   Self Closing: %s\n", TokenTypes[token->getType()].c_str(), token->getTagName().c_str(), boolToString(token->getTagIsSelfClosing()).c_str());
+             printf("%s:\n   Name:%s\n   Self Closing: %s\n", TokenTypes[token.getType()].c_str(), token.getTagName().c_str(), boolToString(token.getTagIsSelfClosing()).c_str());
 
              printf("   Attributes: \n");
-             for (auto &attribute: *token->getAttributes())
+             for (auto &attribute: token.tag.attributes)
              {
-                 printf("       %s=%s\n", attribute.first.c_str(), attribute.second.c_str());
+                 printf("       %s=%s\n", attribute.name.c_str(), attribute.value.c_str());
              }
         }
 
-        if (token->getType() == HTMLToken::Type::Doctype)
+        if (token.getType() == HTMLToken::Type::Doctype)
         {
-             printf("%s:\n  Data: %s\n", TokenTypes[token->getType()].c_str(), token->getDoctypeName().c_str());
+             printf("%s:\n  Data: %s\n", TokenTypes[token.getType()].c_str(), token.getDoctypeName().c_str());
         }
 
-        if (token->getType() == HTMLToken::Type::Comment || token->getType() == HTMLToken::Type::Character)
+        if (token.getType() == HTMLToken::Type::Comment || token.getType() == HTMLToken::Type::Character)
         {
-             printf("%s:\n  Data: '%s'\n", TokenTypes[token->getType()].c_str(), token->getCommentOrCharacterData().c_str());
+             printf("%s:\n  Data: '%s'\n", TokenTypes[token.getType()].c_str(), token.getCommentOrCharacterData().c_str());
         }
     }
 }
 
-void consumeEscapeCodes(bool tab, bool newLine, bool space)
+HTMLToken::Attribute HTMLStateMachine::createAttribute(std::string name, std::string value)
+{
+    HTMLToken::Attribute returnAttr;
+    returnAttr.name = name;
+    returnAttr.value = value;
+
+    return returnAttr;
+}
+
+void HTMLStateMachine::consumeEscapeCodes(bool tab, bool newLine, bool space)
 {
     if (tab)
         lexer->consumeToken('\t');
@@ -131,7 +138,7 @@ void consumeEscapeCodes(bool tab, bool newLine, bool space)
 
 void HTMLStateMachine::run()
 {
-    std::unique_ptr<HTMLToken> token;
+    HTMLToken currentToken;
 
     std::string currentAttributeKey;
     std::string currentAttributeValue;
@@ -150,25 +157,25 @@ void HTMLStateMachine::run()
                 }
                 else
                 {
-                    token = std::make_unique<HTMLToken>();
-                    token->setType(HTMLToken::Type::Character);
+                    currentToken = {};
+                    currentToken.setType(HTMLToken::Type::Character);
 
                     if (lexer->peek() == '\n')
                     {
-                        token->appendCommentOrCharacterData('\n');
+                        currentToken.appendCommentOrCharacterData('\n');
                         lexer->consume();
                     }
                     else if (lexer->peek() == '\t')
                     {
-                        token->appendCommentOrCharacterData('\t');
+                        currentToken.appendCommentOrCharacterData('\t');
                         lexer->consume();
                     }
                     else
                     {
-                        token->appendCommentOrCharacterData(lexer->consume());
+                        currentToken.appendCommentOrCharacterData(lexer->consume());
                     }
 
-                    tokens.push_back(std::move(token));
+                    m_tokens.push_back(currentToken);
                     break;
                 }
 
@@ -191,8 +198,8 @@ void HTMLStateMachine::run()
                 }
                 else if(std::isalpha(lexer->peek()))
                 {
-                    token = std::make_unique<HTMLToken>();
-                    token->setType(HTMLToken::Type::StartTag);
+                    currentToken = {};
+                    currentToken.setType(HTMLToken::Type::StartTag);
                     // TODO: Set name to empty string.
                     switchToState(HTMLState::TagNameState);
                     break;
@@ -224,18 +231,18 @@ void HTMLStateMachine::run()
                 else if (lexer->peek() == '>')
                 {
                     lexer->consume();
-                    tokens.push_back(std::move(token));
+                    m_tokens.push_back(currentToken);
                     switchToState(HTMLState::Data);
                     break;
                 }
                 else if (std::isupper(lexer->peek()))
                 {
-                    token->appendTagName(std::tolower(lexer->consume()));
+                    currentToken.appendTagName(std::tolower(lexer->consume()));
                     break;
                 }
                 else
                 {
-                    token->appendTagName(lexer->consume());
+                    currentToken.appendTagName(lexer->consume());
                     break;
                 }
 
@@ -356,7 +363,8 @@ void HTMLStateMachine::run()
                 if (lexer->peek() == ' ')
                 {
                     lexer->consume();
-                    token->getAttributes()->insert(std::pair<std::string, std::string>(currentAttributeKey, currentAttributeValue));
+                    currentToken.tag.attributes.push_back(createAttribute(currentAttributeKey, currentAttributeValue));
+
                     currentAttributeKey.clear();
                     currentAttributeValue.clear();
 
@@ -372,8 +380,9 @@ void HTMLStateMachine::run()
                 else if (lexer->peek() == '>')
                 {
                     lexer->consume();
-                    token->getAttributes()->insert(std::pair<std::string, std::string>(currentAttributeKey, currentAttributeValue));
-                    tokens.push_back(std::move(token));
+                    currentToken.tag.attributes.push_back(createAttribute(currentAttributeKey, currentAttributeValue));
+                    m_tokens.push_back(currentToken);
+
                     currentAttributeKey.clear();
                     currentAttributeValue.clear();
 
@@ -402,7 +411,7 @@ void HTMLStateMachine::run()
                 if (lexer->peek() == ' ')
                 {
                     lexer->consume();
-                    token->getAttributes()->insert(std::pair<std::string, std::string>(currentAttributeKey, currentAttributeValue));
+                    currentToken.tag.attributes.push_back(createAttribute(currentAttributeKey, currentAttributeValue));
                     currentAttributeKey.clear();
                     currentAttributeValue.clear();
 
@@ -418,8 +427,8 @@ void HTMLStateMachine::run()
                 else if (lexer->peek() == '>')
                 {
                     lexer->consume();
-                    token->getAttributes()->insert(std::pair<std::string, std::string>(currentAttributeKey, currentAttributeValue));
-                    tokens.push_back(std::move(token));
+                    currentToken.tag.attributes.push_back(createAttribute(currentAttributeKey, currentAttributeValue));
+                    m_tokens.push_back(currentToken);
                     currentAttributeKey.clear();
                     currentAttributeValue.clear();
 
@@ -432,8 +441,8 @@ void HTMLStateMachine::run()
             case HTMLState::EndTagOpenState:
                 if (std::isalpha(lexer->peek()))
                 {
-                    token = std::make_unique<HTMLToken>();
-                    token->setType(HTMLToken::Type::EndTag);
+                    currentToken = {};
+                    currentToken.setType(HTMLToken::Type::EndTag);
                     // TODO: Set name to empty string.
                     switchToState(HTMLState::TagNameState);
                     break;
@@ -453,8 +462,8 @@ void HTMLStateMachine::run()
                 if (lexer->peek() == '>')
                 {
                     lexer->consume();
-                    token->setTagIsSelfClosing(true);
-                    tokens.push_back(std::move(token));
+                    currentToken.setTagIsSelfClosing(true);
+                    m_tokens.push_back(currentToken);
                     switchToState(HTMLState::Data);
                     break;
                 }
@@ -474,19 +483,18 @@ void HTMLStateMachine::run()
            case HTMLState::BeforeDOCTYPENameState:
                 consumeEscapeCodes(true, true, true);
 
+                currentToken = {};
+                currentToken.setType(HTMLToken::Type::Doctype);
+
                 if(std::isupper(lexer->peek()))
                 {
-                    token = std::make_unique<HTMLToken>();
-                    token->setType(HTMLToken::Type::Doctype);
-                    token->appendDoctypeName(std::tolower(lexer->consume()));
+                    currentToken.appendDoctypeName(std::tolower(lexer->consume()));
                     switchToState(HTMLState::DOCTYPENameState);
                     break;
                 }
                 else
                 {
-                    token = std::make_unique<HTMLToken>();
-                    token->setType(HTMLToken::Type::Doctype);
-                    token->appendDoctypeName(lexer->consume());
+                    currentToken.appendDoctypeName(lexer->consume());
                     switchToState(HTMLState::DOCTYPENameState);
                     break;
                 }
@@ -501,18 +509,18 @@ void HTMLStateMachine::run()
                 else if (lexer->peek() == '>')
                 {
                     lexer->consume();
-                    tokens.push_back(std::move(token));
+                    m_tokens.push_back(currentToken);
                     switchToState(HTMLState::Data);
                     break;
                 }
                 else if (std::isupper(lexer->peek()))
                 {
-                    token->appendDoctypeName(std::tolower(lexer->consume()));
+                    currentToken.appendDoctypeName(std::tolower(lexer->consume()));
                     break;
                 }
                 else
                 {
-                    token->appendDoctypeName(lexer->consume());
+                    currentToken.appendDoctypeName(lexer->consume());
                     break;
                 }
 
@@ -523,8 +531,8 @@ void HTMLStateMachine::run()
                     lexer->consume();
                     lexer->consume();
 
-                    token = std::make_unique<HTMLToken>();
-                    token->setType(HTMLToken::Type::Comment);
+                    currentToken = {};
+                    currentToken.setType(HTMLToken::Type::Comment);
 
                     switchToState(HTMLState::CommentStartState);
                     break;
@@ -575,7 +583,7 @@ void HTMLStateMachine::run()
                 }
                 else
                 {
-                    token->appendCommentOrCharacterData(lexer->consume());
+                    currentToken.appendCommentOrCharacterData(lexer->consume());
                     break;
                 }
 
@@ -593,7 +601,7 @@ void HTMLStateMachine::run()
                 {
                     lexer->consume();
                     switchToState(HTMLState::Data);
-                    tokens.push_back(std::move(token));
+                    m_tokens.push_back(currentToken);
                     break;
                 }
                 break;
@@ -608,7 +616,4 @@ void HTMLStateMachine::run()
                 break;
         }
     }
-
-    //printAllTokens();
-
 }

@@ -1,66 +1,65 @@
 #include <CSS/StyleResolver.h>
 
-StyleResolver::StyleResolver(std::shared_ptr<Document> document)
+StyleResolver::StyleResolver(std::shared_ptr<Document>& documentWithStyles) : m_documentWithResolvedStyles(documentWithStyles)
 {
-    this->documentWithCSSDeclrations = document;
-
-    std::vector<std::shared_ptr<Node>> empty = {};
-    std::vector<std::shared_ptr<Node>> elements = documentWithCSSDeclrations->getAllNodes(empty, documentWithCSSDeclrations);
+    std::vector<std::weak_ptr<Node>> empty = {};
+    std::vector<std::weak_ptr<Node>> elements = m_documentWithResolvedStyles->getAllNodes(empty, m_documentWithResolvedStyles);
 
     for (auto elementNode: elements)
     {
-        if (auto element = dynamic_cast<Element*>(elementNode.get()))
+        if (elementNode.lock()->isElement())
         {
-            for (auto dec: element->declarations)
+            auto element = elementNode.lock()->asNodeTypeElement(elementNode.lock());
+            for (auto dec: element.lock()->declarations)
             {
-                element->styleProperties.push_back(resolveStyleFromDeclaration(dec, elementNode));
+                element.lock()->styleProperties.push_back(resolveStyleFromDeclaration(dec, elementNode.lock()));
             }
         }
     }
 
 }
 
-std::shared_ptr<StyleProperty> StyleResolver::resolveStyleFromDeclaration(const std::shared_ptr<Declaration> declaration, const std::shared_ptr<Node>& node)
+std::shared_ptr<StyleProperty> StyleResolver::resolveStyleFromDeclaration(const std::shared_ptr<Declaration>& declaration, const std::shared_ptr<Node>& node)
 {
    std::shared_ptr<StyleProperty> styleProp = std::make_shared<StyleProperty>(declaration);
    //Should be returning a list??!!
    for (auto declarationValue: declaration->value)
    {
-       if (declarationValue->type == CSSTokenType::Dimension)
+       if (declarationValue.type == CSSTokenType::Dimension)
        {
            //font-size (em)
-           if (Tools::caseInsensitiveStringCompare("em", declarationValue->unit))
+           if (Tools::caseInsensitiveStringCompare("em", declarationValue.unit))
            {
                if (findFirstDeclarationOccurence("font-size", node))
                {
-                   styleProp->computedValue = findFirstDeclarationOccurence("font-size", node)->computedValue * declarationValue->valueAsDouble();
+                   styleProp->computedValue = findFirstDeclarationOccurence("font-size", node)->computedValue * declarationValue.valueAsDouble();
                    return styleProp;
                }
 
-               if (!findFirstDeclarationOccurence("font-size", node->parentNode))
+               if (!findFirstDeclarationOccurence("font-size", node->parentNode.lock()))
                {
                     // Fallback font-size
-                    styleProp->computedValue = 16 * declarationValue->valueAsDouble();
+                    styleProp->computedValue = 16 * declarationValue.valueAsDouble();
                     return styleProp;
                }
                else
                {
                    // Declaration defined font-size
-                   styleProp->computedValue = findFirstDeclarationOccurence("font-size", node->parentNode)->computedValue * declarationValue->valueAsDouble();
+                   styleProp->computedValue = findFirstDeclarationOccurence("font-size", node->parentNode.lock())->computedValue * declarationValue.valueAsDouble();
                    return styleProp;
                }
            }
            else
            {
-               styleProp->computedValue = declarationValue->valueAsDouble();
+               styleProp->computedValue = declarationValue.valueAsDouble();
                return styleProp;
            }
 
        }
-       else if (isColor(declarationValue->value()))
+       else if (isColor(declarationValue.value()))
        {
 
-           styleProp->color = convertColorToRGB(declarationValue->value());
+           styleProp->color = convertColorToRGB(declarationValue.value());
            return styleProp;
        }
    }
@@ -80,8 +79,16 @@ std::shared_ptr<Color> StyleResolver::convertColorToRGB(std::string color)
     }
     else if (Tools::caseInsensitiveStringCompare("gray", color))
     {
-        return std::make_shared<Color>(128,128,128);
-    }else if (Tools::caseInsensitiveStringCompare("white", color))
+          return std::make_shared<Color>(128,128,128);
+    }else if (Tools::caseInsensitiveStringCompare("lightgray", color))
+    {
+        return std::make_shared<Color>(211,211,211);
+    }
+    else if (Tools::caseInsensitiveStringCompare("darkgray", color))
+    {
+        return std::make_shared<Color>(169,169,169);
+    }
+    else if (Tools::caseInsensitiveStringCompare("white", color))
     {
         return std::make_shared<Color>(255,255,255);
     }else if (Tools::caseInsensitiveStringCompare("maroon", color))
@@ -122,7 +129,6 @@ std::shared_ptr<Color> StyleResolver::convertColorToRGB(std::string color)
         return std::make_shared<Color>(255, 165, 0);
     }
     else {
-        printf("\033[1;33mbold [WARN] CSS: Color not supported (%s) \033[0m\n", color.c_str());
         return std::make_shared<Color>(0, 0, 0);
     }
 }
@@ -131,7 +137,9 @@ bool StyleResolver::isColor(std::string value)
 {
     if (value == "black" ||
         value == "silver" ||
-        value == "gray" ||
+        value == "gray" |
+        value == "lightgray" ||
+        value == "darkgray" ||
         value == "white" ||
         value == "maroon" ||
         value == "red" ||
@@ -172,7 +180,7 @@ std::shared_ptr<StyleProperty> StyleResolver::findFirstDeclarationOccurence(std:
             }
         }
 
-        absoluteParent = tempElementNode->parentNode;
+        absoluteParent = tempElementNode->parentNode.lock();
         tempElementNode = absoluteParent;
     }
 

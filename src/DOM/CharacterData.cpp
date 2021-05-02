@@ -1,6 +1,6 @@
 #include <DOM/CharacterData.h>
 
-CharacterData::CharacterData(std::shared_ptr<Node> parentNode) : Node(parentNode)
+CharacterData::CharacterData(std::weak_ptr<Node> parentNode) : Node(parentNode)
 {
     this->data = "";
     this->length = 0;

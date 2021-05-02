@@ -1,8 +1,8 @@
 #include <Layout/HTMLView.h>
-
+#include <fmt/core.h>
 bool isSizeSet = false;
 
-HTMLView::HTMLView(Core* core, std::shared_ptr<Node> renderElements) : m_core(core), renderElements(renderElements)
+HTMLView::HTMLView(std::shared_ptr<Node> documentWithResolvedStyles) : m_documentWithResolvedStyles(documentWithResolvedStyles)
 {
 }
 
@@ -29,17 +29,19 @@ void HTMLView::createBoxForElement(std::shared_ptr<Node> node, std::shared_ptr<L
 {
     if (auto elementNode = std::dynamic_pointer_cast<Element>(node))
     {
-        if (elementNode->tagName != "head" && elementNode->tagName != "title" && !elementNode->isDisplayNone())
+        if (elementNode->tagName() != "head" && elementNode->tagName() != "title" && !elementNode->isDisplayNone())
         {
             if (!root)
             {
                 root = std::make_shared<LayoutBox>(this->create_pango_layout(elementNode->getTextContent()), elementNode);
 
-                if (root->element->tagName == "html")
+                if (root->element->tagName() == "html")
                 {
                     root->marginRect.width = this->get_width();
                     root->borderRect.width = this->get_width();
-                }
+                }\
+
+                root->isRoot = true;
 
                 layoutBox = root;
             }
@@ -48,10 +50,10 @@ void HTMLView::createBoxForElement(std::shared_ptr<Node> node, std::shared_ptr<L
                 if (elementNode->isDisplayBlock())
                 {
                     std::shared_ptr<LayoutBox> blockBox = createBlockBox(elementNode, layoutBox);
-                    blockBox->parent->children.push_back(blockBox);
-                    blockBox->updateAllParentHeights();
-
                     layoutBox = blockBox;
+
+                    blockBox->appendChildAndUpdateParentHeights(blockBox);
+
                 }
             }
         }
@@ -66,7 +68,7 @@ void HTMLView::createBoxForElement(std::shared_ptr<Node> node, std::shared_ptr<L
 std::shared_ptr<LayoutBox> HTMLView::createBlockBox(std::shared_ptr<Element> elementNode, std::shared_ptr<LayoutBox> parentLayoutBox)
 {
     std::shared_ptr<LayoutBox> layoutBlockBox;
-    if (elementNode->tagName == "body")
+    if (elementNode->tagName() == "body")
     {
         // FIXME: This is a hack to strip all text from the body as it will contain other elements.
         layoutBlockBox = std::make_shared<LayoutBox>(this->create_pango_layout(""), elementNode);
@@ -79,62 +81,63 @@ std::shared_ptr<LayoutBox> HTMLView::createBlockBox(std::shared_ptr<Element> ele
     layoutBlockBox->parent = parentLayoutBox;
     layoutBlockBox->compute();
 
-    layoutBlockBox->marginRect.width = layoutBlockBox->parent->marginRect.width -
-            layoutBlockBox->parent->borderLeftWidth - layoutBlockBox->parent->borderRightWidth -
-            layoutBlockBox->parent->paddingLeft - layoutBlockBox->parent->paddingRight -
-            layoutBlockBox->parent->marginLeft - layoutBlockBox->parent->marginRight;
+    layoutBlockBox->marginRect.width = layoutBlockBox->parent.lock()->marginRect.width -
+            layoutBlockBox->parent.lock()->borderLeftWidth - layoutBlockBox->parent.lock()->borderRightWidth -
+            layoutBlockBox->parent.lock()->paddingLeft - layoutBlockBox->parent.lock()->paddingRight -
+            layoutBlockBox->parent.lock()->marginLeft - layoutBlockBox->parent.lock()->marginRight;
 
-    layoutBlockBox->borderRect.width = layoutBlockBox->parent->borderRect.width
+    layoutBlockBox->borderRect.width = layoutBlockBox->parent.lock()->borderRect.width
             - layoutBlockBox->marginLeft - layoutBlockBox->marginRight
-            - layoutBlockBox->parent->borderLeftWidth - layoutBlockBox->parent->borderRightWidth
-            - layoutBlockBox->parent->paddingLeft - layoutBlockBox->parent->paddingRight;
+            - layoutBlockBox->parent.lock()->borderLeftWidth - layoutBlockBox->parent.lock()->borderRightWidth
+            - layoutBlockBox->parent.lock()->paddingLeft - layoutBlockBox->parent.lock()->paddingRight;
 
     layoutBlockBox->borderRect.y += layoutBlockBox->marginTop;
     layoutBlockBox->borderRect.x += layoutBlockBox->marginLeft;
 
     // First element in the containing block
-    if (layoutBlockBox->parent->children.empty())
+    if (layoutBlockBox->parent.lock()->children.empty())
     {
-        layoutBlockBox->borderRect.y += layoutBlockBox->parent->borderRect.y;
+        layoutBlockBox->borderRect.y += layoutBlockBox->parent.lock()->borderRect.y;
 
         // Align layoutBlockBox in parent's layoutBlockBoxontent view
-        layoutBlockBox->borderRect.y += layoutBlockBox->parent->paddingTop + layoutBlockBox->parent->borderTopWidth;
-        layoutBlockBox->borderRect.x += layoutBlockBox->parent->borderRect.x + layoutBlockBox->parent->paddingLeft + layoutBlockBox->parent->borderLeftWidth;
+        layoutBlockBox->borderRect.y += layoutBlockBox->parent.lock()->paddingTop + layoutBlockBox->parent.lock()->borderTopWidth;
+        layoutBlockBox->borderRect.x += layoutBlockBox->parent.lock()->borderRect.x + layoutBlockBox->parent.lock()->paddingLeft + layoutBlockBox->parent.lock()->borderLeftWidth;
     }
     else
     {
         // Margin Collapse Logic
-        if (layoutBlockBox->parent->children.at(layoutBlockBox->parent->children.size() - 1)->marginBottom > layoutBlockBox->marginTop ||
-                layoutBlockBox->parent->children.at(layoutBlockBox->parent->children.size() - 1)->marginBottom == layoutBlockBox->marginTop)
+        if (layoutBlockBox->parent.lock()->children.at(layoutBlockBox->parent.lock()->children.size() - 1)->marginBottom > layoutBlockBox->marginTop ||
+                layoutBlockBox->parent.lock()->children.at(layoutBlockBox->parent.lock()->children.size() - 1)->marginBottom == layoutBlockBox->marginTop)
         {
           layoutBlockBox->borderRect.y -= layoutBlockBox->marginTop;
           layoutBlockBox->marginRect.height -= layoutBlockBox->marginTop;
         }
 
         // Align layoutBlockBox in parent's content view
-        layoutBlockBox->borderRect.y += layoutBlockBox->parent->paddingTop + layoutBlockBox->parent->borderTopWidth;
-        layoutBlockBox->borderRect.x += layoutBlockBox->parent->borderRect.x + layoutBlockBox->parent->paddingLeft + layoutBlockBox->parent->borderLeftWidth;
+        layoutBlockBox->borderRect.y += layoutBlockBox->parent.lock()->paddingTop + layoutBlockBox->parent.lock()->borderTopWidth;
+        layoutBlockBox->borderRect.x += layoutBlockBox->parent.lock()->borderRect.x + layoutBlockBox->parent.lock()->paddingLeft + layoutBlockBox->parent.lock()->borderLeftWidth;
 
         // This is the Y position of the last block layoutBlockBox in the layoutBlockBox's containing layoutBlockBox.
         double lastBlockBoxInContainingBoxY = 0;
-        for (int i = 0; i < layoutBlockBox->parent->children.size(); i++)
+        for (int i = 0; i < layoutBlockBox->parent.lock()->children.size(); i++)
         {
-            lastBlockBoxInContainingBoxY += layoutBlockBox->parent->children[i]->marginRect.height;
+            lastBlockBoxInContainingBoxY += layoutBlockBox->parent.lock()->children[i]->marginRect.height;
         }
 
-        layoutBlockBox->borderRect.y += layoutBlockBox->parent->borderRect.y + lastBlockBoxInContainingBoxY;
+        layoutBlockBox->borderRect.y += layoutBlockBox->parent.lock()->borderRect.y + lastBlockBoxInContainingBoxY;
     }
 
     return layoutBlockBox;
-
 }
 
 
 void HTMLView::paintLayoutBox(const Cairo::RefPtr<Cairo::Context>& cr, std::string indent, std::shared_ptr<LayoutBox> layoutBox)
 {
-    printf("%s\033[0;33m<LayoutBox> (%s)\033[0m\n", indent.c_str(), layoutBox->element->tagName.c_str());
+#ifdef PRINT_LAYOUT_TREE_DEBUG
+    printf("------------------------------Layout Tree------------------------------\n");
+    printf("%s\033[0;33m<LayoutBox> (%s)\033[0m\n", indent.c_str(), layoutBox->element->tagName().c_str());
 
-    printf("%s    Containing Block: (%s)\n", indent.c_str(), layoutBox->parent ? layoutBox->parent->element->tagName.c_str() : "<Initial Containing Block>");
+    printf("%s    Containing Block: (%s)\n", indent.c_str(), layoutBox->parent.lock() ? layoutBox->parent.lock()->element->tagName().c_str() : "<Initial Containing Block>");
     printf("%s    Layout Box:\n", indent.c_str());
     printf("%s        Height: %lf\n", indent.c_str(), layoutBox->marginRect.height);
     printf("%s        Width: %lf\n", indent.c_str(), layoutBox->marginRect.width);
@@ -143,9 +146,10 @@ void HTMLView::paintLayoutBox(const Cairo::RefPtr<Cairo::Context>& cr, std::stri
     printf("%s        Width: %lf\n", indent.c_str(), layoutBox->borderRect.width);
     printf("%s        Coords (x,y): \n", indent.c_str());
     printf("%s            (%lf, %lf)\n", indent.c_str(), layoutBox->borderRect.x, layoutBox->borderRect.y);
-
+#endif
 
     layoutBox->paint(cr);
+
     indent += "    ";
     for (int i = 0; i < layoutBox->children.size(); i++)
     {
@@ -167,9 +171,9 @@ bool HTMLView::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     cr->fill();
     cr->stroke();
 
-    root = {};
+    root = nullptr;
 
-    createBoxForElement(renderElements, {});
+    createBoxForElement(m_documentWithResolvedStyles, {});
 
     this->maxHeight += root->marginRect.height;
 
@@ -179,10 +183,7 @@ bool HTMLView::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         isSizeSet = true;
     }
 
-
-    printf("------------------------------Layout Tree------------------------------\n");
     paintLayoutBox(cr, "", root);
-
 
     return true;
 }

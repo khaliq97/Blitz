@@ -1,79 +1,92 @@
 #include <stdio.h>
 #include <vector>
 #include <DOM/Document.h>
-#include <Parser/Lexer.h>
+#include <fmt/core.h>
+#include <LexerUtils.h>
 Document::Document()
 {
 
 }
 
-Document::Document(std::shared_ptr<Node> parentNode) : Node(parentNode)
+Document::Document(std::weak_ptr<Node> parentNode) : Node(parentNode)
 {
 
 }
 
-void Document::printTree(const std::shared_ptr<Node>& node, std::string indent, bool last)
+void Document::printDocument(const std::shared_ptr<Node>& node, std::string indentation)
 {
-    printf("%s%s\033[1;32m%d\033[0m\n", indent.c_str(), "\033[1;32m+- \033[0m", node->nodeType);
-    printf("%s%s%s\n", indent.c_str(), " Node Name: ", node->nodeName.c_str());
-    printf("%s%s%s\n", indent.c_str(), " Node Value: ", node->nodeValue.c_str());
-    printf("%s%s%s\n", indent.c_str(), " Base URI: ", node->baseURI.c_str());
-    printf("%s%s%s\n", indent.c_str(), " Is Connected: ", node->getIsConnected().c_str());
-    printf("%s%s%s\n", indent.c_str(), " Text Content: ", node->getTextContent().c_str());
+    fmt::print("{}<{}>\n", indentation.c_str(), node->nodeName.c_str());
 
-    if (node->nextSibling)
-        printf("%s%s%s\n", indent.c_str(), " Next Sibling Node Name: ", node->nextSibling->nodeName.c_str());
+    fmt::print("  {}Node Type: {}\n", indentation.c_str(), Tools::lookupNodeTypeFromDictionary(node->nodeType));
+    fmt::print("  {}Node Name: {}\n", indentation.c_str(), node->nodeName);
+    fmt::print("  {}Node Value: {}\n", indentation.c_str(), node->nodeValue);
+    fmt::print("  {}Base URI: {}\n", indentation.c_str(), node->baseURI);
+    fmt::print("  {}Is Connected: {}\n", indentation.c_str(), node->getIsConnected());
+    fmt::print("  {}Text Content: {}\n", indentation.c_str(), node->getTextContent());
 
-    if (node->previousSibling)
-        printf("%s%s%s\n", indent.c_str(), " Previous Sibling Node Name: ", node->previousSibling->nodeName.c_str());
-
-    if (auto commentNode = dynamic_cast<Comment*>(node.get()))
+    if (node->isComment())
     {
-        printf("%s%s%s\n", indent.c_str(), " Data: ", commentNode->data.c_str());
-        printf("%s%s%d\n", indent.c_str(), " Length: ", commentNode->length);
+        std::weak_ptr<Comment> commentNode = node->asNodeTypeComment(node).lock();
+        fmt::print("  {}Data: {}\n", indentation.c_str(), commentNode.lock()->data);
+        fmt::print("  {}Length : {}\n", indentation.c_str(), commentNode.lock()->length);
     }
 
-    if (auto documentTypeNode = dynamic_cast<DocumentType*>(node.get()))
+
+    if (node->isDocumentType())
     {
-        printf("%s%s%s\n", indent.c_str(), " Name: ", documentTypeNode->name.c_str());
-        printf("%s%s%s\n", indent.c_str(), " Public ID: ", documentTypeNode->publicId.c_str());
-        printf("%s%s%s\n", indent.c_str(), " System ID: ", documentTypeNode->systemId.c_str());
+        std::weak_ptr<DocumentType> documentTypeNode = node->asNodeTypeDocumentType(node).lock();
+        fmt::print("  {}Name: {}\n", indentation.c_str(), documentTypeNode.lock()->name());
+        fmt::print("  {}Public ID : {}\n", indentation.c_str(), documentTypeNode.lock()->publicId());
+        fmt::print("  {}System ID : {}\n", indentation.c_str(), documentTypeNode.lock()->systemId());
     }
 
-    if (auto elementNode = dynamic_cast<HTMLElement*>(node.get()))
+    if (node->isElement())
     {
-        printf("%s%s%s\n", indent.c_str(), " Namespace URI: ", elementNode->namespaceURI.c_str());
-        printf("%s%s%s\n", indent.c_str(), " Prefix: ", elementNode->prefix.c_str());
-        printf("%s%s%s\n", indent.c_str(), " Local Name: ", elementNode->localName.c_str());
-        printf("%s%s%s\n", indent.c_str(), " Tag Name: ", elementNode->tagName.c_str());
-        if (elementNode->hasAttributes())
+        std::weak_ptr<Element> elementNode = node->asNodeTypeElement(node).lock();
+
+        fmt::print("  {}Namespace URI: {}\n", indentation.c_str(), elementNode.lock()->namespaceURI());
+        fmt::print("  {}Prefix: {}\n", indentation.c_str(), elementNode.lock()->prefix());
+        fmt::print("  {}Local Name: {}\n", indentation.c_str(), elementNode.lock()->localName());
+        fmt::print("  {}Tag Name: {}\n", indentation.c_str(), elementNode.lock()->tagName());
+
+
+        if (elementNode.lock()->hasAttributes())
         {
-            printf("%s%s\n", indent.c_str(), " Attributes: ");
-            for (auto &attribute: *elementNode->attributes)
+            fmt::print("  {}Attributes: \n", indentation.c_str());
+            for (auto &attribute: elementNode.lock()->attributes)
             {
-                printf("	%s%s=%s\n", indent.c_str(), attribute.first.c_str(), attribute.second.c_str());
+                fmt::print("  {}    {}={}\n", indentation.c_str(), attribute.first.c_str(), attribute.second.c_str());
             }
         }
+    }
 
-         printf("    Styles: \n");
-        for (auto dec: elementNode->declarations)
+    if (node->isText())
+    {
+        std::weak_ptr<Text> textNode = node->asNodeTypeText(node).lock();
+        fmt::print("  {}Data: {}\n", indentation.c_str(), textNode.lock()->data);
+        fmt::print("  {}Length: {}\n", indentation.c_str(), textNode.lock()->length);
+    }
+
+    if (node->isElement())
+    {
+        fmt::print("{}\033[1;33m  Styles: \033[0m\n", indentation.c_str());
+        for (auto dec: node->asNodeTypeElement(node).lock()->declarations)
         {
-            printf("        Declaration\n");
-            printf("            Name: %s\n", dec->name.c_str());
+            fmt::print("    {}Declaration:\n", indentation.c_str());
+            fmt::print("       {}Name: {}\n", indentation.c_str(), dec->name.c_str());
             for (auto declarationValue: dec->value)
             {
-                printf("            Value: %s\n", declarationValue->value().c_str());
-                if (declarationValue->type == CSSTokenType::Dimension)
-                    printf("                Unit: %s\n", declarationValue->unit.c_str());
+                fmt::print("       {}Value: {}\n", indentation.c_str(), declarationValue.value().c_str());
+                if (declarationValue.type == CSSTokenType::Dimension)
+                    fmt::print("           {}Unit: {}\n", indentation.c_str(), declarationValue.unit.c_str());
             }
         }
     }
 
-    indent += last ? " " : "|  ";
+    indentation += "    ";
 
     for (int i = 0; i < node->childNodes.size(); i++)
     {
-
-        printTree(node->childNodes[i], indent, i == node->childNodes.size() - 1);
+        printDocument(node->childNodes[i], indentation);
     }
 }

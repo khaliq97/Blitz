@@ -1,29 +1,29 @@
 #include <CSS/Selectors/ComplexSelector.h>
 ComplexSelector::ComplexSelector()
 {
-    compoundSelector = std::make_shared<CompoundSelector>();
+    m_compoundSelector = std::make_shared<CompoundSelector>();
 }
 
 void ComplexSelector::calculateSelectorSpecifity()
 {
-    if (compoundSelector->typeSelector)
+    if (m_compoundSelector->m_typeSelector)
     {
-        if (!dynamic_cast<UniversalSelector*>(compoundSelector->typeSelector.get()))
+        if (m_compoundSelector->m_typeSelector->type() != SelectorType::Universal)
         {
-            this->c++;
+            this->m_c++;
         }
     }
 
-    for (auto subClassSelctor: compoundSelector->subClassSelectors)
+    for (auto subClassSelctor: m_compoundSelector->m_subClassSelectors)
     {
-        if (auto idSelector = dynamic_cast<IdSelector*>(subClassSelctor.get()))
+        if (subClassSelctor->type() == SelectorType::Id)
         {
-            this->a++;
+            this->m_a++;
         }
-        else if (auto idSelector = dynamic_cast<ClassSelector*>(subClassSelctor.get()))
+        else if (subClassSelctor->type() != SelectorType::Class)
         {
             // This would also count attribute selectors and pseudo-classes
-            this->b++;
+            this->m_b++;
         }
     }
 }

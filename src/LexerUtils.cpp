@@ -1,4 +1,21 @@
 #include <LexerUtils.h>
+std::string NodeTypes[] =
+{
+    "ElementNode",
+    "Attribute_Node",
+    "TextNode",
+    "CDATASectionNode",
+    "EntityReferenceNode",// Historical
+    "EntityNode", // Historical
+    "ProcessingInstructionNode",
+    "CommentNode",
+    "DocumentNode",
+    "DocumentTypeNode",
+    "DoucmentFragmentNode",
+    "NotationNode" // Historical
+
+};
+
 std::string Tools::getFileContent(std::string fileName)
 {
     std::string fileContent;
@@ -34,4 +51,9 @@ bool Tools::compareChar(char &c1, char &c2)
 bool Tools::caseInsensitiveStringCompare(std::string val1, std::string val2)
 {
     return val1.size() == val2.size() && std::equal(val1.begin(), val1.end(), val2.begin(), &Tools::compareChar);
+}
+
+std::string Tools::lookupNodeTypeFromDictionary(Node::NodeType nodeType)
+{
+    return NodeTypes[nodeType - 1];
 }

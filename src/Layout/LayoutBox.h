@@ -10,9 +10,9 @@ class HTMLView;
 class LayoutBox
 {
 public:
-    LayoutBox(const Glib::RefPtr<Pango::Layout>& pangoLayout, const std::shared_ptr<Element>& element);
+    LayoutBox(const Glib::RefPtr<Pango::Layout>& pangoLayout, std::shared_ptr<Element> element);
 
-    std::shared_ptr<LayoutBox> parent;
+    std::weak_ptr<LayoutBox> parent;
     std::vector<std::shared_ptr<LayoutBox>> children;
 
     // Font metrics
@@ -59,7 +59,10 @@ public:
     Cairo::Rectangle borderRect;
     Cairo::Rectangle contentRect;
 
+    bool isRoot = false;
 
+
+    void appendChildAndUpdateParentHeights(std::shared_ptr<LayoutBox> layoutBox);
 private:
 
     enum Border {

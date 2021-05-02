@@ -5,6 +5,12 @@
 #include <vector>
 class Lexer {
     public:
+        Lexer(std::string source);
+        std::vector<char> charStream;
+
+        int tokenIndex = 0;
+        int tokensLength = 0;
+
         void lex();
 
         char peekNextToken();
@@ -25,10 +31,7 @@ class Lexer {
         bool consumeTokenWhileCaseInsesitive(std::string tokenData);
         bool caseInsensitiveStringCompare(std::string val1, std::string val2);
         std::string peekWhileCaseInsesitive(std::string tokenData);
-        std::string getFileContent(std::string fileName);
-
-        void loadContent(std::string content);
-
+        static bool compareChar(char &c1, char &c2);
 };
 
 #endif

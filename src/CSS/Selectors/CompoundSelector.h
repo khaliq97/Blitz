@@ -7,8 +7,13 @@ class CompoundSelector
 {
 public:
     CompoundSelector();
-    std::shared_ptr<TypeSelector> typeSelector;
-    std::vector<std::shared_ptr<SimpleSelector>> subClassSelectors;
+   // std::shared_ptr<SimpleSelector> typeSelector() { return m_typeSelector; }
+   // std::vector<std::shared_ptr<SimpleSelector>> subClassSelectors() { return m_subClassSelectors; }
+    std::shared_ptr<SimpleSelector> m_typeSelector;
+    std::vector<std::shared_ptr<SimpleSelector>> m_subClassSelectors;
+private:
+
+
 };
 
 #endif // COMPOUNDSELECTOR_H

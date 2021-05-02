@@ -5,11 +5,16 @@
 
 class DocumentType : public Node
 {
-    public:
-        DocumentType(std::shared_ptr<Node> parentNode);
-        std::string name;
-        std::string publicId;
-        std::string systemId;
+public:
+    DocumentType(std::weak_ptr<Node> parentNode);
+    std::string name() const;
+    std::string publicId() const;
+    std::string systemId() const;
+    void setName(std::string documentTypeName);
+private:
+    std::string m_name = "";
+    std::string m_publicId = "";
+    std::string m_systemId = "";
 };
 
 

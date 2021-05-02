@@ -7,12 +7,9 @@
 #include <stdio.h>
 #include <thread>
 #include <Blitz.h>
-
-size_t WriteCallback(char *contents, size_t size, size_t nmemb, void *userp)
-{
-    ((std::string*)userp)->append((char*)contents, size * nmemb);
-    return size * nmemb;
-}
+#include <Browser/Core.h>
+#include <fmt/core.h>
+#include <fmt/color.h>
 
 int onCommandLine(const Glib::RefPtr<Gio::ApplicationCommandLine> &, Glib::RefPtr<Gtk::Application> &app)
 {
@@ -38,8 +35,12 @@ int main(int argc, char ** argv)
     auto app = Gtk::Application::create(argc, argv, "blitz.web.browser", Gio::ApplicationFlags::APPLICATION_HANDLES_COMMAND_LINE);
     app->signal_command_line().connect(sigc::bind(sigc::ptr_fun(onCommandLine), app), false);
 
-    std::shared_ptr<Blitz> blitzWebEngineInstance = std::make_shared<Blitz>();
+    std::unique_ptr<Blitz> blitzWebEngineInstance = std::make_unique<Blitz>(argv[1]);
     blitzWebEngineInstance->loadHTML(Tools::getFileContent(argv[1]));
 
-    return app->run(*blitzWebEngineInstance->browserCoreWindow);
+    std::unique_ptr<Browser::Core> browserCoreWindow = std::make_unique<Browser::Core>(blitzWebEngineInstance->documentWithResolvedStyles(), blitzWebEngineInstance->htmlFilePath());
+    browserCoreWindow->set_icon_from_file("../res/Blitz Logo V1.png");
+
+
+    return app->run(*browserCoreWindow);
 }

@@ -4,8 +4,8 @@
 #include <string>
 class Text : public CharacterData
 {
-    public:
-        Text(std::shared_ptr<Node> parentNode);
+public:
+    Text(std::weak_ptr<Node> parentNode);
 };
 
 #endif // TEXT_H

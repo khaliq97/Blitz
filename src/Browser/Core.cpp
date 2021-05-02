@@ -1,21 +1,8 @@
 #include <Browser/Core.h>
 
-Core::Core()
+Browser::Core::Core(std::shared_ptr<Node> documentWithResolvedStyles, std::string htmlFilePath) : m_documentWithResolvedStyles(documentWithResolvedStyles), m_htmlFilePath(htmlFilePath)
 {
-
-}
-
-Core::Core(std::shared_ptr<Node> documentWithStyling)
-{
-    m_document = documentWithStyling;
-    std::vector<std::shared_ptr<Node>> nodeList = documentWithStyling->getAllNodes({}, documentWithStyling);
-    std::string windowName;
-    for (auto node: nodeList)
-    {
-        if (node->nodeName == "title")
-            windowName = node->getTextContent();
-    }
-    this->set_title(windowName);
+    this->set_title("Caspian Web Browser");
     this->set_default_size(1280, 720);
 
     // Menu Bar
@@ -39,7 +26,7 @@ Core::Core(std::shared_ptr<Node> documentWithStyling)
     vbox = std::make_unique<Gtk::VBox>();
     vbox->pack_start(*coreMenuBar, false, false);
 
-    webView = std::make_unique<WebView>(this, m_document);
+    webView = std::make_unique<WebView>(m_documentWithResolvedStyles);
 
     vbox->add(*webView);
     this->add(*vbox);
@@ -47,12 +34,12 @@ Core::Core(std::shared_ptr<Node> documentWithStyling)
     vbox->show_all_children();
 }
 
-void Core::inspectorMenuItemActivate()
+void Browser::Core::inspectorMenuItemActivate()
 {
     printf("Browser: Launching Inspector window\n");
 }
 
-bool Core::onWindowKeyPress(GdkEventKey* event)
+bool Browser::Core::onWindowKeyPress(GdkEventKey* event)
 {
 
     switch(event->keyval)
@@ -60,7 +47,20 @@ bool Core::onWindowKeyPress(GdkEventKey* event)
         case GDK_KEY_r:
             if (event->state & GDK_CONTROL_MASK)
             {
-                printf("Reloading page event triggered\n");
+                 printf("Reloading page event triggered\n");
+                std::unique_ptr<Blitz> blitz = std::make_unique<Blitz>(m_htmlFilePath);
+                blitz->loadHTML(Tools::getFileContent(blitz->htmlFilePath()));
+
+                vbox->remove(*webView);
+                webView = std::make_unique<WebView>(blitz->documentWithResolvedStyles());
+
+                vbox->pack_start(*coreMenuBar, false, false);
+                vbox->add(*webView);
+                this->remove();
+                this->add(*vbox);
+                vbox->show();
+                vbox->show_all_children();
+               printf("Reload complete!\n");
             }
             break;
     }

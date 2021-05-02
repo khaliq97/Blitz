@@ -4,8 +4,8 @@
 
 class Comment : public CharacterData
 {
-    public:
-        Comment(std::shared_ptr<Node> parentNode);
+public:
+    Comment(std::weak_ptr<Node> parentNode, const std::string commentContent);
 };
 
 #endif // COMMENT_H

@@ -2,10 +2,9 @@
 
 HTMLToken::HTMLToken()
 {
-    this->tag.attributes = new std::map<std::string, std::string>();
 }
 
-std::string HTMLToken::getCommentOrCharacterData()
+std::string HTMLToken::getCommentOrCharacterData() const
 {
     if (!commentOrCharacter.data.empty())
     {
