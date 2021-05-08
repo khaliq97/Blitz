@@ -109,10 +109,10 @@ _OBJ = Main.o Blitz.o LexerUtils.o \
 OBJ = $(patsubst %, $(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.cpp $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS) `pkg-config --libs --cflags gtkmm-3.0 fmt`
+	$(CC) -c -o $@ $< $(CFLAGS) `pkg-config --libs --cflags gtkmm-3.0 fmt curlpp`
 
 blitz: $(OBJ)
-	$(CC) -g -o $@ $^ $(CFLAGS) `pkg-config --libs --cflags gtkmm-3.0 fmt`
+	$(CC) -g -o $@ $^ $(CFLAGS) `pkg-config --libs --cflags gtkmm-3.0 fmt curlpp`
 
 .PHONY: clean
 
