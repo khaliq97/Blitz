@@ -8,4 +8,8 @@ Blitz.includes
 src/obj
 src/blitz
 src/test
-res/test.css
+src/build
+src/gtk.supp
+res/test.css 
+res/logo
+
