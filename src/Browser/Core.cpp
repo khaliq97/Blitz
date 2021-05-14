@@ -2,7 +2,7 @@
 
 Browser::Core::Core(std::shared_ptr<Node> documentWithResolvedStyles, std::string htmlFilePath) : m_documentWithResolvedStyles(documentWithResolvedStyles), m_htmlFilePath(htmlFilePath)
 {
-    this->set_title("Caspian Web Browser");
+    this->set_title("Blitz Web Engine (Browser Window)");
     this->set_default_size(1280, 720);
 
     // Menu Bar
