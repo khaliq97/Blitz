@@ -23,6 +23,8 @@ void Document::printDocument(const std::shared_ptr<Node>& node, std::string inde
     fmt::print("  {}Base URI: {}\n", indentation.c_str(), node->baseURI);
     fmt::print("  {}Is Connected: {}\n", indentation.c_str(), node->getIsConnected());
     fmt::print("  {}Text Content: {}\n", indentation.c_str(), node->getTextContent());
+    fmt::print("  {}Parent: {}\n", indentation.c_str(), node->parentNode.lock() ? node->parentNode.lock()->nodeName : "<root>");
+    fmt::print("  {}Previous Sibling: {}\n", indentation.c_str(), node->previousSibling ? node->previousSibling->nodeName : "<empty>");
 
     if (node->isComment())
     {
@@ -80,6 +82,16 @@ void Document::printDocument(const std::shared_ptr<Node>& node, std::string inde
                 if (declarationValue.type == CSSTokenType::Dimension)
                     fmt::print("           {}Unit: {}\n", indentation.c_str(), declarationValue.unit.c_str());
             }
+        }
+
+        fmt::print("{}\033[1;33m  Style Properties (computed): \033[0m\n", indentation.c_str());
+        for (auto dec: node->asNodeTypeElement(node).lock()->styleProperties)
+        {
+            fmt::print("    {}Declaration:\n", indentation.c_str());
+            fmt::print("       {}Name: {}\n", indentation.c_str(), dec->m_declaration->name);
+                fmt::print("       {}Computed Value: {}\n", indentation.c_str(), dec->computedValue);
+                if (dec->m_declaration->value[0].type == CSSTokenType::Dimension)
+                    fmt::print("           {}Unit: px\n", indentation);
         }
     }
 
