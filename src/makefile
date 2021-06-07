@@ -5,56 +5,6 @@ CFLAGS= -g -I$(IDIR)
 ODIR=obj
 LDIR=../lib
 
-_DEPS = Blitz.h \
-		LexerUtils.h \
-		Parser/HTMLStateMachine.h \
-		Parser/HTMLDocumentParser.h \
-		Parser/Lexer.h \
-		Parser/HTMLToken.h \
-		DOM/Document.h \
-		DOM/HTMLElement.h \
-		DOM/HTMLHeadElement.h \
-		DOM/Element.h \
-		DOM/Node.h \
-		DOM/CharacterData.h \
-		DOM/Comment.h \
-		DOM/Attribute.h \
-		DOM/NamedNodeMap.h \
-		DOM/DocumentType.h \
-		DOM/Text.h \
-		Browser/Core.h \
-		Terminal/Terminal.h \
-		JS/JS.h \
-		JS/Interpreter.h \
-		JS/Scanner.h \
-		JS/Token.h \
-		JS/TokenType.h \
-		JS/ASTNode.h \
-		JS/Expression.h \
-		JS/ExpressionStatement.h \
-		JS/BinaryExpression.h \
-		JS/LiteralExpression.h \
-		JS/VariableDeclaration.h \
-		CSS/Tokenizer.h \
-		CSS/CSSToken.h \
-		CSS/Parser.h \
-		CSS/QualifiedRule.h \
-		CSS/SimpleBlock.h \
-		CSS/Stylesheet.h \
-		CSS/Selectors/ComplexSelector.h \
-		CSS/Selectors/CompoundSelector.h \
-		CSS/Selectors/SimpleSelector.h \
-		CSS/Declaration.h \
-		CSS/StyleRule.h \
-		CSS/SelectorEngine.h \
-		CSS/StyleProperty.h \
-		CSS/StyleResolver.h \
-		Layout/WebView.h \
-		Layout/HTMLView.h \
-		Layout/LayoutBox.h
-
-DEPS = $(patsubst, %,$(IDIR)/%,$(_DEPS))
-
 _OBJ = Main.o Blitz.o LexerUtils.o \
 		Parser/HTMLStateMachine.o \
 		Parser/HTMLDocumentParser.o \
@@ -108,7 +58,9 @@ _OBJ = Main.o Blitz.o LexerUtils.o \
 
 OBJ = $(patsubst %, $(ODIR)/%,$(_OBJ))
 
-$(ODIR)/%.o: %.cpp $(DEPS)
+
+$(ODIR)/%.o: %.cpp
+	@ mkdir -p $(ODIR)/Browser $(ODIR)/CSS $(ODIR)/CSS/Selectors $(ODIR)/DOM $(ODIR)/JS $(ODIR)/Layout $(ODIR)/Parser $(ODIR)/Terminal
 	$(CC) -c -o $@ $< $(CFLAGS) `pkg-config --libs --cflags gtkmm-3.0 fmt curlpp`
 
 blitz: $(OBJ)
