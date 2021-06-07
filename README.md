@@ -2,53 +2,47 @@
 A web engine for fun that can render a sub set of HTML and CSS as well as a very early stage JavaScript interpreter.
 
 ## About
-This is a project to build a somewhat HTML5 compatible browser and learn a ton about web rendering along the way. Everything is written from scratch and I'm still very much learning C++. Blitz is still very much at the earlier stages of development, so plently more to come.
+This is a project to build a HTML5 compatible browser and learn a ton about web rendering along the way. Everything is written from scratch and I'm still very much learning C++. Blitz is still at an early stage of development, so plently more work to be done.
 
 ## Features (Broadly)
-* HTML Parsing
-* CSS Engine
+* HTML + CSS Tree Construction
 * Render Tree Construction
 * Layout Box Painting
-* Very much WIP JS interpreter
+* Early Stage JS interpreter
 
-## Preview (Browser Window)
+## Browser Window Screenshot
 
 ![A preview of the Blitz browser window](https://github.com/khaliq97/Blitz/blob/master/screenshots/1.png?raw=true)
 
 
 ## How do I build and run this?
 
-Currently you can only build Blitz on Ubuntu Linux (tested on 20.04). A bit limited for now, yes I know.
+Currently you can only build Blitz on Ubuntu Linux (tested on 20.04):
 
-## Bash
 ### Required Depenencies
-##### Required Library
-```sudo apt-get install gtkmm-3.0```
+##### Required Libraries
+```sudo apt install libgtkmm-3.0-dev```
+
+```sudo apt install libcurl-dev```
+
+```sudo apt install libcurlpp-dev```
+
+```sudo apt install libfmt-dev```
 ##### Build Tools
 ```sudo apt-get install make```
-<br/>
+
 ```sudo apt-get install g++```
-</br>
+
 
 ### Download
 ```git clone https://github.com/khaliq97/Blitz.git```
 
 ### Build
 ```cd Blitz/src```
-<br/>
-```./setup.sh```
-<br/>
+
 ```make```
 ### Run
 ```./blitz <HTML File Name>```
 #### This will run the html page shown in the preview screenshot:
 ```./blitz ../res/index.html```
-#### 
-
-
-Hopefully that all builds and it will launch the browser window (well more of a preview for now). 
-
-### References
-HTML5 Specification
-<br/>
-CSS3 Specifcation (Tokenizing, Parsing, Layout Boxes, Selectors)
+####
