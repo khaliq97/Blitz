@@ -57,3 +57,22 @@ std::string Tools::lookupNodeTypeFromDictionary(Node::NodeType nodeType)
 {
     return NodeTypes[nodeType - 1];
 }
+
+bool Tools::isJustWhiteSpace(const std::shared_ptr<Node>& node)
+{
+    bool isJustWhiteSpace = false;
+    std::string textContent = node->getTextContent();
+    for (int i = 0; i < textContent.length(); i++)
+    {
+        if (textContent.at(i) == ' ' || textContent.at(i) == '\n' || textContent.at(i) == '\t')
+        {
+            isJustWhiteSpace = true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    return isJustWhiteSpace;
+}
