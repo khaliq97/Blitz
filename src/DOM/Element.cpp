@@ -1,6 +1,7 @@
-#include <DOM/Element.h>
+﻿#include <DOM/Element.h>
 #include <algorithm>
 #include <LexerUtils.h>
+#include <fmt/core.h>
 Element::Element(std::weak_ptr<Node> parentNode) : Node(parentNode)
 {
 }
@@ -67,6 +68,14 @@ bool Element::isDisplayBlock()
     return false;
 }
 
+bool Element::isDisplayInline()
+{
+    if (getStylePropertyByDeclarationName("display"))
+        return getStylePropertyByDeclarationName("display")->m_declaration->value[0].value() == "inline";
+
+    return false;
+}
+
 bool Element::doesDeclarationExist(std::string decToFind)
 {
     for (auto dec: declarations)
@@ -107,6 +116,28 @@ std::shared_ptr<StyleProperty> Element::getStylePropertyByDeclarationName(std::s
     }
 
     return std::make_shared<StyleProperty>();
+}
+
+std::shared_ptr<Node> Element::getDOMNode()
+{
+    return this->shared_from_this();
+}
+
+std::optional<std::shared_ptr<LayoutBox>> Element::createLayoutBox()
+{
+    if (isDisplayNone())
+        return {};
+
+    if (isDisplayBlock())
+    {
+        return std::make_shared<LayoutBox>(this->getDOMNode(), LayoutBox::BlockType::Block);
+    }
+    else if (isDisplayInline())
+    {
+        return std::make_shared<LayoutBox>(this->getDOMNode(), LayoutBox::BlockType::Inline);
+    }
+
+    return {};
 }
 
 void Element::removeDeclaration(std::string declarationPropertyName)

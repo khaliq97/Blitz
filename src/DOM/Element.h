@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <Layout/LayoutBox.h>
 #include <CSS/Declaration.h>
 #include <CSS/Selectors/ComplexSelector.h>
 #include <CSS/StyleRule.h>
@@ -20,6 +21,7 @@ public:
     std::string slot = "";
 
     bool hasAttributes();
+    std::shared_ptr<Node> getDOMNode();
     std::map<std::string, std::string> attributes;
 
     std::vector<std::shared_ptr<CSS::StyleRule>> styleRules;
@@ -33,6 +35,8 @@ public:
     std::string tagName() const { return m_tagName; }
     void setTagName(std::string value) { m_tagName = value; }
 
+    virtual std::optional<std::shared_ptr<LayoutBox> > createLayoutBox() override;
+
     void removeDeclaration(std::string declarationPropertyName);
     bool doesDeclarationExist(std::string decToFind);
     bool replaceDeclaration(std::string decToReplace, std::shared_ptr<Declaration> replacementDec);
@@ -43,6 +47,7 @@ public:
 
     bool isDisplayNone();
     bool isDisplayBlock();
+    bool isDisplayInline();
 
 private:
     std::string m_namespaceURI = "";
