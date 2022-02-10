@@ -30,6 +30,4 @@ void Blitz::loadHTML(std::string html)
     m_styleResolver = std::make_unique<StyleResolver>(m_documentWithStyles);
 
     m_documentWithResolvedStyles = m_styleResolver->documentWithResolvedStyles();
-
-    m_documentWithResolvedStyles->printDocument(m_documentWithResolvedStyles, "");
 }
