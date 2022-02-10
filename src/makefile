@@ -1,6 +1,6 @@
 IDIR= ${CURDIR}
 CC=g++
-CFLAGS= -g -I$(IDIR)
+CFLAGS= -g -I$(IDIR) -std=c++20
 
 ODIR=obj
 LDIR=../lib
@@ -51,7 +51,8 @@ _DEPS = Blitz.h \
 		CSS/StyleResolver.h \
 		Layout/WebView.h \
 		Layout/HTMLView.h \
-		Layout/LayoutBox.h
+		Layout/LayoutBox.h \
+		Layout/BlockFormattingContext.h
 
 DEPS = $(patsubst, %,$(IDIR)/%,$(_DEPS))
 
@@ -104,7 +105,8 @@ _OBJ = Main.o Blitz.o LexerUtils.o \
 		CSS/StyleResolver.o \
 		Layout/WebView.o \
 		Layout/HTMLView.o \
-		Layout/LayoutBox.o
+		Layout/LayoutBox.o \
+		Layout/BlockFormattingContext.o
 
 OBJ = $(patsubst %, $(ODIR)/%,$(_OBJ))
 
