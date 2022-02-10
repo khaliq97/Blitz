@@ -3,13 +3,15 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <map>
 class Document;
 class DocumentType;
 class Element;
 class CharacterData;
 class Comment;
 class Text;
-class Node
+class LayoutBox;
+class Node : public std::enable_shared_from_this<Node>
 {
 public:
     Node();
@@ -56,6 +58,8 @@ public:
 
     std::vector<std::weak_ptr<Node>> getAllNodes(std::vector<std::weak_ptr<Node> > returnNodes, std::weak_ptr<Node> node);
     std::string getIsConnected() const;
+
+    virtual std::optional<std::shared_ptr<LayoutBox>> createLayoutBox() { return {}; }
 
     bool isComment() { return nodeType == NodeType::CommentNode; }
     bool isDocumentType() { return nodeType == NodeType::DocumentTypeNode; }

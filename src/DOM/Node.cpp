@@ -89,4 +89,3 @@ std::weak_ptr<Text> Node::asNodeTypeText(std::weak_ptr<Node> comparisonNode)
 
     return {};
 }
-
