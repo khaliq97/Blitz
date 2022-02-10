@@ -5,60 +5,89 @@
 #include <pangomm.h>
 #include <pangomm/init.h>
 #include <cairomm/cairomm.h>
-
+#include <fmt/core.h>
 bool paintMarginBox = false;
 
-LayoutBox::LayoutBox(const Glib::RefPtr<Pango::Layout>& pangoLayout, std::shared_ptr<Element>element) : pangoLayout(std::move(pangoLayout)), element(element)
+LayoutBox::LayoutBox(std::shared_ptr<Node> element, BlockType type) : m_type(type)
 {
+    if (element->isElement())
+        this->m_element = element->asNodeTypeElement(element).lock();
+
+    if (element->isText()) { }
+        // TODO: These should create Line boxes
 
     // TODO: Move all of these property setters to a box model class
-    this->paddingTop = element->getStylePropertyByDeclarationName("padding-top")->computedValue;
-    this->paddingBottom = element->getStylePropertyByDeclarationName("padding-bottom")->computedValue;
-    this->paddingLeft = element->getStylePropertyByDeclarationName("padding-left")->computedValue;
-    this->paddingRight = element->getStylePropertyByDeclarationName("padding-right")->computedValue;
+    this->paddingTop = m_element->getStylePropertyByDeclarationName("padding-top")->computedValue;
+    this->paddingBottom = m_element->getStylePropertyByDeclarationName("padding-bottom")->computedValue;
+    this->paddingLeft = m_element->getStylePropertyByDeclarationName("padding-left")->computedValue;
+    this->paddingRight = m_element->getStylePropertyByDeclarationName("padding-right")->computedValue;
 
-    this->marginTop = element->getStylePropertyByDeclarationName("margin-block-start")->computedValue;
-    this->marginBottom = element->getStylePropertyByDeclarationName("margin-block-end")->computedValue;
-    this->marginLeft = element->getStylePropertyByDeclarationName("margin-inline-start")->computedValue;
-    this->marginRight = element->getStylePropertyByDeclarationName("margin-inline-end")->computedValue;
+    this->marginTop = m_element->getStylePropertyByDeclarationName("margin-block-start")->computedValue;
+    this->marginBottom = m_element->getStylePropertyByDeclarationName("margin-block-end")->computedValue;
+    this->marginLeft = m_element->getStylePropertyByDeclarationName("margin-inline-start")->computedValue;
+    this->marginRight = m_element->getStylePropertyByDeclarationName("margin-inline-end")->computedValue;
 
-    if (element->doesDeclarationExist("margin-top"))
-        this->marginTop = element->getStylePropertyByDeclarationName("margin-top")->computedValue;
+    if (m_element->doesDeclarationExist("margin-top"))
+        this->marginTop = m_element->getStylePropertyByDeclarationName("margin-top")->computedValue;
 
-    if (element->doesDeclarationExist("margin-bottom"))
-        this->marginBottom = element->getStylePropertyByDeclarationName("margin-bottom")->computedValue;
+    if (m_element->doesDeclarationExist("margin-bottom"))
+        this->marginBottom = m_element->getStylePropertyByDeclarationName("margin-bottom")->computedValue;
 
-    if (element->doesDeclarationExist("margin-left"))
-        this->marginLeft = element->getStylePropertyByDeclarationName("margin-left")->computedValue;
+    if (m_element->doesDeclarationExist("margin-left"))
+        this->marginLeft = m_element->getStylePropertyByDeclarationName("margin-left")->computedValue;
 
-    if (element->doesDeclarationExist("margin-right"))
-        this->marginRight = element->getStylePropertyByDeclarationName("margin-right")->computedValue;
+    if (m_element->doesDeclarationExist("margin-right"))
+        this->marginRight = m_element->getStylePropertyByDeclarationName("margin-right")->computedValue;
 
-    this->borderTopWidth = element->getStylePropertyByDeclarationName("border-top-width")->computedValue;
-    this->borderBottomWidth = element->getStylePropertyByDeclarationName("border-bottom-width")->computedValue;
-    this->borderLeftWidth = element->getStylePropertyByDeclarationName("border-left-width")->computedValue;
-    this->borderRightWidth = element->getStylePropertyByDeclarationName("border-right-width")->computedValue;
+    this->borderTopWidth = m_element->getStylePropertyByDeclarationName("border-top-width")->computedValue;
+    this->borderBottomWidth = m_element->getStylePropertyByDeclarationName("border-bottom-width")->computedValue;
+    this->borderLeftWidth = m_element->getStylePropertyByDeclarationName("border-left-width")->computedValue;
+    this->borderRightWidth = m_element->getStylePropertyByDeclarationName("border-right-width")->computedValue;
 
-    this->borderTopColor = element->getStylePropertyByDeclarationName("border-top-color")->color;
-    this->borderBottomColor = element->getStylePropertyByDeclarationName("border-bottom-color")->color;
-    this->borderLeftColor = element->getStylePropertyByDeclarationName("border-left-color")->color;
-    this->borderRightColor = element->getStylePropertyByDeclarationName("border-right-color")->color;
+    this->borderTopColor = m_element->getStylePropertyByDeclarationName("border-top-color")->color;
+    this->borderBottomColor = m_element->getStylePropertyByDeclarationName("border-bottom-color")->color;
+    this->borderLeftColor = m_element->getStylePropertyByDeclarationName("border-left-color")->color;
+    this->borderRightColor = m_element->getStylePropertyByDeclarationName("border-right-color")->color;
 
-    this->fontSize = element->getStylePropertyByDeclarationName("font-size")->computedValue;
+    this->fontSize = m_element->getStylePropertyByDeclarationName("font-size")->computedValue;
 
-    this->textColor = element->getStylePropertyByDeclarationName("color")->color;
+    this->textColor = m_element->getStylePropertyByDeclarationName("color")->color;
 
-    if (element->doesDeclarationExist("background-color"))
+    if (m_element->doesDeclarationExist("background-color"))
     {
-        this->backgroundColor = element->getStylePropertyByDeclarationName("background-color")->color;
+        this->backgroundColor = m_element->getStylePropertyByDeclarationName("background-color")->color;
     }
 
     borderRect.x = 0;
     borderRect.y = 0;
+
+    marginRect.x = 0;
+    marginRect.y = 0;
+
+    contentRect.x = 0;
+    contentRect.y = 0;
+
+    marginRect.height = marginTop + borderTopWidth + paddingTop + contentRect.height + paddingBottom  + borderBottomWidth + marginBottom;
+    marginRect.width = marginLeft + borderLeftWidth + paddingLeft + contentRect.width + paddingRight + borderRightWidth + marginRight;
+
+    borderRect.height = borderTopWidth + paddingTop + contentRect.height + paddingBottom + borderBottomWidth;
+    borderRect.width = borderLeftWidth + paddingLeft + contentRect.width + paddingRight + borderRightWidth;
 }
 
-void LayoutBox::createTextLayout()
+void LayoutBox::createTextLayout(const Cairo::RefPtr<Cairo::Context>& cairoContext)
 {
+    m_pangoLayout = Pango::Layout::create(cairoContext);
+
+    if (m_element->tagName() == "body")
+    {
+          m_pangoLayout->set_text("");
+    }
+    else
+    {
+          m_pangoLayout->set_text(m_element->getTextContent());
+    }
+
+
     Pango::FontDescription font;
 
     font.set_family("Monospace"); // TODO: CSS font property
@@ -66,36 +95,47 @@ void LayoutBox::createTextLayout()
 
     font.set_absolute_size(this->fontSize * Pango::SCALE);
 
-    pangoLayout->set_font_description(font);
+    m_pangoLayout->set_font_description(font);
 
-    // Set content metrics after font has been set
+    contentRect.height = m_pangoLayout->get_logical_extents().get_height() / Pango::SCALE;
+    contentRect.width = m_pangoLayout->get_logical_extents().get_width() / Pango::SCALE;
 
-    contentRect.height = pangoLayout->get_logical_extents().get_height() / Pango::SCALE;
-    contentRect.width = pangoLayout->get_logical_extents().get_width() / Pango::SCALE;
+    marginRect.height = marginTop + borderTopWidth + paddingTop + contentRect.height + paddingBottom  + borderBottomWidth + marginBottom;
+    marginRect.width = marginLeft + borderLeftWidth + paddingLeft + contentRect.width + paddingRight + borderRightWidth + marginRight;
+
+    borderRect.height = borderTopWidth + paddingTop + contentRect.height + paddingBottom + borderBottomWidth;
+    borderRect.width = borderLeftWidth + paddingLeft + contentRect.width + paddingRight + borderRightWidth;
 }
 
 bool LayoutBox::isBlockBox()
 {
-    if (element->getStylePropertyByDeclarationName("display"))
-        return element->getStylePropertyByDeclarationName("display")->m_declaration->value[0].value() == "block";
-
-    return false;
+    return m_type == BlockType::Block;
 }
 
 bool LayoutBox::isInlineBox()
 {
-    if (element->getStylePropertyByDeclarationName("display"))
-        return element->getStylePropertyByDeclarationName("display")->m_declaration->value[0].value() == "inline";
-
-    return false;
+  return m_type == BlockType::Inline;
 }
+
 
 void LayoutBox::appendChildAndUpdateParentHeights(std::shared_ptr<LayoutBox> layoutBox)
 {
-    parent.lock()->children.push_back(std::move(layoutBox));
+    //parent.lock()->children.push_back(layoutBox);
     updateAllParentHeights();
 }
 
+int LayoutBox::calculateYPositionInContainingBlock(std::shared_ptr<LayoutBox>& currentLayoutBox)
+{
+    int y = 0;
+    for (auto layoutBox: parent.lock()->children)
+    {
+        if (layoutBox == currentLayoutBox)
+            break;
+        y += layoutBox->marginRect.height;
+    }
+
+    return y;
+}
 
 void LayoutBox::updateAllParentHeights()
 {
@@ -113,18 +153,22 @@ void LayoutBox::updateAllParentHeights()
 
         parent.lock()->updateAllParentHeights();
     }
-    // TODO: Need a IF condition for the root layout box (i.e. html tag)
 }
 
-void LayoutBox::compute()
+bool LayoutBox::isFirstLayoutBoxInContainingBlock(const std::shared_ptr<LayoutBox>& layoutBox)
 {
-    createTextLayout();
+    return parent.lock()->children.front() == layoutBox;
+}
 
-    marginRect.height = marginTop + borderTopWidth + paddingTop + contentRect.height + paddingBottom  + borderBottomWidth + marginBottom;
-    marginRect.width = marginLeft + borderLeftWidth + paddingLeft + contentRect.width + paddingRight + borderRightWidth + marginRight;
+std::vector<std::shared_ptr<LayoutBox>> LayoutBox::toVectorFromLayoutTree(std::shared_ptr<LayoutBox> initialContainingBlockBox, std::vector<std::shared_ptr<LayoutBox>> layoutVector)
+{
+    layoutVector.push_back(initialContainingBlockBox);
+    for (int i = 0; i < initialContainingBlockBox->children.size(); i++)
+    {
+        layoutVector = toVectorFromLayoutTree(initialContainingBlockBox->children[i], layoutVector);
+    }
 
-    borderRect.height = borderTopWidth + paddingTop + contentRect.height + paddingBottom + borderBottomWidth;
-    borderRect.width = borderLeftWidth + paddingLeft + contentRect.width + paddingRight + borderRightWidth;
+    return layoutVector;
 }
 
 void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cairo::RefPtr<Cairo::Context> &cr)
@@ -175,7 +219,6 @@ void LayoutBox::drawBorder(Border border, Cairo::Rectangle borderRect, const Cai
         case Border::Bottom: {
 
             // Left half:
-
             double leftHalfStep = borderLeftWidth / borderBottomWidth;
             cr->move_to(borderRect.x, borderRect.y + borderRect.height);
             layoutBoxDrawCursor_Y += borderRect.y + borderRect.height;
@@ -332,7 +375,7 @@ bool LayoutBox::paint(const Cairo::RefPtr<Cairo::Context> &cr)
     // Paint Phase: Content:
     cr->set_source_rgb(textColor->displayColor.get_red(), textColor->displayColor.get_green(), textColor->displayColor.get_blue());
     cr->move_to(contentRect.x, contentRect.y);
-    pangoLayout->show_in_cairo_context(cr);
+    m_pangoLayout->show_in_cairo_context(cr);
 
     // Reset back to white
     cr->set_source_rgb(0.0, 0.0, 0.0);
@@ -340,4 +383,6 @@ bool LayoutBox::paint(const Cairo::RefPtr<Cairo::Context> &cr)
 
     return true;
 }
+
+
 
