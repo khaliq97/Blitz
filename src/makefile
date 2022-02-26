@@ -116,7 +116,7 @@ OBJ = $(patsubst %, $(ODIR)/%,$(_OBJ))
 
 
 $(ODIR)/%.o: %.cpp
-	@ mkdir -p $(ODIR)/Browser $(ODIR)/CSS $(ODIR)/CSS/Selectors $(ODIR)/DOM $(ODIR)/JS $(ODIR)/Layout $(ODIR)/Parser $(ODIR)/Terminal
+	@ mkdir -p $(ODIR)/Browser $(ODIR)/CSS $(ODIR)/CSS/Selectors $(ODIR)/DOM $(ODIR)/JS $(ODIR)/Layout $(ODIR)/HTML $(ODIR)/Terminal
 	$(CC) -c -o $@ $< $(CFLAGS) `pkg-config --libs --cflags gtkmm-3.0 fmt curlpp`
 
 blitz: $(OBJ)
