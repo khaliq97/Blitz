@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <DOM/HTMLElement.h>
 #include <stdlib.h>
-#include <Parser/Lexer.h>
+#include <HTML/Lexer.h>
 
 Lexer::Lexer(std::string source)
 {

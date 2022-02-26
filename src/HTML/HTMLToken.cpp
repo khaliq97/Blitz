@@ -1,4 +1,4 @@
-#include <Parser/HTMLToken.h>
+#include <HTML/HTMLToken.h>
 
 HTMLToken::HTMLToken()
 {

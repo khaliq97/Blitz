@@ -1,15 +1,15 @@
-#include <Parser/HTMLDocumentParser.h>
-#include <Parser/HTMLStateMachine.h>
+#include <HTML/HTMLDocumentParser.h>
+#include <HTML/Tokenizer.h>
 #include <DOM/Document.h>
 #include <DOM/HTMLElement.h>
 #include <DOM/HTMLHeadElement.h>
-#include <Parser/HTMLToken.h>
+#include <HTML/HTMLToken.h>
 #include <DOM/Comment.h>
 #include <DOM/DocumentType.h>
 #include <DOM/Text.h>
 #include <stack>
 #include <unordered_set>
-#include <Parser/Lexer.h>
+#include <HTML/Lexer.h>
 #include <Logger.h>
 
 std::string InsertionModeDictionary[] =

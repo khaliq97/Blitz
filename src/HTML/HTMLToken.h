@@ -3,10 +3,8 @@
 #include <string>
 #include <memory>
 #include <vector>
-
 class HTMLToken
 {
-    friend class HTMLStateMachine;
     friend class HTMLDocumentParser;
     public:
         HTMLToken();
@@ -19,6 +17,19 @@ class HTMLToken
             Character,
             EndOfFile
         };
+
+        struct Attribute
+        {
+           std::string name;
+           std::string value;
+        };
+
+        struct
+        {
+            std::string name;
+            bool isSelfClosing;
+            std::vector<Attribute> attributes;
+        } tag;
 
         Type getType() const { return this->type; }
         void setType(Type type) { this->type = type; }
@@ -58,12 +69,6 @@ class HTMLToken
     private:
         Type type;
 
-        struct Attribute
-        {
-           std::string name;
-           std::string value;
-        };
-
         struct
         {
             std::string name;
@@ -71,13 +76,6 @@ class HTMLToken
             std::string systemIdentifier;
             bool forceQuirks;
         } doctype;
-
-        struct
-        {
-            std::string name;
-            bool isSelfClosing;
-            std::vector<Attribute> attributes;
-        } tag;
 
         struct
         {

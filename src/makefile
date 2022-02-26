@@ -7,10 +7,10 @@ LDIR=../lib
 
 _DEPS = Blitz.h \
 		LexerUtils.h \
-		Parser/HTMLStateMachine.h \
-		Parser/HTMLDocumentParser.h \
-		Parser/Lexer.h \
-		Parser/HTMLToken.h \
+		HTML/Tokenizer.h \
+		HTML/HTMLDocumentParser.h \
+		HTML/Lexer.h \
+		HTML/HTMLToken.h \
 		DOM/Document.h \
 		DOM/HTMLElement.h \
 		DOM/HTMLHeadElement.h \
@@ -59,10 +59,10 @@ _DEPS = Blitz.h \
 DEPS = $(patsubst, %,$(IDIR)/%,$(_DEPS))
 
 _OBJ = Main.o Blitz.o LexerUtils.o \
-		Parser/HTMLStateMachine.o \
-		Parser/HTMLDocumentParser.o \
-		Parser/Lexer.o \
-		Parser/HTMLToken.o \
+		HTML/Tokenizer.o \
+		HTML/HTMLDocumentParser.o \
+		HTML/Lexer.o \
+		HTML/HTMLToken.o \
 		DOM/Document.o \
 		DOM/HTMLElement.o \
 		DOM/HTMLHeadElement.o \
@@ -125,4 +125,4 @@ blitz: $(OBJ)
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o $(ODIR)/Browser/*.o $(ODIR)/CSS/*.o $(ODIR)/CSS/Selectors/*.o $(ODIR)/Layout/*.o $(ODIR)/DOM/*.o $(ODIR)/JS/*.o $(ODIR)/Parser/*.o $(ODIR)/Terminal/*.o *~ core $(INCDIR)/*~
+	rm -f $(ODIR)/*.o $(ODIR)/Browser/*.o $(ODIR)/CSS/*.o $(ODIR)/CSS/Selectors/*.o $(ODIR)/Layout/*.o $(ODIR)/DOM/*.o $(ODIR)/JS/*.o $(ODIR)/HTML/*.o $(ODIR)/Terminal/*.o *~ core $(INCDIR)/*~

@@ -2,7 +2,7 @@
 #define HTMLDOCUMENTPARSER_H
 #include <vector>
 #include <memory>
-#include <Parser/HTMLToken.h>
+#include <HTML/HTMLToken.h>
 #include <DOM/Document.h>
 #include <LexerUtils.h>
 class HTMLDocumentParser

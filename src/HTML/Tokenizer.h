@@ -1,11 +1,13 @@
 #include <string>
-#include <Parser/HTMLToken.h>
-#include <Parser/Lexer.h>
+#include <HTML/HTMLToken.h>
+#include <HTML/Lexer.h>
 #include <vector>
 #include <LexerUtils.h>
-class HTMLStateMachine {
+
+namespace HTML {
+class Tokenizer {
 public:
-    HTMLStateMachine(std::string source);
+    Tokenizer(std::string source);
     void run();
     void printAllTokens();
     std::vector<HTMLToken> tokens() { return m_tokens; }
@@ -15,5 +17,7 @@ private:
     std::vector<HTMLToken> m_tokens;
     void consumeEscapeCodes(bool tab, bool newLine, bool space);
 };
+}
+
 
 

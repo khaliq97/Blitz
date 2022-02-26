@@ -1,9 +1,9 @@
-#include <Parser/HTMLStateMachine.h>
-#include <Parser/Lexer.h>
-#include <Parser/HTMLToken.h>
+#include <HTML/Tokenizer.h>
+#include <HTML/Lexer.h>
+#include <HTML/HTMLToken.h>
 #include <stack>
 #include <memory>
-#include <Parser/Lexer.h>
+#include <HTML/Lexer.h>
 #include <fmt/core.h>
 
 enum HTMLState
@@ -69,7 +69,7 @@ std::string TokenTypes[] =
 
 HTMLState htmlTokenizerState;
 
-HTMLStateMachine::HTMLStateMachine(std::string source)
+HTML::Tokenizer::Tokenizer(std::string source)
 {
     lexer = std::make_unique<Lexer>(source);
     htmlTokenizerState = HTMLState::Data;
@@ -88,7 +88,7 @@ std::string boolToString(bool value)
     return value ? "true" : "false";
 }
 
-void HTMLStateMachine::printAllTokens()
+void HTML::Tokenizer::printAllTokens()
 {
     printf("\n");
 
@@ -117,7 +117,7 @@ void HTMLStateMachine::printAllTokens()
     }
 }
 
-HTMLToken::Attribute HTMLStateMachine::createAttribute(std::string name, std::string value)
+HTMLToken::Attribute HTML::Tokenizer::createAttribute(std::string name, std::string value)
 {
     HTMLToken::Attribute returnAttr;
     returnAttr.name = name;
@@ -126,7 +126,7 @@ HTMLToken::Attribute HTMLStateMachine::createAttribute(std::string name, std::st
     return returnAttr;
 }
 
-void HTMLStateMachine::consumeEscapeCodes(bool tab, bool newLine, bool space)
+void HTML::Tokenizer::consumeEscapeCodes(bool tab, bool newLine, bool space)
 {
     if (tab)
         lexer->consumeToken('\t');
@@ -136,7 +136,7 @@ void HTMLStateMachine::consumeEscapeCodes(bool tab, bool newLine, bool space)
         lexer->consumeToken(' ');
 }
 
-void HTMLStateMachine::run()
+void HTML::Tokenizer::run()
 {
     HTMLToken currentToken;
 

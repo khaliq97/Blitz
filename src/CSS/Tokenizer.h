@@ -1,6 +1,6 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
-#include <Parser/Lexer.h>
+#include <HTML/Lexer.h>
 #include <CSS/CSSToken.h>
 #include <memory>
 class Tokenizer

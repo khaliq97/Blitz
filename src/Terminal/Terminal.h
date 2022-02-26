@@ -2,7 +2,7 @@
 #define TERMINAL_H
 #include <string>
 #include <memory>
-#include <Parser/Lexer.h>
+#include <HTML/Lexer.h>
 #include <Blitz.h>
 class Terminal
 {

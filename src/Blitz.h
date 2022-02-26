@@ -2,8 +2,8 @@
 #define BLITZ_H
 #include <string>
 #include <memory>
-#include <Parser/HTMLDocumentParser.h>
-#include <Parser/HTMLStateMachine.h>
+#include <HTML/HTMLDocumentParser.h>
+#include <HTML/Tokenizer.h>
 #include <CSS/Tokenizer.h>
 #include <CSS/Parser.h>
 #include <CSS/SelectorEngine.h>
@@ -20,7 +20,7 @@ private:
 
     std::string m_htmlFilePath;
 
-    std::unique_ptr<HTMLStateMachine> m_htmlTokenizer;
+    std::unique_ptr<HTML::Tokenizer> m_htmlTokenizer;
     std::unique_ptr<HTMLDocumentParser> m_documentParser;
     std::unique_ptr<Tokenizer> m_cssTokenizer;
     std::unique_ptr<CSS::Parser> m_cssParser;

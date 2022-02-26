@@ -12,7 +12,7 @@ Blitz::Blitz(std::string htmlFilePath) : m_htmlFilePath(htmlFilePath)
 
 void Blitz::loadHTML(std::string html)
 {
-    m_htmlTokenizer = std::make_unique<HTMLStateMachine>(html);
+    m_htmlTokenizer = std::make_unique<HTML::Tokenizer>(html);
     m_htmlTokenizer->run();
 
     m_documentParser = std::make_unique<HTMLDocumentParser>(m_htmlTokenizer->tokens());
