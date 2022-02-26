@@ -52,8 +52,9 @@ int main(int argc, char ** argv)
     app->signal_command_line().connect(sigc::bind(sigc::ptr_fun(onCommandLine), app), false);
 
     std::unique_ptr<Browser::Core> browserCoreWindow = std::make_unique<Browser::Core>(blitzWebEngineInstance->documentWithResolvedStyles(), blitzWebEngineInstance->htmlFilePath());
-    browserCoreWindow->set_icon_from_file("../res/Blitz Logo V1.png");
 
+    browserCoreWindow->set_size_request(500);
+    browserCoreWindow->set_icon_from_file("../res/Blitz Logo V1.png");
 
     return app->run(*browserCoreWindow);
 }
