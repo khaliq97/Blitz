@@ -9,7 +9,7 @@ std::string getFileContent(std::string fileName);
 bool caseInsensitiveStringCompare(std::string val1, std::string val2);
 bool compareChar(char &c1, char &c2);
 std::string lookupNodeTypeFromDictionary(Node::NodeType nodeType);
-bool isJustWhiteSpace(const std::shared_ptr<Node>& node);
+bool isJustWhiteSpace(const std::string text);
 
 }
 #endif // LEXERUTILS_H
