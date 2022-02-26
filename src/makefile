@@ -52,7 +52,9 @@ _DEPS = Blitz.h \
 		Layout/WebView.h \
 		Layout/HTMLView.h \
 		Layout/LayoutBox.h \
-		Layout/BlockFormattingContext.h
+		Layout/BlockFormattingContext.h \
+		Layout/LineBox.h \
+		Layout/LayoutText.h
 
 DEPS = $(patsubst, %,$(IDIR)/%,$(_DEPS))
 
@@ -106,7 +108,9 @@ _OBJ = Main.o Blitz.o LexerUtils.o \
 		Layout/WebView.o \
 		Layout/HTMLView.o \
 		Layout/LayoutBox.o \
-		Layout/BlockFormattingContext.o
+		Layout/BlockFormattingContext.o \
+		Layout/LineBox.o \
+		Layout/LayoutText.o
 
 OBJ = $(patsubst %, $(ODIR)/%,$(_OBJ))
 

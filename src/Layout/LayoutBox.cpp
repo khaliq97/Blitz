@@ -13,9 +13,6 @@ LayoutBox::LayoutBox(std::shared_ptr<Node> element, BlockType type) : m_type(typ
     if (element->isElement())
         this->m_element = element->asNodeTypeElement(element).lock();
 
-    if (element->isText()) { }
-        // TODO: These should create Line boxes
-
     // TODO: Move all of these property setters to a box model class
     this->paddingTop = m_element->getStylePropertyByDeclarationName("padding-top")->computedValue;
     this->paddingBottom = m_element->getStylePropertyByDeclarationName("padding-bottom")->computedValue;
@@ -72,6 +69,62 @@ LayoutBox::LayoutBox(std::shared_ptr<Node> element, BlockType type) : m_type(typ
 
     borderRect.height = borderTopWidth + paddingTop + contentRect.height + paddingBottom + borderBottomWidth;
     borderRect.width = borderLeftWidth + paddingLeft + contentRect.width + paddingRight + borderRightWidth;
+}
+
+// FIXME: This is quite buggy when individual line boxes start to only contain 1 or 2 words. Need to investigate why this happens.
+void LayoutBox::updateLineBoxes(const Cairo::RefPtr<Cairo::Context>& cairoContext, int index)
+{
+    std::shared_ptr<Layout::LineBox> lineBoxCurrent = m_lineBoxes[index];
+
+    if (index >= 1)
+    {
+        std::shared_ptr<Layout::LineBox> lineBoxBeforeCurrent = m_lineBoxes[index - 1];
+        if (lineBoxBeforeCurrent->width() > borderRect.width)
+        {
+
+             Layout::LayoutText lineBoxTextBeforeCurrent = Layout::LayoutText(lineBoxBeforeCurrent->text());
+             Layout::LayoutText lineBoxTextCurrent = Layout::LayoutText(lineBoxCurrent->text());
+
+             lineBoxTextCurrent.appendWordToBeginning(lineBoxTextBeforeCurrent.removeLastWord());
+
+             lineBoxBeforeCurrent->setText(lineBoxTextBeforeCurrent.displayText());
+             lineBoxCurrent->setText(lineBoxTextCurrent.displayText());
+
+             updateLineBoxes(cairoContext, index);
+        }
+
+    }
+    if (lineBoxCurrent->width() > borderRect.width )
+    {
+        Layout::LayoutText beforeUpdateText = Layout::LayoutText(lineBoxCurrent->text());
+        std::string lastWord = beforeUpdateText.removeLastWord();
+        lineBoxCurrent->setText(beforeUpdateText.displayText());
+
+        std::shared_ptr<Layout::LineBox> newLineBox = std::make_shared<Layout::LineBox>(lastWord, this->fontSize, cairoContext);
+        m_lineBoxes.push_back(newLineBox);
+        index++;
+        updateLineBoxes(cairoContext, index);
+
+    }
+}
+
+void LayoutBox::createLineBoxes(const Cairo::RefPtr<Cairo::Context>& cairoContext)
+{
+    std::vector<Layout::LineBox> lineBoxes;
+    for (auto node: this->m_element->childNodes)
+    {
+        if (node->isText())
+        {
+            auto textNode = node->asNodeTypeText(node);
+
+            if (!Tools::isJustWhiteSpace(textNode.lock()->data))
+            {
+                auto initialLineBox = std::make_shared<Layout::LineBox>(textNode.lock()->data, this->fontSize, cairoContext);
+                m_lineBoxes.push_back(initialLineBox);
+                updateLineBoxes(cairoContext, 0);
+            }
+        }
+    }
 }
 
 void LayoutBox::createTextLayout(const Cairo::RefPtr<Cairo::Context>& cairoContext)
@@ -341,10 +394,33 @@ bool LayoutBox::paint(const Cairo::RefPtr<Cairo::Context> &cr)
         cr->stroke();
     }
 
-
     // Update local draw cursor
     layoutBoxDrawCursor_X = borderRect.x;
     layoutBoxDrawCursor_Y = borderRect.y;
+
+    // Update position of content in border rectangle.
+    contentRect.y = borderRect.y + borderTopWidth + paddingTop;
+    contentRect.x = borderRect.x + borderLeftWidth + paddingLeft;
+
+    createLineBoxes(cr);
+
+    int index = 0;
+    for (int i = 0; i < m_lineBoxes.size(); i++)
+    {
+        // fmt::print("LineBox frag ({}), Height: {}: {}\n", index, m_lineBoxes[i]->height(), m_lineBoxes[i]->text());
+        cr->set_source_rgb(textColor->displayColor.get_red(), textColor->displayColor.get_green(), textColor->displayColor.get_blue());
+        cr->move_to(contentRect.x, contentRect.y);
+
+        if (i != m_lineBoxes.size() - 1)
+        {
+            borderRect.height += m_lineBoxes[i + 1]->height();
+            marginRect.height += m_lineBoxes[i + 1]->height();
+        }
+
+        contentRect.y += m_lineBoxes[i]->height();
+        m_lineBoxes[i]->textLayout()->show_in_cairo_context(cr);
+        index++;
+    }
 
     // Paint Phase: Border:
     drawBorder(Border::Top, borderRect, cr);
@@ -364,23 +440,8 @@ bool LayoutBox::paint(const Cairo::RefPtr<Cairo::Context> &cr)
         cr->fill();
     }
 
-    // Update position of content in border rectangle.
-    contentRect.y = borderRect.y + borderTopWidth + paddingTop;
-    contentRect.x = borderRect.x + borderLeftWidth + paddingLeft;
-
-
-    // TODO: This is a very primitive way to render text, these should exist as LineBox objects and be
-    // drawn how boxes are drawn in HTMLView (i.e. a box within a box and not text).
-
-    // Paint Phase: Content:
-    cr->set_source_rgb(textColor->displayColor.get_red(), textColor->displayColor.get_green(), textColor->displayColor.get_blue());
-    cr->move_to(contentRect.x, contentRect.y);
-    m_pangoLayout->show_in_cairo_context(cr);
-
     // Reset back to white
     cr->set_source_rgb(0.0, 0.0, 0.0);
-
-
     return true;
 }
 

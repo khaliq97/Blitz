@@ -5,6 +5,7 @@
 #include <CSS/StyleProperty.h>
 #include <optional>
 #include <Layout/LineBox.h>
+#include <Layout/LayoutText.h>
 class DrawCoordinates;
 class HTMLView;
 
@@ -55,7 +56,6 @@ public:
     double layoutBoxDrawCursor_X = 0;
     double layoutBoxDrawCursor_Y = 0;
 
-    // TODO: Text node support (line boxes)
     bool paint(const Cairo::RefPtr<Cairo::Context>& cr);
     void createTextLayout(const Cairo::RefPtr<Cairo::Context>& cairoContext);
     bool isBlockBox();
@@ -87,9 +87,10 @@ private:
    Glib::RefPtr<Pango::Layout> m_pangoLayout;
 
    void drawBorder(Border border, Cairo::Rectangle borderRect, const Cairo::RefPtr<Cairo::Context> &cr);
-   std::vector<Layout::LineBox> m_lineBoxes;
+   std::vector<std::shared_ptr<Layout::LineBox>> m_lineBoxes;
 
-
+   void createLineBoxes(const Cairo::RefPtr<Cairo::Context> &cairoContext);
+   void updateLineBoxes(const Cairo::RefPtr<Cairo::Context> &cairoContext, int index);
 };
 
 #endif // BOX_H
