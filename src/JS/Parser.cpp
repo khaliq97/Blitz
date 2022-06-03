@@ -1,6 +1,14 @@
-﻿#include <JS/Parser.h>
+﻿#include "Parser.h"
+
+#include <JS/Parser.h>
 #include <JS/JS.h>
+#include <fmt/core.h>
 static JS js;
+
+Parser::Parser(std::vector<std::shared_ptr<Token> > tokens, std::shared_ptr<VariableEnviroment> &m_variable_enviroment) : tokens(tokens), m_variable_enviroment(m_variable_enviroment)
+{
+
+}
 
 std::shared_ptr<Expression> Parser::parse()
 {
@@ -14,7 +22,35 @@ std::shared_ptr<Expression> Parser::parse()
 
 std::shared_ptr<Expression> Parser::expression()
 {
-    return equality();
+    return assigment_expression();
+}
+
+std::shared_ptr<Expression> Parser::assigment_expression()
+{
+    auto expression = equality();
+    std::weak_ptr<Token> indetifierToken;
+
+    if (match({TokenType::EQUAL}))
+    {
+        int index = currentParserToken - 1;
+
+        while (index >=0)
+        {
+            if (tokens[index]->type == TokenType::IDENTIFIER)
+            {
+                indetifierToken = tokens[index];
+                break;
+            }
+            index--;
+        }
+
+        auto equals = previous();
+        auto value = assigment_expression();
+
+        return std::make_shared<AssigmentExpression>(indetifierToken, equals, value, m_variable_enviroment);
+    }
+
+    return expression;
 }
 
 std::shared_ptr<Expression> Parser::statement()
@@ -130,7 +166,17 @@ std::shared_ptr<Expression> Parser::primary()
 
     if (match({TokenType::IDENTIFIER}))
     {
-        return std::make_shared<StringLiteral>(previous()->value);
+        std::shared_ptr<Value> value;
+        for (auto record: m_variable_enviroment->m_dec_env_records)
+        {
+            if (record->m_record.find(previous()->lexeme) != record->m_record.end())
+            {
+                value = record->m_record.find(previous()->lexeme)->second;
+                break;
+            }
+
+        }
+        return std::make_shared<VariableExpression>(value);
     }
 
     if (match({TokenType::LEFT_PAREN}))
@@ -153,7 +199,7 @@ std::shared_ptr<Expression> Parser::varDeclaration()
         expr = expression();
     }
 
-    return std::make_shared<VariableDeclaration>(name->lexeme, expr);
+    return std::make_shared<VariableDeclaration>(name->lexeme, expr, m_variable_enviroment);
 }
 
 std::shared_ptr<Token> Parser::consume(TokenType type, std::string message)

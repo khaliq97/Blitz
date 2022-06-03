@@ -35,6 +35,10 @@ _DEPS = Blitz.h \
 		JS/BinaryExpression.h \
 		JS/LiteralExpression.h \
 		JS/VariableDeclaration.h \
+		JS/Enviroment/DeclarativeEnviromentRecord.h \
+		JS/Enviroment/FunctionEnvriomentRecord.h \
+		JS/Enviroment/VariableEnviroment.h \
+		JS/Enviroment/VariableRecord.h \
 		CSS/Tokenizer.h \
 		CSS/CSSToken.h \
 		CSS/Parser.h \
@@ -91,6 +95,10 @@ _OBJ = Main.o Blitz.o LexerUtils.o \
 		JS/Value.o \
 		JS/Error.o \
 		JS/VariableDeclaration.o \
+		JS/Enviroment/DeclarativeEnviromentRecord.o \
+		JS/Enviroment/FunctionEnvriomentRecord.o \
+		JS/Enviroment/VariableEnviroment.o \
+		JS/Enviroment/VariableRecord.o \
 		CSS/Tokenizer.o \
 		CSS/CSSToken.o \
 		CSS/Parser.o \

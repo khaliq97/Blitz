@@ -11,10 +11,11 @@
 #include <JS/VariableDeclaration.h>
 #include <JS/Value.h>
 #include <JS/Error.h>
+#include <JS/Enviroment/VariableEnviroment.h>
 class Parser
 {
     public:
-        Parser(std::vector<std::shared_ptr<Token>> tokens) : tokens(tokens) { }
+        Parser(std::vector<std::shared_ptr<Token>> tokens, std::shared_ptr<VariableEnviroment> &m_variable_enviroment);
         std::shared_ptr<Expression> parse();
         std::shared_ptr<Expression> expression();
         std::shared_ptr<Expression> statement();
@@ -26,6 +27,7 @@ class Parser
         std::shared_ptr<Expression> unary();
         std::shared_ptr<Expression> primary();
         std::shared_ptr<Expression> varDeclaration();
+        std::shared_ptr<Expression> assigment_expression();
         std::shared_ptr<Token> consume(TokenType type, std::string message);
         std::unique_ptr<SyntaxError> error(std::shared_ptr<Token> token, std::string message);
         void synchronize();
@@ -37,10 +39,9 @@ class Parser
         std::shared_ptr<Token> previous();
 
         int currentParserToken = 0;
-
-
-    private:
+private:
         std::vector<std::shared_ptr<Token>> tokens;
+        std::shared_ptr<VariableEnviroment> &m_variable_enviroment;
 };
 
 #endif // PARSER_H
