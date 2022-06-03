@@ -7,10 +7,13 @@
 #include <memory>
 #include <JS/Interpreter.h>
 #include <LexerUtils.h>
+#include <fmt/core.h>
 bool hadError = false;
 
 JS::JS(std::string fileName)
 {
+    m_variable_enviroment = std::make_shared<VariableEnviroment>();
+
     if (!fileName.empty())
     {
         runFile(fileName);
@@ -36,7 +39,29 @@ void JS::runPrompt()
 
 void JS::runFile(std::string path)
 {
-    run(Tools::getFileContent(path));
+    std::string source = Tools::getFileContent(path);
+    std::vector<std::string> lines;
+
+
+    std::string line;
+    for (int i = 0; i < source.length(); i++)
+    {
+        if (source[i] != '\n')
+        {
+            line.push_back(source[i]);
+            if (i == source.length() - 1)
+            {
+                run(line);
+            }
+        }
+        else
+        {
+            line.push_back('\n');
+            run(line);
+            line = "";
+        }
+
+    }
 
     if (hadError)
         exit(0);
@@ -54,7 +79,7 @@ void JS::run(std::string source)
     }
 #endif
 
-    std::unique_ptr<Parser> parser = std::make_unique<Parser>(tokens);
+    std::unique_ptr<Parser> parser = std::make_unique<Parser>(tokens, m_variable_enviroment);
 
     std::shared_ptr<Expression> expression = parser->parse();
 

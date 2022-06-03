@@ -16,6 +16,9 @@ class JS
         void report(int line, std::string where, std::string message);
         void runFile(std::string path);
 
+     private:
+        std::shared_ptr<VariableEnviroment> m_variable_enviroment;
+
 };
 
 #endif // JS_H
