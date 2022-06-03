@@ -23,6 +23,10 @@ public:
     std::weak_ptr<LayoutBox> parent;
     std::vector<std::shared_ptr<LayoutBox>> children;
 
+    std::shared_ptr<LayoutBox> m_previous_sibling;
+    std::shared_ptr<LayoutBox> m_next_sibling;
+    std::shared_ptr<LayoutBox> nextSibling();
+
     std::shared_ptr<Element> getElement() { return m_element; }
 
     // Font metrics
@@ -73,6 +77,11 @@ public:
     std::vector<std::shared_ptr<LayoutBox>> toVectorFromLayoutTree(std::shared_ptr<LayoutBox> initialContainingBlockBox, std::vector<std::shared_ptr<LayoutBox> > layoutVector);
     void enumerate(std::function<void(std::shared_ptr<LayoutBox> box)> callback);
     int calculateYPositionInContainingBlock(std::shared_ptr<LayoutBox> &currentLayoutBox);
+    std::shared_ptr<LayoutBox> previousSibling();
+     std::vector<std::shared_ptr<Layout::LineBox>> m_lineBoxes;
+     double marginEdgeTop() { return marginTop + borderTopWidth + paddingTop + paddingBottom  + borderBottomWidth + marginBottom; }
+     double borderEdgeTop() { return borderTopWidth + paddingTop + paddingBottom  + borderBottomWidth; }
+     void createLineBoxes(const Cairo::RefPtr<Cairo::Context> &cairoContext);
 private:
     BlockType m_type;
     std::shared_ptr<Element> m_element;
@@ -87,10 +96,9 @@ private:
    Glib::RefPtr<Pango::Layout> m_pangoLayout;
 
    void drawBorder(Border border, Cairo::Rectangle borderRect, const Cairo::RefPtr<Cairo::Context> &cr);
-   std::vector<std::shared_ptr<Layout::LineBox>> m_lineBoxes;
 
-   void createLineBoxes(const Cairo::RefPtr<Cairo::Context> &cairoContext);
    void updateLineBoxes(const Cairo::RefPtr<Cairo::Context> &cairoContext, int index);
+   double lineBoxHeight();
 };
 
 #endif // BOX_H

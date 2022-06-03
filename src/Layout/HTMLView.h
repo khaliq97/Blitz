@@ -12,7 +12,7 @@ public:
     HTMLView(std::shared_ptr<Node> documentWithResolvedStyles);
     void init(const Cairo::RefPtr<Cairo::Context>& cairoContext, std::shared_ptr<Node> node, std::shared_ptr<LayoutBox> layoutBox);
 
-    double maxHeight = 0;
+    double totalPageHeight = 0;
     double maxWidth = 0;
 private:
 
@@ -26,7 +26,7 @@ private:
     void createBoxForElement(const Cairo::RefPtr<Cairo::Context>& cr, std::shared_ptr<Node> node, std::shared_ptr<LayoutBox> layoutBox);
     std::shared_ptr<LayoutBox> createBlockBox(const Cairo::RefPtr<Cairo::Context>& cr, std::shared_ptr<Element> elementNode, std::shared_ptr<LayoutBox> parentLayoutBox);
     void createLayoutTree(const Cairo::RefPtr<Cairo::Context>& cr, std::shared_ptr<Node> node, std::shared_ptr<LayoutBox> layoutBox);
-    void runFormattingContext(std::shared_ptr<LayoutBox> initialContainingBlock);
+    void runFormattingContext(std::shared_ptr<LayoutBox> initialContainingBlock, const Cairo::RefPtr<Cairo::Context>& cr);
     void printLayoutTree(std::string indent, std::shared_ptr<LayoutBox> layoutBox);
     void paintLayoutBox(const Cairo::RefPtr<Cairo::Context> &cr, std::shared_ptr<LayoutBox> layoutBox);
 };

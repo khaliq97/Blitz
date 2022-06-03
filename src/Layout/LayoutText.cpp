@@ -45,7 +45,12 @@ std::string Layout::LayoutText::displayText() const
 
      displayText.erase(0, 1);
 
-    return displayText;
+     return displayText;
+}
+
+int Layout::LayoutText::words_length() const
+{
+    return m_words.size();
 }
 
 

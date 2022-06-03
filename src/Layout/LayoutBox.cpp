@@ -71,6 +71,16 @@ LayoutBox::LayoutBox(std::shared_ptr<Node> element, BlockType type) : m_type(typ
     borderRect.width = borderLeftWidth + paddingLeft + contentRect.width + paddingRight + borderRightWidth;
 }
 
+std::shared_ptr<LayoutBox> LayoutBox::nextSibling()
+{
+   return m_next_sibling;
+}
+
+std::shared_ptr<LayoutBox> LayoutBox::previousSibling()
+{
+   return m_previous_sibling;
+}
+
 // FIXME: This is quite buggy when individual line boxes start to only contain 1 or 2 words. Need to investigate why this happens.
 void LayoutBox::updateLineBoxes(const Cairo::RefPtr<Cairo::Context>& cairoContext, int index)
 {

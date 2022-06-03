@@ -41,11 +41,19 @@ void HTMLView::createLayoutTree(const Cairo::RefPtr<Cairo::Context>& cr, std::sh
                   blockOrInlineLayoutBox->parent = layoutBox;
 
                   blockOrInlineLayoutBox->parent.lock()->children.push_back(blockOrInlineLayoutBox);
+                  if (blockOrInlineLayoutBox->parent.lock()->children.size() > 1)
+                      blockOrInlineLayoutBox->m_previous_sibling = blockOrInlineLayoutBox->parent.lock()->children[blockOrInlineLayoutBox->parent.lock()->children.size() - 2];
+
+                  if (blockOrInlineLayoutBox->parent.lock()->children.size() > 1)
+                      blockOrInlineLayoutBox->parent.lock()->children[blockOrInlineLayoutBox->parent.lock()->children.size() - 2]->m_next_sibling = blockOrInlineLayoutBox->parent.lock()->children[blockOrInlineLayoutBox->parent.lock()->children.size() - 1];
+
 
                   layoutBox = blockOrInlineLayoutBox;
             }
         }
     }
+
+
 
     for (int i = 0; i < node->childNodes.size(); i++)
     {
@@ -60,11 +68,24 @@ void HTMLView::printLayoutTree(std::string indent, std::shared_ptr<LayoutBox> la
     printf("%s    Layout Box:\n", indent.c_str());
     printf("%s        Height: %lf\n", indent.c_str(), layoutBox->marginRect.height);
     printf("%s        Width: %lf\n", indent.c_str(), layoutBox->marginRect.width);
+    printf("%s        Margin Top: %lf\n", indent.c_str(), layoutBox->marginTop);
     printf("%s    Border Rectangle:\n", indent.c_str());
     printf("%s        Height: %lf\n", indent.c_str(), layoutBox->borderRect.height);
     printf("%s        Width: %lf\n", indent.c_str(), layoutBox->borderRect.width);
     printf("%s        Coords (x,y): \n", indent.c_str());
     printf("%s            (%lf, %lf)\n", indent.c_str(), layoutBox->borderRect.x, layoutBox->borderRect.y);
+    printf("%s    Siblings:\n", indent.c_str());
+
+    if (layoutBox->previousSibling())
+    {
+        printf("%s        Previous: %s\n", indent.c_str(), layoutBox->previousSibling()->getElement()->tagName().c_str());
+    }
+
+
+    if (layoutBox->nextSibling())
+    {
+        printf("%s        Next: %s\n", indent.c_str(), layoutBox->nextSibling()->getElement()->tagName().c_str());
+    }
 
     indent += "    ";
     for (int i = 0; i < layoutBox->children.size(); i++)
@@ -83,7 +104,7 @@ void HTMLView::paintLayoutBox(const Cairo::RefPtr<Cairo::Context>& cr, std::shar
    }
 }
 
-void HTMLView::runFormattingContext(std::shared_ptr<LayoutBox> initialContainingBlock)
+void HTMLView::runFormattingContext(std::shared_ptr<LayoutBox> initialContainingBlock, const Cairo::RefPtr<Cairo::Context>& cr)
 {
     BlockFormattingContext blockFormattingContext;
     if (Tools::caseInsensitiveStringCompare(initialContainingBlock->getElement()->tagName(), "html"))
@@ -97,7 +118,7 @@ void HTMLView::runFormattingContext(std::shared_ptr<LayoutBox> initialContaining
 
     for (int i = 0; i < initialContainingBlock->children.size(); i++)
     {
-        runFormattingContext(initialContainingBlock->children[i]);
+        runFormattingContext(initialContainingBlock->children[i], cr);
     }
 }
 
@@ -116,9 +137,13 @@ bool HTMLView::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 
     initialContainingBlock = nullptr;
     init(cr, m_documentWithResolvedStyles, {});
-    runFormattingContext(initialContainingBlock);
+
+    runFormattingContext(initialContainingBlock, cr);
 
     paintLayoutBox(cr, initialContainingBlock);
+    printLayoutTree("", initialContainingBlock);
+
+    this->set_size_request(-1, initialContainingBlock->marginRect.height);
 
     return true;
 }
