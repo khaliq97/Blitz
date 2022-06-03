@@ -13,6 +13,7 @@ public:
     std::string removeLastWord();
     void appendWordToBeginning(const std::string word);
     std::string displayText() const;
+    int words_length() const;
 
 private:
     std::vector<std::string> m_words;
